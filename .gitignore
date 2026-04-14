@@ -22,6 +22,21 @@ output.csv
 minicontest/recordings/
 replay-*
 
+# experiments/ generated outputs (keep source scripts, ignore large/ephemeral artifacts)
+experiments/artifacts/
+experiments/**/*.csv
+experiments/**/__pycache__/
+experiments/tournament_results/
+experiments/evolution_log/
+experiments/monsters/archive/
+
+# Keep README and script source
+!experiments/README.md
+!experiments/*.py
+!experiments/*.sh
+!experiments/*.yaml
+!experiments/monsters/*.py
+
 # OMC local state (match at any nesting level)
 **/.omc/state/
 **/.omc/logs/

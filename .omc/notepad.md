@@ -21,6 +21,21 @@
 
 <!-- 이후 관찰 기록 -->
 
+### 2026-04-14 후반 — Ralplan consensus 확정 + multi-reviewer 통과
+
+- 3-round consensus: Planner → Architect (PROCEED w/ 7 patches) → Critic iter1 (ITERATE, 7 actionable) → patches applied → Critic iter2 (APPROVE)
+- 추가 3-way validation: Scientist (2 must-fix), Codex (6 patches), Gemini (3 high-leverage additions — risk-sensitive fitness, APSP init, STOP fallback 개선)
+- 모든 MUST-FIX 패치 적용 완료. 최종 플랜: `.omc/plans/STRATEGY.md` 746 lines
+- Stretch items는 `.omc/plans/open-questions.md` 50줄에 정리 (online opponent profiling, max-flow bottleneck, numpy MLP, report narrative 개선 등)
+- 커밋 `8c9fe66` — plan milestone 확정
+
+### 2026-04-14 후반 — Autopilot Phase 2 M1 시작
+
+- Executor (Opus) 백그라운드 가동: `minicontest/zoo_core.py` (CoreCaptureAgent) + `zoo_dummy.py` + 10회 smoke test
+- Path layout 결정: 플랜의 `experiments/zoo/_core.py` 대신 `minicontest/zoo_*.py`로 변경 (capture.py -r 이름 해석 호환)
+- `experiments/` 디렉토리 = 평가 파이프라인/진화/분석/제출 스크립트용
+- M1 완료 후 M2 (zoo 12+ variants) 바로 진행 예정
+
 ## Manual (never pruned)
 
 <!-- 유저가 수동으로 적는 영구 메모 -->
