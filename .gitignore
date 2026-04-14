@@ -27,6 +27,10 @@ replay-*
 **/.omc/logs/
 **/.omc/research/
 **/.omc/sessions/
+**/.omc/artifacts/ask/
+
+# Claude Code per-machine permission overrides (keep shared config only)
+.claude/settings.local.json
 
 # Reports (build artifacts)
 icml2021_style/*.aux
