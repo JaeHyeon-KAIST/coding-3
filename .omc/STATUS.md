@@ -67,6 +67,25 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 
 **Tier policy (applies to any 1h+ milestone): each sub-tier is an independent resumable unit with a Go/No-go gate at the end. User decides after each gate whether to continue, pause, or pivot. No milestone commits us to more than ~4h of uninterrupted work.**
 
+## Compute dispatch policy (pm17 — remote server provisioned)
+
+| task class | venue | command pattern |
+|---|---|---|
+| Quick smoke (pop≤4, 1 gen, ≤10 min) | **Mac** | `.venv/bin/python experiments/evolve.py …` |
+| Mid tuning (pop 8-16, 2-5 gen) | Either | Mac if convenient |
+| **Heavy evolve (pop≥16, ≥5 gen, ≥30 min)** | **Server (jdl_wsl tmux work)** | `ssh jdl_wsl "tmux send-keys -t work '… 2>&1 \| tee logs/<name>.log' Enter"` |
+| Large tournament (≥100 matches) | Server | same pattern |
+| Result analysis / report writing | **Mac** | inline Claude context |
+
+Server: AMD Ryzen 9 7950X (16 phys / 32 threads), 128 GB RAM, WSL2 Ubuntu, `~/projects/coding-3`. Measured 2.25× faster than Mac M3 Pro on `evolve` `pop=16 workers=16`. Full env doc: wiki `environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl`. Dispatch directive in project memory (high priority).
+
+⚠️ **Cross-platform fitness reproducibility imperfect** — same `--master-seed` on Mac vs server can yield different best/mean. Use server for fitness ranking; verify the *final* `your_best.py` win-rate on Mac before submission.
+
+M6 budget on server (Option A bypass + 2.25× server):
+- Phase 2a 10 gens × 40 pop × 264 games / 16 workers ≈ **~5 h**
+- Phase 2b 20 gens × 40 pop × 224 games / 16 workers ≈ **~5-6 h**
+- **M6 total ≈ 10-11 h** — overnight on the server.
+
 ## Critical observations / blockers
 
 🟢 **CAPTURE.PY 4-LOOP PROTOCOL — DECODED 2026-04-15 pm4** — `capture.py:1054-1074` loops over `lst=['your_baseline1','your_baseline2','your_baseline3','baseline.py']` to build `output.csv` for the assignment's required comparison report. `your_baseline1/2/3.py` are currently **identical copies of myTeam.py = DummyAgent (random actions)**. So `-n 10 -b baseline` = 40 games all vs baseline.py; bare `-n 10` = 10 vs random ×3 blocks + 10 vs baseline. Before M8 submission, we must populate `your_baseline1/2/3.py` with our own variants (per CLAUDE.md spec) so `output.csv` shows a meaningful 4-way comparison for the report.

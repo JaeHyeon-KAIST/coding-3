@@ -29,7 +29,14 @@
     ],
     "gitBranches": null
   },
-  "customNotes": [],
+  "customNotes": [
+    {
+      "timestamp": 1776287099465,
+      "source": "manual",
+      "category": "environment",
+      "content": "Remote server (jdl_wsl, WSL2 Ryzen 7950X, 16 phys cores) available since 2026-04-16. Heavy evolve/tournament → server tmux `work`; quick smoke + analysis → Mac. Server 2.25× faster on evolve pop=16 workers=16. Project at ~/projects/coding-3 (git, .venv/ same as Mac). Long runs MUST tee to ~/projects/coding-3/logs/. Cross-platform fitness reproducibility imperfect — final agent re-validate on Mac. Full env page: wiki environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl"
+    }
+  ],
   "directoryMap": {
     "docs": {
       "path": "docs",
@@ -94,6 +101,12 @@
       "type": "file"
     },
     {
+      "path": ".claude/settings.local.json",
+      "accessCount": 2,
+      "lastAccessed": 1776287271029,
+      "type": "file"
+    },
+    {
       "path": "minicontest/capture.py",
       "accessCount": 1,
       "lastAccessed": 1776270292221,
@@ -106,5 +119,13 @@
       "type": "file"
     }
   ],
-  "userDirectives": []
+  "userDirectives": [
+    {
+      "timestamp": 1776287101248,
+      "directive": "For any evolve.py / tournament.py run with pop ≥ 16 OR n_gens ≥ 5 OR expected wall ≥ 30 min: dispatch to server (`ssh jdl_wsl \"tmux send-keys -t work '... 2>&1 | tee logs/<name>.log' Enter\"`). For quick smokes (<10 min) and result analysis: keep on Mac. ALWAYS pipe long-run output through `tee` (capture-pane 2000-line buffer truncates beyond that).",
+      "context": "CS470 A3 dispatch policy after pm17 server provisioning",
+      "source": "explicit",
+      "priority": "high"
+    }
+  ]
 }

@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 31 pages | Last updated: 2026-04-15T19:34:28.481Z
+> 32 pages | Last updated: 2026-04-15T21:04:52.143Z
 
 ## convention
 
@@ -14,6 +14,10 @@
 ## decision
 
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
+
+## environment
+
+- [Remote compute infra — WSL2 Ryzen 7950X server (jdl_wsl)](remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl.md) — # Remote compute infra — WSL2 Ryzen 7950X server (jdl_wsl)
 
 ## pattern
 
