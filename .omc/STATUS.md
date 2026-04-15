@@ -40,9 +40,13 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 | **M4b-1-infra** | `evolve.py` fail-fast (remove `NotImplementedError` swallow) | ✅ Done | loud raise verified | `b854f16` |
 | **M4b-2-infra** | Weight-override protocol (run_match `--red-opts` + zoo_core loader + zoo_reflex_tuned createTeam) | ✅ Done | 5 unit tests + e2e (override → Red +2 vs baseline; seed-weight → Tie) | `b854f16` |
 | **M4b-3-infra** | `evaluate_genome()` full implementation (decode, dump, matches, aggregate, cleanup) | ✅ Done | h1test genome smoke → `{pool_win_rate:0.5, crash_rate:0.0, ...}` | `b854f16` |
-| **Pre-α** | Baseline measurement + STRATEGY §6 gap analysis + T1-T4 test plan + parallelization ADR | ✅ Done | 7.74s/match empirical; 4 wiki pages ingested | (this commit) |
-| **Option α** | genome-level ProcessPool + per-gen-JSON resume + opponents/layouts CLI (+ optional truncated eval) | ⏳ Pending | target: 8× speedup → M6 ~23h | — |
-| **M4b-4** | M5 dry-run (~13min post-α): 2 gens × 8 pop × 24 games/opp | ⏳ Pending | — | — |
+| **Pre-α** | Baseline measurement + STRATEGY §6 gap analysis + T1-T4 test plan + parallelization ADR | ✅ Done | 7.74s/match empirical; 4 wiki pages ingested | `6548098` |
+| **α-1** | genome-level ProcessPoolExecutor in run_phase (workers=8) | ✅ Done | 8-genome smoke 27.3s (~9× speedup) | `b625dc8` |
+| **α-2** | `--resume-from <dir>` checkpoint + forward-compat `best_ever_*` field | ✅ Done | T4 PASS: gen 0 mtime unchanged, gens 1/2 regenerated | `ad56ebe` |
+| **α-3** | `--opponents` / `--layouts` CLI → run_phase → evaluate_genome | ✅ Done | 2-opp round-trip smoke 54s | `b625dc8` |
+| **α-4** | T1-T4 verification (same-genome equivalence / parallel ranking / crash-robust / resume) | ✅ Done | T1 PASS (90s), T2 PASS (49s), T3 PASS (0.9s), T4 PASS (pm11) | (this commit) |
+| **α-5** (optional) | `--time-limit` pass-through for truncated eval (first 3 gens, 600-move) | ⏳ Deferred (user paused) | — | — |
+| **M4b-4** | M5 dry-run (~13-20min post-α): 2 gens × 8 pop × 24 games/opp | ⏳ Unblocked | — | — |
 | **M4c-2-infra** | `run_match.py` `start_new_session=True` + `killpg` on timeout | ⏳ Pending (5min) | — | — |
 | M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | ~13min parallel; validates CEM loop end-to-end | — |
 | **M6-a** | Phase 2a **smoke** (2 gens × 40 pop, 3-opp dry pool) — Go/No-go check for full 2a | ⏳ Pending | ~1.5h parallel; pass = best_ever > h1test seed fitness | — |

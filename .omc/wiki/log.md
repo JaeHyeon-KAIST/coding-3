@@ -104,3 +104,7 @@
 - **Pages:** adr-evolve-py-parallelization-genome-level-resume-checkpoint.md
 - **Summary:** Created new page "ADR — evolve.py parallelization (genome-level) + resume checkpoint"
 
+## [2026-04-15T09:57:47.998Z] ingest
+- **Pages:** 2026-04-15-pm12-core-complete-t1-t4-all-pass-1-2-3-4-verified.md
+- **Summary:** Created new page "2026-04-15 pm12 α-core complete — T1-T4 all PASS (α-1/2/3/4 verified)"
+

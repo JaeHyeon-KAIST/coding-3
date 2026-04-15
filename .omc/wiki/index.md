@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 20 pages | Last updated: 2026-04-15T09:15:10.536Z
+> 21 pages | Last updated: 2026-04-15T09:57:48.011Z
 
 ## convention
 
@@ -26,6 +26,7 @@
 ## session-log
 
 - [2026-04-15 pm - H1 deadlock validation confirmed](2026-04-15-pm-h1-deadlock-validation-confirmed.md) — # 2026-04-15 pm - H1 deadlock validation confirmed
+- [2026-04-15 pm12 α-core complete — T1-T4 all PASS (α-1/2/3/4 verified)](2026-04-15-pm12-core-complete-t1-t4-all-pass-1-2-3-4-verified.md) — # 2026-04-15 pm12 α-core complete — T1-T4 all PASS (α-1/2/3/4 verified)
 - [2026-04-15 pm2 - H1b rejected + strategic replanning](2026-04-15-pm2-h1b-rejected-strategic-replanning.md) — # 2026-04-15 pm2 - H1b rejected + strategic replanning
 - [2026-04-15 pm3 - H1c rejected + capture.py 4-loop discovery](2026-04-15-pm3-h1c-rejected-capture-py-4-loop-discovery.md) — # 2026-04-15 pm3 - H1c rejected + capture.py 4-loop discovery
 - [2026-04-15 pm4 - 40-game apples-to-apples reverification + H1b redemption](2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem.md) — # 2026-04-15 pm4 - 40-game apples-to-apples reverification + H1b redemption

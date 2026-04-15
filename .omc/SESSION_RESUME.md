@@ -35,16 +35,9 @@ ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 21 expected (18 zoo
 
 **Current state (2026-04-15 pm9)**: M4a, M4b-1/2/3, M4c-1 infrastructure all landed and committed. M4-v1/v2 tournaments produced canonical ELO (h1test 50% vs baseline, h1b best net +8). Pre-α preflight complete: baseline measured at 7.74s/match, ADR written, test plan (T1-T4) ready.
 
-**Immediate next action = Option α** (evolve.py parallelization + resume):
+**α-core is DONE as of pm12.** Commits: `b625dc8` (α-1 parallelization), `ad56ebe` (α-2 resume), CLI plumbing folded into α-1, T1-T4 all PASS. α-5 (truncated eval) is the only α sub-tier deferred — user paused before greenlighting it.
 
-> Single session (~3-4h):
-> 1. **Genome-level ProcessPoolExecutor** in `run_phase` (workers = `min(physical_cores - 1, 8)`). See wiki `decision/adr-evolve-py-parallelization-genome-level-resume-checkpoint` for the reject/accept rationale and the code skeleton.
-> 2. **`--resume-from <artifacts_dir>`** flag reading highest `{phase}_gen{N:03d}.json` to restore `mean, sigma, stagnation_count, best_ever_fitness, best_ever_genome`. Forward-compat field added to per-gen JSON.
-> 3. **`--opponents`, `--layouts` CLI** flags threaded into `run_phase → evaluate_genome` (replace hardcoded `DEFAULT_DRY_RUN_*`).
-> 4. **(optional)** `run_match.py --time-limit` pass-through for STRATEGY §6.5 "first 3 gens 600-move" truncated eval — gated on M5 dry-run showing initial-gen budget dominance.
-> 5. Run T1-T4 from wiki `pattern/option-test-plan-t1-t4-for-evolve-py-parallelization-resume` to verify.
-
-**Then M4b-4** (M5 dry-run, ~13 min parallel wall): `evolve.py --phase 2a --n-gens-2a 2 --pop 8 --games-per-opponent-2a 24` with the canonical 3-opponent dry-run pool. Check fitness trend, elite selection, gen JSON emit, resume after one mid-gen kill.
+**Immediate next action = M4b-4 (M5 dry-run, ~13-20 min parallel wall):** `evolve.py --phase 2a --n-gens-2a 2 --pop 8 --games-per-opponent-2a 24` with the canonical 3-opponent dry-run pool. Check fitness trend, elite selection, gen JSON emit, resume after one mid-gen kill.
 
 **Then M6 — split into 4 resumable tiers** (do NOT treat as a single 23h block). Each tier is independent via `evolve.py --resume-from`; user judges at each gate whether to continue or pivot:
 
