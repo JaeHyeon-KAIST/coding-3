@@ -88,6 +88,61 @@ PARAM_NAMES = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# Known-good seed genomes (pm15 fix for M6-a v1's zero-fitness fail)
+# ---------------------------------------------------------------------------
+# M6-a v1 (pm14 launch) produced best=0.000 / mean=0.000 / snr=0.00 across
+# 21 120 games (2 gens × 40 pop × 264 matches). Every genome sampled from
+# Gaussian(0, σ=30) lost every game. Root cause: the feature weight range we
+# actually need (f_inDeadEnd=-200, f_successorScore=100, etc.) is an order
+# of magnitude larger than Gaussian(0, 30) typically produces. CEM cannot
+# bootstrap off a population that wins nothing.
+#
+# Fix: seed `initial_mean` from a known-good weight vector — h1test
+# (pm4 50% vs baseline, pm7 M4-v2 champion). With mean=h1test and σ=30 the
+# sampled population surrounds a winning point, so elite selection has real
+# signal to work with from gen 0.
+#
+# Values mirror zoo_reflex_h1test's weight dict verbatim. Order matches
+# FEATURE_NAMES above. PARAM_NAMES slots are zero because our evolve
+# container (zoo_reflex_tuned) is a pure reflex agent and ignores the
+# `params` dict — those 12 dims are dead weight during 2a evolution but
+# must exist so the vector has the right shape.
+_H1TEST_FEAT_SEED = [
+    0.0,     # f_bias
+    100.0,   # f_successorScore
+    10.0,    # f_distToFood
+    8.0,     # f_distToCapsule
+    5.0,     # f_numCarrying
+    4.0,     # f_distToHome
+    -50.0,   # f_ghostDist1
+    -10.0,   # f_ghostDist2
+    -200.0,  # f_inDeadEnd
+    -100.0,  # f_stop
+    -2.0,    # f_reverse
+    -50.0,   # f_numInvaders          (h1test patch: -1000 → -50)
+    30.0,    # f_invaderDist
+    0.0,     # f_onDefense            (h1test patch: +100 → 0)
+    5.0,     # f_patrolDist
+    -3.0,    # f_distToCapsuleDefend
+    -1.0,    # f_scaredFlee
+]
+
+# H1b OFFENSIVE weights are identical to h1test at the feature-vector level
+# (same patches applied to the same SEED_WEIGHTS_OFFENSIVE). H1b's distinguishing
+# feature is role-split agent logic, not the weights. Keep the alias for
+# clarity; the vector is identical.
+_H1B_FEAT_SEED = list(_H1TEST_FEAT_SEED)
+
+KNOWN_SEEDS_PHASE_2A = {
+    "h1test": np.array(_H1TEST_FEAT_SEED + [0.0] * len(PARAM_NAMES)),
+    "h1b":    np.array(_H1B_FEAT_SEED    + [0.0] * len(PARAM_NAMES)),
+    # "zero" is the historical default (initial_mean=None → zeros). Kept as
+    # a valid choice so users can explicitly opt out of seeding for ablation.
+    "zero":   None,
+}
+
+
 def genome_dims(phase: str) -> int:
     if phase == "2a":  # shared W_OFF=W_DEF
         return N_FEATURES + len(PARAM_NAMES)
@@ -419,6 +474,22 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
         seed_gen = master_seed + gen * 1000
         population = sample_gaussian(mean, sigma, N, seed_gen)
 
+        # pm15 elitism (STRATEGY §6.3 "keep best-ever 2"):
+        # Always include the current distribution's exact mean as genome 0
+        # and the best-ever genome as genome 1 (when present). Without
+        # this, Gaussian(h1test_seed, σ=30) can sample a whole population
+        # weaker than the seed itself — feature weights like f_ghostDist1
+        # (-50) flip sign under ±30 noise → agents suicide → pool_win_rate
+        # collapses to 0 → CEM sees no signal from gen 0.
+        # M6-a v1 (pm14) proved this fail mode: 21120 games, 0 wins.
+        # mini-smoke post-seeding (pm15) reproduced it at pop=8 even WITH
+        # h1test as initial_mean, confirming the issue is the σ=30 noise
+        # budget, not the seeding itself.
+        if N >= 1:
+            population[0] = mean
+        if N >= 2 and best_ever_genome is not None:
+            population[1] = best_ever_genome
+
         # Preallocate so results land at the genome's own index even though
         # futures complete out-of-order.
         fitnesses_list: list = [0.0] * N
@@ -566,17 +637,33 @@ def main():
             "Typical use: `--phase both --resume-from experiments/artifacts/`."
         ),
     )
+    ap.add_argument(
+        "--init-mean-from", choices=sorted(KNOWN_SEEDS_PHASE_2A.keys()),
+        default="h1test",
+        help=(
+            "Seed the Phase 2a initial_mean from a known-good genome. "
+            "Default 'h1test' (pm4 50%% vs baseline, pm7 M4-v2 champion). "
+            "'h1b' is currently identical at the feature-vector level. "
+            "'zero' is the historical Gaussian-from-zero start and is "
+            "confirmed (pm14 M6-a v1) to fail: 21 120 games all tie. "
+            "Applies to Phase 2a only; Phase 2b inherits via the Phase 2a "
+            "elite mean."
+        ),
+    )
     args = ap.parse_args()
 
     result_2a = None
     if args.phase in ("2a", "both"):
+        init_mean_2a = KNOWN_SEEDS_PHASE_2A.get(args.init_mean_from)
         print(f"[evolve] starting Phase 2a (shared W, {args.n_gens_2a} gens, "
-              f"pop={args.pop}, workers={args.workers or _default_workers()})",
+              f"pop={args.pop}, workers={args.workers or _default_workers()}, "
+              f"init_mean={args.init_mean_from})",
               file=sys.stderr)
         result_2a = run_phase(
             phase="2a", n_gens=args.n_gens_2a, N=args.pop, rho=args.rho,
             games_per_opponent=args.games_per_opponent_2a,
             master_seed=args.master_seed,
+            initial_mean=init_mean_2a,
             workers=args.workers,
             opponents=args.opponents, layouts=args.layouts,
             resume_from=args.resume_from,
