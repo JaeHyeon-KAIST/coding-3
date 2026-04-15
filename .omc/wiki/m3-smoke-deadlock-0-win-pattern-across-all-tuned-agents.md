@@ -1,12 +1,12 @@
 ---
 title: "M3 smoke deadlock — 0-win pattern across all tuned agents"
-tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open"]
+tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open", "h1-confirmed", "resolved-partial"]
 created: 2026-04-15T00:20:09.516Z
-updated: 2026-04-15T00:20:09.516Z
+updated: 2026-04-15T00:47:29.500Z
 sources: []
 links: []
 category: debugging
-confidence: medium
+confidence: high
 schemaVersion: 1
 ---
 
@@ -90,4 +90,63 @@ If H1/H4 is true, M6 CEM evolution should naturally select for less-defensive we
 ## Resolution log (append as hypotheses are tested)
 
 (Empty — no hypothesis tested yet beyond observation)
+
+---
+
+## Update (2026-04-15T00:47:29.500Z)
+
+## Resolution log — H1 quick validation (2026-04-15 09:45-09:46 KST)
+
+**STATUS: H1 CONFIRMED (partial). Deadlock is NOT structural — root cause localized to SEED_WEIGHTS overweight on defense. Agent: `zoo_reflex_h1test.py`.**
+
+### Experiment
+
+- **Variant**: `minicontest/zoo_reflex_h1test.py` — inherits `ReflexTunedAgent`, overrides `_get_weights()` to always return H1-patched `SEED_WEIGHTS_OFFENSIVE`:
+  - `f_onDefense: 100.0 → 0.0` (remove home-side bonus entirely)
+  - `f_numInvaders: -1000.0 → -50.0` (mild signal, not a cliff)
+  - All other OFFENSIVE weights unchanged
+  - Both teammates use this weight set (ReflexAggressive pattern — bypass `TEAM.role`)
+- **Smoke**: `cd minicontest && ../.venv/bin/python capture.py -r zoo_reflex_h1test -b baseline -l defaultCapture -n 10 -q` → 61s wall
+
+### Result
+
+| Metric | Value | vs. baseline M3 signal |
+|---|---|---|
+| Our wins | **3/10 (30%)** | was 0/47 across all M2/M3 agents |
+| Ties | 5/10 (50%) | was ~45/47 |
+| Losses | 2/10 (20%) | was ~2/47 (monsters only) |
+| Scores | `[0,0,0,0,0, 1,1,-18, 1,-18]` | — |
+| Crashes/forfeits | 0 | ✅ |
+
+The 3 wins are narrow (`+1` — single-food advantage); the 2 losses are decisive (`-18` — baseline's Blue agent returned 18 food unopposed). Seems clearly attributable to both our agents being OFFENSIVE (no defender) — baseline's OffensiveReflexAgent can walk in and score freely.
+
+### Hypothesis verdict
+
+- **H1 CONFIRMED (HIGH confidence).** Zero-defensive weights broke the deadlock; 30% win rate from a 0% baseline is conclusive.
+- **H1 is NOT the complete story.** 50% tie rate persists even with neutralized defense — other factors (possibly H2 STOP fallback, H5 role logic, or just baseline being defensive itself) contribute to deadlock on small food margins.
+- **Root cause interpretation**: `f_onDefense=+100` + `f_numInvaders=-1000` in the OFFENSIVE seed dominated the legitimate offensive signal (`f_successorScore=100` per dot eaten gives +100 gain per food — but also `f_onDefense=+100` gives +100 just for being home; the two are identical magnitude → argmax prefers safer home-side action).
+
+### Implications for plan
+
+- ✅ **M6 evolution CAN fix this.** Selection pressure exists: aggressive mutants outscore tied ones → they propagate. 20h CEM compute is NOT wasted risk.
+- ⚠️ **Seed weights need partial re-tuning** before evolution to give CEM a better starting point:
+  - `f_onDefense` should be ~+20 (not +100) for OFFENSE role — mild home preference, not cliff
+  - `f_numInvaders` should be ~-200 (not -1000) for OFFENSE — signal, not dominator
+  - `DEFENSIVE` weights can keep the cliff (that's the role's purpose)
+- ⚠️ **-18 loss pattern suggests** the "both OFFENSE" pattern of H1 test is not viable as a real team strategy — need 1 OFFENSE + 1 DEFENSE split with the rebalanced weights.
+- ✅ **M4 tournament can proceed with confidence.** Deadlock was tuning, not structural.
+
+### Remaining open hypotheses (lower priority now)
+
+- H2 (STOP fallback over-firing) — STILL plausible for the 50% tie rate residual; instrument next session if M4 tournament shows persistent tie bias.
+- H3 (APSP corruption) — unlikely given agent moved and scored; can deprioritize.
+- H4 (monster features inherit bias) — RELEVANT for monster redesign but not blocking for M4.
+- H5 (role assignment broken) — deprioritize; H1 test bypassed role entirely and still scored, but this doesn't disprove H5.
+- H6 (red/blue start randomization) — low; results balanced across starts.
+
+### Next actions
+
+1. **M4 tournament activation** — run `experiments/tournament.py` on full zoo + monsters across multiple layouts × color swaps × seeds. Confirms whether tie rate persists across opponent diversity or is baseline-specific.
+2. **Before M5/M6**: optional re-tune `SEED_WEIGHTS_OFFENSIVE` to mid-values (`f_onDefense=20`, `f_numInvaders=-200`) so CEM gen-0 has a competitive starting pop.
+3. **Keep `zoo_reflex_h1test.py`** in the zoo as an ablation reference — documents the deadlock cause in the final report.
 

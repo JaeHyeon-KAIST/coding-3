@@ -1,19 +1,19 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-15
+**Last updated:** 2026-04-15 (pm — after H1 validation)
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 
 ## Step 1 — Read this 30-second TL;DR
 
-This is **CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent for KAIST CS470 (UC Berkeley CS188 framework). Student ID `20200492`. We have a fully reviewed plan (6-way validation: Planner/Architect/Critic + Scientist/Codex/Gemini), 18 agents implemented (15 zoo + 3 monster), and a critical OPEN issue: **all our agents tie 0-0 vs baseline (deadlock).** Next action is to validate the deadlock hypothesis before committing to the ~20h M6 evolution campaign.
+This is **CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent for KAIST CS470 (UC Berkeley CS188 framework). Student ID `20200492`. We have a fully reviewed plan (6-way validation: Planner/Architect/Critic + Scientist/Codex/Gemini), 19 agents implemented (16 zoo + 3 monster; includes `zoo_reflex_h1test` diagnostic). **The M3 deadlock has been H1-CONFIRMED as seed-weight bias (NOT structural)** — 3W/2L/5T in 10 games on defaultCapture with `f_onDefense=0`, `f_numInvaders=-50` overrides. M4 tournament activation is the next action.
 
 ## Step 2 — Run these commands (~30 sec)
 
 ```bash
 cd "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3"
 git log --oneline -5         # what was committed recently
-ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 18 agents expected
+ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 19 expected (16 zoo + 3 monsters)
 ```
 
 ## Step 3 — Read these in order (~3 min)
@@ -24,13 +24,13 @@ ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 18 agents expected
 
 ## Step 4 — Know what to do next
 
-Per the last session-log entry, the **immediate next action** is:
+Per the 2026-04-15 pm session-log (H1 validation), the **immediate next action** is:
 
-> **H1 quick validation**: patch one zoo variant with neutralized `f_onDefense`, run 10 games vs baseline. If win rate > 0%, deadlock is just bad seed weights — proceed to M4 confidently. (~15 min)
+> **M4 activation**: run `experiments/tournament.py` with full zoo (16) + monsters (3) on 3 layouts × 2 color swaps × 5 seeds. Generate first ELO table. Confirms whether H1 win-pattern generalizes beyond defaultCapture. (~2-3h)
 
-If H1 confirms (win rate > 0%), the secondary action is:
+If M4 tie rate stays ≥50% on multiple layouts, escalate to H2 instrumentation (STOP fallback over-firing — add a counter to `CoreCaptureAgent._safeFallback` and re-run one layout).
 
-> **M4 activation**: run `experiments/tournament.py` with full zoo + monsters on 3 layouts × 2 color swaps × 5 seeds. Generate first ELO table. (~2h)
+Stretch after M4: replicate H1 patch pattern for `zoo_minimax_h1test` / `zoo_mcts_h1test` for family consistency, then proceed to **M5 dry run (N=8, G=2)**.
 
 ## Project rules — must respect
 

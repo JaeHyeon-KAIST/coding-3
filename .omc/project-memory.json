@@ -89,14 +89,44 @@
     },
     {
       "path": "docs/AI_USAGE.md",
-      "accessCount": 1,
-      "lastAccessed": 1776210814775,
+      "accessCount": 2,
+      "lastAccessed": 1776213537550,
       "type": "file"
     },
     {
       "path": "CLAUDE.md",
       "accessCount": 1,
       "lastAccessed": 1776212519247,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_features.py",
+      "accessCount": 1,
+      "lastAccessed": 1776213791666,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_tuned.py",
+      "accessCount": 1,
+      "lastAccessed": 1776213791736,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_aggressive.py",
+      "accessCount": 1,
+      "lastAccessed": 1776213792005,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_core.py",
+      "accessCount": 1,
+      "lastAccessed": 1776213793084,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_h1test.py",
+      "accessCount": 1,
+      "lastAccessed": 1776213892713,
       "type": "file"
     }
   ],
