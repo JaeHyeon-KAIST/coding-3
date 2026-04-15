@@ -83,15 +83,27 @@
   "hotPaths": [
     {
       "path": "minicontest/capture.py",
-      "accessCount": 7,
-      "lastAccessed": 1776215232490,
+      "accessCount": 13,
+      "lastAccessed": 1776228171191,
       "type": "directory"
     },
     {
-      "path": ".claude/settings.local.json",
-      "accessCount": 4,
-      "lastAccessed": 1776155868505,
+      "path": "experiments/tournament.py",
+      "accessCount": 8,
+      "lastAccessed": 1776230848831,
       "type": "file"
+    },
+    {
+      "path": ".claude/settings.local.json",
+      "accessCount": 7,
+      "lastAccessed": 1776218353611,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 4,
+      "lastAccessed": 1776230784544,
+      "type": "directory"
     },
     {
       "path": "minicontest/zoo_core.py",
@@ -100,27 +112,21 @@
       "type": "file"
     },
     {
-      "path": "docs/AI_USAGE.md",
-      "accessCount": 2,
-      "lastAccessed": 1776213537550,
-      "type": "file"
-    },
-    {
-      "path": "experiments/tournament.py",
-      "accessCount": 2,
-      "lastAccessed": 1776215151476,
+      "path": "experiments/evolve.py",
+      "accessCount": 3,
+      "lastAccessed": 1776229510064,
       "type": "file"
     },
     {
       "path": "experiments/run_match.py",
-      "accessCount": 2,
-      "lastAccessed": 1776215151831,
+      "accessCount": 3,
+      "lastAccessed": 1776229510173,
       "type": "file"
     },
     {
-      "path": "experiments/evolve.py",
+      "path": "docs/AI_USAGE.md",
       "accessCount": 2,
-      "lastAccessed": 1776215153108,
+      "lastAccessed": 1776213537550,
       "type": "file"
     },
     {
@@ -136,21 +142,39 @@
       "type": "file"
     },
     {
-      "path": "CLAUDE.md",
-      "accessCount": 1,
-      "lastAccessed": 1776212519247,
+      "path": "minicontest/zoo_reflex_h1test.py",
+      "accessCount": 2,
+      "lastAccessed": 1776219137289,
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_features.py",
-      "accessCount": 1,
-      "lastAccessed": 1776213791666,
+      "path": "minicontest/zoo_reflex_h1b.py",
+      "accessCount": 2,
+      "lastAccessed": 1776219137668,
       "type": "file"
     },
     {
       "path": "minicontest/zoo_reflex_tuned.py",
+      "accessCount": 2,
+      "lastAccessed": 1776219138045,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_features.py",
+      "accessCount": 2,
+      "lastAccessed": 1776219139488,
+      "type": "file"
+    },
+    {
+      "path": "experiments/select_top4.py",
+      "accessCount": 2,
+      "lastAccessed": 1776229510120,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
       "accessCount": 1,
-      "lastAccessed": 1776213791736,
+      "lastAccessed": 1776212519247,
       "type": "file"
     },
     {
@@ -160,21 +184,9 @@
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_reflex_h1test.py",
-      "accessCount": 1,
-      "lastAccessed": 1776213892713,
-      "type": "file"
-    },
-    {
       "path": "minicontest/baseline.py",
       "accessCount": 1,
       "lastAccessed": 1776215146665,
-      "type": "file"
-    },
-    {
-      "path": "experiments/select_top4.py",
-      "accessCount": 1,
-      "lastAccessed": 1776215160251,
       "type": "file"
     },
     {
@@ -196,9 +208,27 @@
       "type": "directory"
     },
     {
-      "path": "minicontest/zoo_reflex_h1b.py",
+      "path": "minicontest/zoo_reflex_h1c.py",
       "accessCount": 1,
-      "lastAccessed": 1776215940780,
+      "lastAccessed": 1776219326393,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/your_baseline1.py",
+      "accessCount": 1,
+      "lastAccessed": 1776228235481,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/your_baseline2.py",
+      "accessCount": 1,
+      "lastAccessed": 1776228235609,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/your_baseline3.py",
+      "accessCount": 1,
+      "lastAccessed": 1776228235625,
       "type": "file"
     }
   ],

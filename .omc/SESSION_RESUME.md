@@ -1,36 +1,50 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-15 (pm2 — after H1b rejection + strategic replan)
+**Last updated:** 2026-04-15 (pm4 — after 40-game apples-to-apples reverification; single-dict saturated, M4 infra pivot)
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 
 ## Step 1 — Read this 30-second TL;DR
 
-This is **CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent for KAIST CS470 (UC Berkeley CS188 framework). Student ID `20200492`. Plan is 6-way validated; 20 agents implemented (17 zoo + 3 monster; includes H1/H1b diagnostics). **M3 deadlock resolved as seed-weight bias** (H1 confirmed: both-OFFENSE 3W/2L/5T). **H1b role-split rejected** (1W/2L/7T): simple fix insufficient. DEFENSIVE weights themselves weak; formation matters as much as weights. Next: H1c (capsule exploit, highest ROI) → M4 infra patches → M4 tournament.
+**CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent (KAIST, UC Berkeley CS188 framework). Student ID `20200492`. 21 agents implemented (18 zoo incl. 3 H1-family + 3 monsters). 40-game apples-to-apples reverification (pm4) produced the canonical comparison vs `baseline.py` on `defaultCapture`:
+
+| Agent | W / L / T | Win% | Net (W−L) |
+|---|---|---|---|
+| zoo_reflex_tuned (control) | 0 / 0 / 40 | 0% (100% tie) | 0 |
+| zoo_reflex_h1test (both-OFFENSE) | 14 / 14 / 12 | **35%** | 0 |
+| zoo_reflex_h1b (role-split, RESURRECTED) | 12 / 4 / 24 | 30% | **+8** |
+| zoo_reflex_h1c (capsule-exploit, new) | 8 / 2 / 30 | 20% | +6 |
+
+Key reversals: **pm2's H1b rejection was wrong** — H1b has the best net score (+8) and lowest loss rate (10%). **H1 leads on raw win% (grading metric) at 35%**, but 14/40 vs p=0.51 rejects the 51% threshold at 95% (z=-2.07). **Single-dict tuning is statistically saturated**; M6 CEM evolution is now the only viable path to the 40pt code score. ReflexTuned 100% tie confirms the original deadlock is structural.
 
 ## Step 2 — Run these commands (~30 sec)
 
 ```bash
 cd "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3"
 git log --oneline -5         # what was committed recently
-ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 20 expected (17 zoo + 3 monsters)
+ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 21 expected (18 zoo + 3 monsters)
 ```
 
 ## Step 3 — Read these in order (~3 min)
 
-1. **`.omc/STATUS.md`** — milestone progress table + open blockers (1 min)
-2. Wiki `session-log/session-2026-04-15-...` — what the last session did (1 min) — read with `wiki_read`
-3. Wiki `debugging/m3-smoke-deadlock-...` — the OPEN critical issue (1 min) — read with `wiki_read`
+1. **`.omc/STATUS.md`** — canonical 40-game table + all open blockers (1 min)
+2. Wiki `session-log/2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem` — what pm4 concluded (1 min) — read with `wiki_read`
+3. Wiki `debugging/experiments-infrastructure-audit-pre-m4-m6` — the two 🔴 blockers that M4 must fix (1 min) — read with `wiki_read`
 
 ## Step 4 — Know what to do next
 
-Per the 2026-04-15 pm2 session-log (H1b rejected), the **immediate next action** is:
+Per pm4 reverification, **do NOT attempt another single-dict variant** (H1d etc.). Single-dict search is statistically exhausted. The immediate critical path:
 
-> **H1c quick validation**: author `minicontest/zoo_reflex_h1c.py`. Inherits ReflexTunedAgent; both OFFENSE (H1 formation). Override `f_distToCapsule: 8 → 80` (10x). Goal: exploit baseline's capsule blindness — when we eat capsule, baseline defender scared 40 ticks; baseline weights ignore scared → it self-destructs chasing us. Prediction: 5W+ if hypothesis correct. ~15 min.
+> **M4 infrastructure patches** (~1h total, all audited in wiki `debugging/experiments-infrastructure-audit-...`):
+> 1. **🔴 `evolve.py:140-142`** — fix `NotImplementedError` swallow. Without this, a 20h M6 run emits noise weights while appearing to succeed. Highest ROI; blocks everything.
+> 2. **🔴 `run_match.py:72`** — seed plumbing broken; apply `-l RANDOM<seed>` workaround so CRN seed axis becomes real.
+> 3. **🟡 `tournament.py`** — CSV-append + fsync per row, sliding futures window (workers×4). ~40 lines. Makes mid-run kill survivable at M6 scale.
+> 4. **🟡 `run_match.py:80`** — add `start_new_session=True` + `os.killpg` on timeout. 1-line fix.
+> 5. **🟡 `experiments/select_top4.py`** — implement `flatten_agent` AST concatenation (blocks M7).
 
-If H1c fails too (< H1's 30%): pivot to H1d (DEFENSIVE rebalance: `f_patrolDist 30 → 5`, `f_invaderDist 80 → 400`). This is the signal that ALL single-dict tunings are insufficient, and M6 evolution is the only path — which makes fixing `evolve.py:140-142` NotImplementedError swallow the critical path.
+After infra patches: **M4 tournament activation** — `experiments/tournament.py` across all 21 agents × 3 layouts (defaultCapture, + 2 more) × 5 seeds → first real ELO table. **M5 dry run** (N=8, G=2) on small genome → verify evolution pipeline end-to-end. **M6 full CEM campaign** (~20h).
 
-After a successful diagnostic hypothesis: activate **M4 infra patches** (architect audit: CSV append + resume, seed workaround via `-l RANDOM<seed>`, `start_new_session=True`, sliding futures window, tmux+caffeinate launch; ~1h). Then M4 tournament across 3 layouts × all zoo.
+Also queued (before M8): **populate `your_baseline1/2/3.py`** with our strongest variants (currently all DummyAgent random copies) so `output.csv` produces the required 4-way comparison table for the report.
 
 ## Project rules — must respect
 

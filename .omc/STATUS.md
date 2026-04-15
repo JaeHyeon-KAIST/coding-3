@@ -1,11 +1,21 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-15 (pm, post H1-verify)
+**Last updated:** 2026-04-15 (pm4, post 40-game apples-to-apples reverification)
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## Headline
 
-Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirmed, 3W/2L/5T)**. H1b role-split variant REJECTED (1W/2L/7T): simple role+OFFENSIVE patch insufficient — DEFENSIVE weights themselves weak, and "2-OFFENSE formation" has real attacking advantage over "1+1 split". New critical path: H1c (capsule exploit) + H1d (DEFENSIVE rebalance) + **M4 infra patches** (architect audit surfaced 2 🔴 + 3 🟡 findings). M6 evolution dimensionality doubled vs plan.
+40-game reverification with same `-b baseline -n 10` protocol for all candidates. **Prior 10-game judgements were undersampled and partly wrong**. Canonical table (vs `baseline.py`, defaultCapture, 40 games):
+
+| Agent | W | L | T | Win% | Loss% | Tie% | Net |
+|---|---|---|---|---|---|---|---|
+| `zoo_reflex_tuned` (control) | 0 | 0 | 40 | 0% | 0% | **100%** | 0 |
+| `zoo_reflex_h1test` (both-OFFENSE) | 14 | 14 | 12 | **35%** | 35% | 30% | 0 |
+| `zoo_reflex_h1b` (role-split, ~~REJECTED~~ RESURRECTED) | 12 | 4 | 24 | 30% | **10%** | 60% | **+8** |
+| `zoo_reflex_h1c` (capsule-exploit, new run) | 8 | 2 | 30 | 20% | 5% | 75% | +6 |
+| `zoo_reflex_h1c` (pm3 earlier run) | 4 | 4 | 32 | 10% | 10% | 80% | 0 |
+
+Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win with 10% loss (lower risk than H1). (2) **H1 still leads on raw win% = grading metric** at 35%, but **cannot clear 51%** (14/40 vs p=0.51: z=-2.07, p≈0.02 → single-dict tuning definitively insufficient for code 40pt). (3) **H1c variance large between runs** (10%→20% across two identical 40-game invocations); 40 games still under-powered for <5%-point CIs. (4) **ReflexTuned 100% tie** confirms original deadlock is structural and reproducible. (5) **`your_baseline1/2/3.py` are DummyAgent (random) copies** — capture.py 4-loop is actually a "vs [random×3, baseline×1]" grading protocol for `output.csv`; before M8 submission we must populate them with our own variants. Next: pivot to **M4 infra patches + M6 evolution** as the only path to 51%.
 
 ## Milestone progress (M-series from `.omc/plans/STRATEGY.md` §10)
 
@@ -20,8 +30,13 @@ Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirme
 | M3 | 3 hand-tuned monster agents | ✅ Done | 3/3 exit 0 | `9e278b4` |
 | **M3-verify** | Smoke for skipped MCTS + monsters | ✅ Done | 7/7 exit 0 | `9e278b4` |
 | **H1-verify** | Deadlock-hypothesis validation (zoo_reflex_h1test) | ✅ Done | 3W/2L/5T in 10 games | `a512863` |
-| **H1b-verify** | Role-split variant test (zoo_reflex_h1b) | ✅ Done — REJECTED | 1W/2L/7T in 10 games (below H1) | (uncommitted) |
-| **M4** | Tournament pipeline activation | ⏳ Deferred until M4 infra patches | — | — |
+| **H1b-verify** | Role-split variant test (zoo_reflex_h1b) | ✅ Done — RESURRECTED | 12W/4L/24T in 40 games (30% W / 10% L, highest net +8) | (uncommitted) |
+| **H1c-verify** | Capsule-exploit variant (zoo_reflex_h1c) | ✅ Done — below H1 | 8W/2L/30T in 40 games (20% win, but pm3 run had 10% — variance large) | (uncommitted) |
+| **Reverify pm4** | 40-game apples-to-apples for H1/H1b/H1c + ReflexTuned control | ✅ Done | Canonical table in Headline; single-dict saturated | (uncommitted) |
+| **M4a-infra** | `tournament.py` CSV-append + fsync + `--resume-from` (autopilot pm5) | ✅ Done | 4/4 QA tests + code-reviewer APPROVED (2 🟡 orthogonal scope-out, 3 🟢 nit) | (uncommitted) |
+| **M4b-infra** | `evolve.py` NotImplementedError swallow fix + `evaluate_genome` impl | ⏳ Pending | — | — |
+| **M4c-infra** | `run_match.py` seed workaround (`-l RANDOM<seed>`) + `start_new_session` | ⏳ Pending | — | — |
+| **M4** | Tournament pipeline activation | ⏳ Deferred until M4b/c patches | — | — |
 | M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | — | — |
 | M6 | Full evolution campaign (~20h) | ⏳ Pending | — | — |
 | M7 | select_top4 + flatten + populate slots | ⏳ Pending | — | — |
@@ -32,13 +47,23 @@ Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirme
 
 ## Critical observations / blockers
 
-🟡 **DEADLOCK PATTERN — H1 CONFIRMED (partial) on 2026-04-15** — one variant (`zoo_reflex_h1test.py`) with `f_onDefense=0` + `f_numInvaders=-50` patched went from 0/47 wins (M1-M3) to **3/10 wins** vs baseline on defaultCapture (30% win rate, 2 losses, 5 ties). H1 confirmed: deadlock was seed-weight overweight on defense, NOT structural. **M6 safe to pursue** (~20h compute not wasted). 50% tie rate persists → possibly baseline itself timid, or H2 residual. See wiki `debugging/m3-smoke-deadlock-...` Resolution log.
+🟢 **CAPTURE.PY 4-LOOP PROTOCOL — DECODED 2026-04-15 pm4** — `capture.py:1054-1074` loops over `lst=['your_baseline1','your_baseline2','your_baseline3','baseline.py']` to build `output.csv` for the assignment's required comparison report. `your_baseline1/2/3.py` are currently **identical copies of myTeam.py = DummyAgent (random actions)**. So `-n 10 -b baseline` = 40 games all vs baseline.py; bare `-n 10` = 10 vs random ×3 blocks + 10 vs baseline. Before M8 submission, we must populate `your_baseline1/2/3.py` with our own variants (per CLAUDE.md spec) so `output.csv` shows a meaningful 4-way comparison for the report.
+
+🟡 **DEADLOCK — STRUCTURAL, CONFIRMED 2026-04-15 pm4** — `zoo_reflex_tuned.py` (untouched seed weights) produces **0W/0L/40T** vs baseline across a 40-game reverification. The original deadlock claim (0/47 in M1-M3) is exactly reproducible. Weight patches in H1/H1b/H1c break the deadlock (tie% drops from 100% to 30-75%), but none clear 51% win rate.
+
+🔴 **SINGLE-DICT TUNING STATISTICALLY INSUFFICIENT (2026-04-15 pm4)** — H1 14/40 at p=0.51 gives z=-2.07 (p≈0.02). We can reject 51% with 95% confidence for H1 on baseline. H1b (12/40) and H1c (4-8/40) are further below. No pure weight-scaling of `SEED_WEIGHTS_OFFENSIVE` / `SEED_WEIGHTS_DEFENSIVE` will clear grading threshold. Policy-level change required: coordination protocol, role swap, search-based planning, OR **M6 CEM evolution over wider search space**. `evolve.py:140-142` NotImplementedError fix is now ON the critical path.
+
+🟡 **H1b RESURRECTION — pm2 rejection overturned** — The pm2 session concluded H1b "rejected" based on a single 10-game block (1W/2L/7T). 40-game reverification shows 12W/4L/24T (30% W, 10% L, **+8 net** — highest among all diagnostics). H1b has the lowest risk profile (4 losses vs H1's 14). For tournament (diverse opponents), a low-loss / moderate-win variant might rank better than H1's high-variance profile. Keep H1b as a live seed variant for M6.
 
 🔴 **Evolution silent-failure risk (`evolve.py:140-142`)** — `evaluate_genome` raises `NotImplementedError`; the enclosing try/except swallows it into `f=0.0`. A 20h M6 campaign would "complete successfully" and emit `final_weights.py` of random noise. MUST fix before any M5 dry-run. See wiki `debugging/experiments-infrastructure-audit-...`.
 
 🔴 **Seed plumbing broken (`run_match.py:72`)** — seed value is dropped; only `--fixRandomSeed` flag passed to `capture.py` which hardcodes `random.seed('cs188')`. CRN seed-axis variance is a no-op. Workaround: use `-l RANDOM<seed>` layout-generator flag. See audit page.
 
-🟡 **Tournament CSV + memory robustness** — `tournament.py` writes CSV only at run-end and submits all futures upfront. Mid-run kill discards all progress; at M6 scale (~280K games) futures dict alone is ~85MB. Patch set: CSV-append + fsync per row, sliding futures window (workers×4). ~40 lines total.
+🟢 **Tournament CSV durability — CSV-append + fsync + resume DONE (pm5, autopilot run)** — `tournament.py` now writes each row with `flush()+fsync()` + parent-dir fsync on first-write (hard-crash survival on APFS). Added `_load_completed_keys()` helper + `--resume-from` CLI flag; (red,blue,layout,seed) dedup on resume. Code-reviewer APPROVED (0 🔴, 2 🟡 orthogonal, 3 🟢 nits). 4-test QA: fresh run (2 jobs, 7s, 0 crash), rerun (skip 2, nothing to do), partial skip (seed 1 2 → skip 2 + append 2, single header), regression after dir-fsync add (pass). See wiki session-log `2026-04-15-pm5-tournament-csv-append-resume-patch`. Residual (separate patch): sliding futures window for 85MB memory footprint at M6 scale.
+
+🟡 **Tournament sliding futures window (deferred)** — `tournament.py:128` still eagerly submits all futures upfront; at M6 ~280K jobs this builds ~85MB of Future objects in parent. Not a correctness issue, but a parent-process memory concern. Patch: replace `{pool.submit(...): job for job in jobs}` one-shot dict with a sliding in-flight window of `workers × 4`. ~20 lines.
+
+🟡 **BrokenProcessPool unhandled (deferred)** — single worker segfault still aborts the whole tournament. CSV-append lifeline means restart with `--resume-from` recovers progress, but a recovery loop around `ProcessPoolExecutor` would avoid manual babysitting. Audit wiki M3.
 
 🟡 **Subprocess process-group leakage** — `run_match.py:80` lacks `start_new_session=True`; on TimeoutExpired, grandchildren can orphan. 1-line fix + `os.killpg` on timeout.
 
@@ -53,12 +78,12 @@ Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirme
 - 1 `zoo_features.py` (17-feature extractor)
 - 1 `zoo_dummy.py` (M1 smoke target)
 - 4 reflex variants (`zoo_reflex_{tuned,capsule,aggressive,defensive}.py`)
-- 2 H1-family diagnostic variants (`zoo_reflex_h1test.py` both-OFFENSE, `zoo_reflex_h1b.py` role-split; kept as permanent ablation references)
+- 3 H1-family diagnostic variants (`zoo_reflex_h1test.py` both-OFFENSE, `zoo_reflex_h1b.py` role-split, `zoo_reflex_h1c.py` capsule-exploit; kept as permanent ablation references)
 - 3 minimax variants (`zoo_minimax_{ab_d2,ab_d3_opp}.py`, `zoo_expectimax.py`)
 - 3 MCTS variants (`zoo_mcts_{random,heuristic,q_guided}.py`)
 - 2 approxQ variants (`zoo_approxq_{v1,v2_deeper}.py`)
 - 3 monster agents (`monster_{rule_expert,mcts_hand,minimax_d4}.py`)
-- **Total: 20 agents (17 zoo + 3 monsters)**
+- **Total: 21 agents (18 zoo incl. 3 H1-family + 3 monsters)**
 
 **Pipeline scripts (`experiments/`):**
 - `run_match.py` — single-game subprocess wrapper (CPU pin support)
@@ -71,14 +96,16 @@ Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirme
 - `CLAUDE.md` — project rules (auto-loaded each session)
 - `.omc/plans/STRATEGY.md` (746 lines) — full plan, ADR
 - `.omc/plans/open-questions.md` (50 lines) — stretch / future items
-- `.omc/wiki/` — long-term knowledge base (just bootstrapped this session)
+- `.omc/wiki/` — long-term knowledge base
   - `reference/glossary-cs470-a3-project-terms`
   - `convention/session-log-protocol-multi-session-continuity-discipline`
   - `debugging/m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents`
+  - `debugging/experiments-infrastructure-audit-pre-m4-m6`
   - `session-log/session-2026-04-15-m3-smoke-completion-deadlock-observation`
   - `session-log/2026-04-15-pm-h1-deadlock-validation-confirmed`
-  - `debugging/experiments-infrastructure-audit-pre-m4-m6`
   - `session-log/2026-04-15-pm2-h1b-rejected-strategic-replanning`
+  - `session-log/2026-04-15-pm3-h1c-rejected-capture-py-4-loop-discovery`
+  - `session-log/2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem`
 - `docs/AI_USAGE.md` — per-milestone code change log (assignment requirement)
 - `.omc/notepad.md` — priority context + working memory
 - `.omc/STATUS.md` (this file)
@@ -88,16 +115,17 @@ Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirme
 
 **STOP and read `.omc/SESSION_RESUME.md` first.** That's the 5-minute onboarding. This STATUS.md is the deeper detail.
 
-If you skipped SESSION_RESUME: the immediate next action is **M4 tournament activation** (run `experiments/tournament.py` across full zoo + monsters on 3 layouts × 2 colors × 5 seeds, generate first ELO table). H1 already validated as of 2026-04-15 pm — deadlock confirmed calibrational, not structural.
+If you skipped SESSION_RESUME: the immediate next action is the **M4 infra patch set** — fix `evolve.py:140-142` `NotImplementedError` swallow (ON critical path now that single-dict tuning is statistically rejected), `run_match.py:72` seed plumbing, `tournament.py` CSV-append + sliding futures window. Then M4 tournament pipeline activation. Do NOT run another single-dict H1d variant — pm4 reverification proved single-dict tuning tops out at H1's 35% (statistically below 51% threshold).
 
 ## Health summary
 
 | Metric | Value | Health |
 |---|---|---|
-| Code crashes in 67 smoke games (47 M1-M3 + 10 H1 + 10 H1b) | 0 | 🟢 |
+| Code crashes in 267 smoke games (47 M1-M3 + 10 H1 old + 10 H1b old + 40 H1c pm3 + 40 H1 + 40 H1b + 40 H1c new + 40 ReflexTuned control) | 0 | 🟢 |
 | Timeout forfeits | 0 | 🟢 |
-| Total agents implemented | 20 | 🟢 |
-| Best win rate vs baseline | 30% (H1 both-OFFENSE); H1b role-split = 10% | 🟡 (calibrational deadlock broken; but weight tuning alone not enough for 51%) |
+| Total agents implemented | 21 (+h1c) | 🟢 |
+| Best win rate vs baseline (40-game CI) | **35%** (H1 both-OFFENSE); H1b 30%, H1c 20% (new), ReflexTuned 0% | 🔴 51% threshold statistically rejected → M6 pivot required |
+| Best net (W-L) vs baseline | **+8** (H1b — 12W/4L/24T, pm2 rejection overturned) | 🟢 (for tournament) |
 | Plan reviewers approving | 6 / 6 | 🟢 |
 | Compute budget for M6 (planned) | ~20h | 🟢 |
 | Days until submission deadline | TBD (check assignment PDF for due date) | 🟡 |

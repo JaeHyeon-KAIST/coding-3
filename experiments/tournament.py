@@ -40,6 +40,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 RUN_MATCH = REPO_ROOT / "experiments" / "run_match.py"
 VENV_PYTHON = REPO_ROOT / ".venv" / "bin" / "python"
 
+# Canonical output column order. Used by both the live writer (run_tournament)
+# and the resume-key loader (_load_completed_keys). Keep in sync with the
+# schema documented in STRATEGY.md §7.4.
+CSV_COLS = [
+    "red", "blue", "layout", "seed", "winner", "score",
+    "red_win", "blue_win", "tie", "crashed", "crash_reason",
+    "wall_time", "exit_code",
+]
+
 
 def physical_cores() -> int:
     """Return physical core count (best-effort)."""
@@ -104,7 +113,48 @@ def build_jobs(agents, layouts, seeds, games_per_pair, crn_pair_colors=True):
     return jobs
 
 
-def run_tournament(agents, layouts, seeds, games_per_pair, workers, pin, out_path, timeout_per_game):
+def _load_completed_keys(resume_csv: Path) -> set:
+    """Return the set of (red, blue, layout, seed) tuples already recorded in
+    resume_csv so run_tournament can skip them.
+
+    - Missing file, empty file, or read error → empty set (run everything).
+    - Seed field is normalised to int-or-None to match build_jobs' tuple shape.
+    - CSV reader is tolerant of trailing newlines / partial last rows (which
+      can happen if a prior run was SIGKILL'd mid-fsync — we accept whatever
+      DictReader can parse).
+    """
+    if not resume_csv.exists() or resume_csv.stat().st_size == 0:
+        return set()
+    keys = set()
+    try:
+        with resume_csv.open(newline="") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                seed_raw = row.get("seed", "")
+                try:
+                    seed = int(seed_raw) if seed_raw not in ("", "None") else None
+                except ValueError:
+                    seed = None
+                keys.add((row.get("red", ""), row.get("blue", ""),
+                          row.get("layout", ""), seed))
+    except (OSError, csv.Error) as e:
+        print(f"[resume] warn: failed reading {resume_csv}: {e}", file=sys.stderr)
+        return set()
+    return keys
+
+
+def run_tournament(agents, layouts, seeds, games_per_pair, workers, pin,
+                   out_path, timeout_per_game, resume_from=None):
+    """Run a round-robin tournament, persisting each result to CSV immediately.
+
+    Resilience contract (pm4 patch):
+    - Each completed game is written to `out_path` and fsync'd before the
+      next is parsed. A mid-run SIGKILL / power loss preserves every row that
+      had returned before the kill.
+    - If `out_path` (or `--resume-from`, if given) already exists with rows,
+      those (red, blue, layout, seed) combos are skipped — pick-up continues
+      in-place via append mode. First-time runs truncate + write header.
+    """
     cpu = physical_cores()
     if workers > cpu:
         print(f"[warn] requested {workers} workers but only {cpu} physical cores; capping.", file=sys.stderr)
@@ -122,42 +172,78 @@ def run_tournament(agents, layouts, seeds, games_per_pair, workers, pin, out_pat
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Resume source defaults to out_path; override via --resume-from.
+    resume_csv = Path(resume_from) if resume_from else out_path
+    completed_keys = _load_completed_keys(resume_csv)
+    if completed_keys:
+        before = len(jobs)
+        jobs = [
+            j for j in jobs
+            if (j[0], j[1], j[2], j[3]) not in completed_keys
+        ]
+        print(f"[resume] {len(completed_keys)} completed rows loaded from {resume_csv}; "
+              f"skipping {before - len(jobs)}; {len(jobs)} remaining.",
+              file=sys.stderr)
+
+    # Write mode: append if out_path already has content (resume in-place),
+    # otherwise truncate and write header.
+    if out_path.exists() and out_path.stat().st_size > 0:
+        mode, write_header = "a", False
+    else:
+        mode, write_header = "w", True
+
     start = time.time()
     results = []
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        futures = {pool.submit(dispatch_one, job): job for job in jobs}
-        for i, fut in enumerate(as_completed(futures)):
+    with out_path.open(mode, newline="", buffering=1) as csv_file:
+        writer = csv.DictWriter(csv_file, fieldnames=CSV_COLS, extrasaction="ignore")
+        if write_header:
+            writer.writeheader()
+            csv_file.flush()
+            os.fsync(csv_file.fileno())
+            # Also fsync the parent directory so the newly-created file's
+            # directory entry survives a hard crash between rows.
+            # macOS/Linux: fsync on an O_RDONLY dir fd flushes the inode.
             try:
-                res = fut.result()
-            except Exception as e:
-                job = futures[fut]
-                res = {
-                    "red": job[0], "blue": job[1], "layout": job[2], "seed": job[3],
-                    "crashed": True, "crash_reason": f"executor_error:{e}",
-                    "wall_time": 0.0,
-                }
-            results.append(res)
-            if (i + 1) % 10 == 0:
-                elapsed = time.time() - start
-                print(f"[{i+1}/{len(jobs)}] elapsed={elapsed:.0f}s", file=sys.stderr)
+                dir_fd = os.open(str(out_path.parent), os.O_RDONLY)
+                try:
+                    os.fsync(dir_fd)
+                finally:
+                    os.close(dir_fd)
+            except OSError:
+                pass  # non-fatal; row data is still in file
 
-    # emit CSV
-    cols = [
-        "red", "blue", "layout", "seed", "winner", "score",
-        "red_win", "blue_win", "tie", "crashed", "crash_reason",
-        "wall_time", "exit_code",
-    ]
-    with out_path.open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=cols, extrasaction="ignore")
-        w.writeheader()
-        for r in results:
-            w.writerow(r)
+        if not jobs:
+            print("[tournament] nothing to do; all jobs already in resume CSV.",
+                  file=sys.stderr)
+            return [], out_path
+
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(dispatch_one, job): job for job in jobs}
+            for i, fut in enumerate(as_completed(futures)):
+                try:
+                    res = fut.result()
+                except Exception as e:
+                    job = futures[fut]
+                    res = {
+                        "red": job[0], "blue": job[1], "layout": job[2], "seed": job[3],
+                        "crashed": True, "crash_reason": f"executor_error:{e}",
+                        "wall_time": 0.0,
+                    }
+                results.append(res)
+                # Per-row persist: mid-run crash preserves everything up to here.
+                writer.writerow(res)
+                csv_file.flush()
+                os.fsync(csv_file.fileno())
+                if (i + 1) % 10 == 0:
+                    elapsed = time.time() - start
+                    print(f"[{i+1}/{len(jobs)}] elapsed={elapsed:.0f}s", file=sys.stderr)
 
     total = len(results)
     crashed = sum(1 for r in results if r.get("crashed"))
     elapsed = time.time() - start
     print(
-        f"[done] {total} matches in {elapsed:.0f}s "
+        f"[done] {total} new matches in {elapsed:.0f}s "
         f"({total / max(elapsed, 1e-9):.2f} games/s); "
         f"crashes: {crashed} ({100 * crashed / max(total, 1):.1f}%); "
         f"csv: {out_path}",
@@ -176,6 +262,13 @@ def main():
     ap.add_argument("--pin", action="store_true", help="CPU-pin each worker (Linux only)")
     ap.add_argument("--timeout-per-game", type=float, default=120.0)
     ap.add_argument("--out", default="experiments/artifacts/tournament_results/tournament.csv")
+    ap.add_argument(
+        "--resume-from",
+        default=None,
+        help="Optional path to a prior CSV; (red,blue,layout,seed) combos present "
+             "there are skipped. If omitted and --out already exists, --out itself "
+             "is used as the resume source and appended to in place.",
+    )
     args = ap.parse_args()
 
     run_tournament(
@@ -187,6 +280,7 @@ def main():
         pin=args.pin,
         out_path=args.out,
         timeout_per_game=args.timeout_per_game,
+        resume_from=args.resume_from,
     )
 
 
