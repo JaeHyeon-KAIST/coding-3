@@ -156,3 +156,7 @@
 - **Pages:** 2026-04-16-pm14-option-a-complete-4-loop-bypass-4-55-speedup-m6-.md
 - **Summary:** Created new page "2026-04-16 pm14 Option A complete — 4-loop bypass, 4.55× speedup, M6 budget restored"
 
+## [2026-04-15T19:34:28.465Z] ingest
+- **Pages:** 2026-04-16-pm16-m6-a-1-smoke-cem-learns-best-0-16-0-77-in-4-gens.md
+- **Summary:** Created new page "2026-04-16 pm16 — M6-a.1 smoke: CEM learns (best 0.16→0.77 in 4 gens)"
+
