@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 18 pages | Last updated: 2026-04-15T07:42:19.957Z
+> 20 pages | Last updated: 2026-04-15T09:15:10.536Z
 
 ## convention
 
@@ -10,6 +10,14 @@
 
 - [Experiments infrastructure audit — pre-M4/M6](experiments-infrastructure-audit-pre-m4-m6.md) — # Experiments infrastructure audit — pre-M4/M6
 - [M3 smoke deadlock — 0-win pattern across all tuned agents](m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md) — # M3 smoke deadlock — 0-win pattern across all tuned agents
+
+## decision
+
+- [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
+
+## pattern
+
+- [Option α test plan (T1-T4) for evolve.py parallelization + resume](option-test-plan-t1-t4-for-evolve-py-parallelization-resume.md) — # Option α test plan (T1-T4) for evolve.py parallelization + resume
 
 ## reference
 

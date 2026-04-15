@@ -37,15 +37,27 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 | **M4-v1** | First tournament run pm6: 15 agents × defaultCapture × seed 1 | ✅ Done (weak signal — superseded by v2) | 210 matches / 0 crashes / 7m10s wall; **95.2% tie** (seed lock) | `4dcbced` |
 | **M4c-1-infra** | `run_match.py` drop `--fixRandomSeed` + route seed via `-l RANDOM<seed>` (autopilot pm7) | ✅ Done | variance smoke 5 reps → 3 distinct outcomes; code-reviewer APPROVED (0 🔴 2 🟡 maintainability 3 🟢 nit) | (uncommitted) |
 | **M4-v2** | Re-tournament post-M4c-1: 15 agents × (defaultCapture + RANDOM) × seeds 1 2 = 840 games | ✅ Done | 840 matches / 0 crashes / 32m28s wall; **tie 90.6%** (down from 95.2%); h1test 50% vs baseline (ELO 1584, #2 overall); h1b 37.5% (#4); h1c 12.5% (map-sensitive); all minimax/expectimax/monster tie baseline | (uncommitted CSV) |
-| **M4b-infra** | `evolve.py` NotImplementedError swallow fix + `evaluate_genome` impl | ⏳ Pending (now critical) | — | — |
-| **M4c-2-infra** | `run_match.py` `start_new_session=True` + `killpg` on timeout | ⏳ Pending | — | — |
-| M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | — | — |
-| M6 | Full evolution campaign (~20h) | ⏳ Pending | — | — |
+| **M4b-1-infra** | `evolve.py` fail-fast (remove `NotImplementedError` swallow) | ✅ Done | loud raise verified | `b854f16` |
+| **M4b-2-infra** | Weight-override protocol (run_match `--red-opts` + zoo_core loader + zoo_reflex_tuned createTeam) | ✅ Done | 5 unit tests + e2e (override → Red +2 vs baseline; seed-weight → Tie) | `b854f16` |
+| **M4b-3-infra** | `evaluate_genome()` full implementation (decode, dump, matches, aggregate, cleanup) | ✅ Done | h1test genome smoke → `{pool_win_rate:0.5, crash_rate:0.0, ...}` | `b854f16` |
+| **Pre-α** | Baseline measurement + STRATEGY §6 gap analysis + T1-T4 test plan + parallelization ADR | ✅ Done | 7.74s/match empirical; 4 wiki pages ingested | (this commit) |
+| **Option α** | genome-level ProcessPool + per-gen-JSON resume + opponents/layouts CLI (+ optional truncated eval) | ⏳ Pending | target: 8× speedup → M6 ~23h | — |
+| **M4b-4** | M5 dry-run (~13min post-α): 2 gens × 8 pop × 24 games/opp | ⏳ Pending | — | — |
+| **M4c-2-infra** | `run_match.py` `start_new_session=True` + `killpg` on timeout | ⏳ Pending (5min) | — | — |
+| M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | ~13min parallel; validates CEM loop end-to-end | — |
+| **M6-a** | Phase 2a **smoke** (2 gens × 40 pop, 3-opp dry pool) — Go/No-go check for full 2a | ⏳ Pending | ~1.5h parallel; pass = best_ever > h1test seed fitness | — |
+| **M6-b** | Phase 2a **full** (gens 3-10 with resume from M6-a) | ⏳ Pending | ~4h parallel; emit 2a elite mean for 2b init | — |
+| **M6-c** | Phase 2b **early** (gens 11-15, split W, monster pool active) | ⏳ Pending | ~2.75h parallel; monster_rule_expert in pool | — |
+| **M6-d** | Phase 2b **late** (gens 16-30) + `final_weights.py` emit | ⏳ Pending | ~8.25h parallel; best-ever across both phases | — |
 | M7 | select_top4 + flatten + populate slots | ⏳ Pending | — | — |
 | M7.5 | Time-budget calibration | ⏳ Pending | — | — |
-| M8 | Final `output.csv` for report | ⏳ Pending | — | — |
-| M9 | LaTeX ICML report | ⏳ Pending | — | — |
-| M10 | Submission packaging (zip, sha256) | ⏳ Pending | — | — |
+| M8 | Final `output.csv` for report | ⏳ Pending | ~30min; populate `your_baseline{1,2,3}.py` first | — |
+| **M9-a** | Report sections: Intro (8pt) + Methods (20pt) | ⏳ Pending | ~1.5h; ICML template | — |
+| **M9-b** | Report Results (20pt) + ablation figures (ELO curves, win-rate tables) | ⏳ Pending | ~1.5h; uses M4-v2 + M6 artifacts | — |
+| **M9-c** | Report Conclusion (12pt) + revise pass | ⏳ Pending | ~1h | — |
+| M10 | Submission packaging (zip, sha256) | ⏳ Pending | ~15min | — |
+
+**Tier policy (applies to any 1h+ milestone): each sub-tier is an independent resumable unit with a Go/No-go gate at the end. User decides after each gate whether to continue, pause, or pivot. No milestone commits us to more than ~4h of uninterrupted work.**
 
 ## Critical observations / blockers
 
@@ -93,6 +105,8 @@ Artifact: `experiments/artifacts/tournament_results/m4_full_pm7_v2.csv`.
 🟡 **Subprocess process-group leakage** — `run_match.py:80` lacks `start_new_session=True`; on TimeoutExpired, grandchildren can orphan. 1-line fix + `os.killpg` on timeout.
 
 🟡 **Submission flatten not yet implemented** — `experiments/select_top4.py` is a skeleton; the `flatten_agent` function raises `NotImplementedError`. Required by M7. Plan has the recipe, but the AST-based concatenation logic needs implementation. Also: `FAMILY_MAP` missing entries for `zoo_dummy`, `zoo_reflex_h1test` (and future h1b/h1c) — silent drop risk during selection.
+
+🟢 **Pre-α complete (2026-04-15 pm9)** — 5-stage preflight before Option α. **Stage 1 baseline**: 1 genome × 72 games sequential = 557s (7.74s/match); sequential extrapolation of M6 full = **186h (~8 days, non-viable)**; 8-way parallel target = 23.2h (≈ STRATEGY §6.6's 20h spec). **Stage 2 STRATEGY §6 gap analysis**: confirmed match (G11 CRN pairing, G3 stddev k=0.5, G8 Phase2→3 transition); scope-in for α (G4 CLI args, G12 ProcessPool, G10 truncated eval optional); scope-out (G1 20-dim claim → doc fix, G5 HALL_OF_FAME, G6 sequential-halving, G7 restart-random, G9 2-elitism — nice-to-have). **Stage 3** T1-T4 test plan (same-genome repeatability, parallel independence, crash isolation, resume integrity) → wiki `pattern/option-test-plan-t1-t4-...`. **Stage 4 ADR**: genome-level ProcessPoolExecutor (workers = min(cores-1, 8)); resume reads existing `{phase}_gen{N}.json` + `best_ever_*` forward-compat fields → wiki `decision/adr-evolve-py-parallelization-...`. **Critical path now**: implement α.
 
 🟡 **Time calibration deferred to M7.5** — `MOVE_BUDGET = 0.80s` is a placeholder. Algorithmic bounds (`MAX_ITERS=1000`, `MAX_DEPTH=3`, `ROLLOUT_DEPTH=20`) are the actual time controllers during dev. Final values come from M7.5 measurement on dev hardware + `taskset/cpulimit` TA simulation.
 

@@ -96,3 +96,11 @@
 - **Pages:** 2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md
 - **Summary:** Created new page "2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)"
 
+## [2026-04-15T09:14:22.963Z] ingest
+- **Pages:** option-test-plan-t1-t4-for-evolve-py-parallelization-resume.md
+- **Summary:** Created new page "Option α test plan (T1-T4) for evolve.py parallelization + resume"
+
+## [2026-04-15T09:15:10.526Z] ingest
+- **Pages:** adr-evolve-py-parallelization-genome-level-resume-checkpoint.md
+- **Summary:** Created new page "ADR — evolve.py parallelization (genome-level) + resume checkpoint"
+
