@@ -35,9 +35,35 @@ ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 21 expected (18 zoo
 
 **Current state (2026-04-15 pm9)**: M4a, M4b-1/2/3, M4c-1 infrastructure all landed and committed. M4-v1/v2 tournaments produced canonical ELO (h1test 50% vs baseline, h1b best net +8). Pre-α preflight complete: baseline measured at 7.74s/match, ADR written, test plan (T1-T4) ready.
 
-**α-core is DONE as of pm12.** Commits: `b625dc8` (α-1 parallelization), `ad56ebe` (α-2 resume), CLI plumbing folded into α-1, T1-T4 all PASS. α-5 (truncated eval) is the only α sub-tier deferred — user paused before greenlighting it.
+**α-core, Option A 4-loop bypass, init-mean fix, M6-a.1 smoke ALL DONE through pm17.** Latest commit: `ded4f05` (pm17 remote infra + dispatch policy). Server `jdl_wsl` (Ryzen 7950X, 16 phys cores, WSL2 Ubuntu) provisioned and validated, tmux session `work` running. Mac/server both at `ded4f05` (server pull pending — see step 4 below).
 
-**Immediate next action = M4b-4 (M5 dry-run, ~13-20 min parallel wall):** `evolve.py --phase 2a --n-gens-2a 2 --pop 8 --games-per-opponent-2a 24` with the canonical 3-opponent dry-run pool. Check fitness trend, elite selection, gen JSON emit, resume after one mid-gen kill.
+## ⚠️ Next-session immediate actions
+
+Read in order:
+1. THIS file
+2. `.omc/STATUS.md` (milestone table + Critical observations)
+3. **wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline`** — the FULL pm17 plan
+4. wiki `environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl` — server how-to
+
+Verify server alive (~10 sec):
+```bash
+ssh jdl_wsl "tmux list-sessions && cd ~/projects/coding-3 && git log --oneline -2 && git pull origin main 2>&1 | tail -3"
+```
+Expected: `work` session present, latest commit `ded4f05`. If pulling brings new commits = server was behind.
+
+## What we're doing (pm17 user decision)
+
+**User has time slack, wants performance-max (code 40pt + tournament extra 30pt). Full 6-phase pipeline.** Fixed `--master-seed=42` for all Phase 2 candidates (apples-to-apples ranking) → Phase 5 multi-seed on top-5 (cross-platform robustness).
+
+Critical path with parallelism:
+- **First slot (~10h calendar)**: launch A1 17-dim baseline candidate on server (overnight, control champion) WHILE coding Phase 1 B1+C4 on Mac in parallel.
+- **Subsequent slots**: queue server with B1-extended candidates (Order 2-7), Mac handles Phase 3 hybrid coding + Phase 5 validation + Phase 6 flatten/report.
+
+Total budget ~5-7 days, mostly server overnight.
+
+**Dispatch is case-by-case** — NOT "always server". See wiki page for the venue decision matrix.
+
+**FIRST decision in next session**: confirm pm17 6-phase plan still wanted. If yes, launch the parallel first slot (server A1 17-dim + Mac Phase 1 coding). `evolve.py --phase 2a --n-gens-2a 2 --pop 8 --games-per-opponent-2a 24` with the canonical 3-opponent dry-run pool. Check fitness trend, elite selection, gen JSON emit, resume after one mid-gen kill.
 
 **Then M6 — split into 4 resumable tiers** (do NOT treat as a single 23h block). Each tier is independent via `evolve.py --resume-from`; user judges at each gate whether to continue or pivot:
 

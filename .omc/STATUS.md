@@ -50,7 +50,14 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 | **α-post A (4-loop bypass)** | `experiments/single_game.py` wrapper + `run_match.py` refactor to skip `capture.py.__main__`'s 4-loop | ✅ Done | 4.55× per-match speedup (1.70s); T1-T3 all PASS post-A; M6 budget restored to ~23-32h | (pm14) |
 | **M6-a v1** (pm14) | Phase 2a smoke v1: zero-init Gaussian → all-zero fitness | ❌ Failed | 2h23m wasted; root cause diagnosed (init_mean=0 cold start) | (pm14) |
 | **M6-a.1 smoke** (pm16) | 4 gens × 20 pop × 12 games × 3 dry opps × defaultCapture, `--init-mean-from h1test` + elitism | ✅ **PASSED** | 17m21s; trajectory 0.160→0.273→0.323→**0.774** (4.8×); snr stable 1.1+ (no drift); real CEM learning confirmed | — |
-| **M6-a.2** | Full Phase 2a smoke: 2-5 gens × 40 pop × 264 games × 11 opps × 2 layouts | ⏳ Unblocked | (pm16 decision pending) target ~2-6h wall | — |
+| **M6-a.2** | Full Phase 2a smoke: 2-5 gens × 40 pop × 264 games × 11 opps × 2 layouts | ⏳ Replaced by pm17 6-phase plan (see Phase 2 below) | (pm16 decision deferred) | — |
+| **pm17 plan** | 6-phase performance-max pipeline (Phase 1 Mac infra → Phase 2 server evolve queue → Phase 3 Mac hybrid → Phase 4 server tournament → Phase 5 multi-seed validation → Phase 6 submission) | ⏳ Pending — start in NEXT session | full plan in wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline` | — |
+| **Phase 1: B1 features + C4 MCTS calibration** | Mac coding: +3 features (`f_scaredGhostChase`, `f_returnUrgency`, `f_teammateSpread`), MCTS time-budget polling | ⏳ Pending | ~6-8h Mac coding; runs in parallel with server A1 17-dim launch | — |
+| **Phase 2: 7-8 candidates evolve queue** | Server sequential: A1 baseline 17-dim (control) → A1/A2/A5 + B1 reflex variants → C1/C3/C4 + B1 paradigm variants. All `--master-seed 42` fixed | ⏳ Pending | ~70-100h server background | — |
+| **Phase 3: D-series hybrid** | Mac code-level enhancements applied per champion: D1 role-swap, D2 capsule timing, D3 endgame mode → 4 variants per champion | ⏳ Pending | ~6-8h Mac | — |
+| **Phase 4: Round-robin ELO** | 28-40 candidates × 5 layouts × 5 seeds tournament on server | ⏳ Pending | ~2-3h server | — |
+| **Phase 5: Top-5 multi-seed final validation** | Server 200-game sweep × 10 seeds + Mac re-validation (cross-platform reproducibility) | ⏳ Pending | ~2-3h | — |
+| **Phase 6: M7 flatten + M8 + M9 report + M10 zip** | Mac flatten_agent AST + your_baseline1/2/3 populate + report + packaging | ⏳ Pending | ~6-8h Mac | — |
 | **M4c-2-infra** | `run_match.py` `start_new_session=True` + `killpg` on timeout | ⏳ Pending (5min) | — | — |
 | M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | ~13min parallel; validates CEM loop end-to-end | — |
 | **M6-a** | Phase 2a **smoke** (2 gens × 40 pop, 3-opp dry pool) — Go/No-go check for full 2a | ⏳ Pending | ~1.5h parallel; pass = best_ever > h1test seed fitness | — |

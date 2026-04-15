@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 32 pages | Last updated: 2026-04-15T21:04:52.143Z
+> 33 pages | Last updated: 2026-04-15T21:23:56.423Z
 
 ## convention
 
@@ -14,6 +14,7 @@
 ## decision
 
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
+- [Next-session execution plan — performance-max 6-phase pipeline](next-session-execution-plan-performance-max-6-phase-pipeline.md) — # Next-session execution plan — performance-max 6-phase pipeline
 
 ## environment
 

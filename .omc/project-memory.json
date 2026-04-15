@@ -35,6 +35,12 @@
       "source": "manual",
       "category": "environment",
       "content": "Remote server (jdl_wsl, WSL2 Ryzen 7950X, 16 phys cores) available since 2026-04-16. Heavy evolve/tournament → server tmux `work`; quick smoke + analysis → Mac. Server 2.25× faster on evolve pop=16 workers=16. Project at ~/projects/coding-3 (git, .venv/ same as Mac). Long runs MUST tee to ~/projects/coding-3/logs/. Cross-platform fitness reproducibility imperfect — final agent re-validate on Mac. Full env page: wiki environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl"
+    },
+    {
+      "timestamp": 1776288248112,
+      "source": "manual",
+      "category": "strategy",
+      "content": "Next-session plan = performance-max 6-phase pipeline. Fixed --master-seed=42 for ALL Phase 2 candidates (apples-to-apples ranking) → Phase 5 multi-seed validation on top-5 (lucky-seed elimination + cross-platform). 7-8 candidates: A1/A2/A5 (reflex seed variants) + C1/C3/C4 (minimax/expectimax/MCTS containers) + B1 feature engineering (+3 features → 20-dim) on most. ~5-7 days calendar, ~75-105h server background + ~25-35h Mac active. Full plan: wiki decision/next-session-execution-plan-performance-max-6-phase-pipeline."
     }
   ],
   "directoryMap": {
@@ -124,6 +130,13 @@
       "timestamp": 1776287101248,
       "directive": "For any evolve.py / tournament.py run with pop ≥ 16 OR n_gens ≥ 5 OR expected wall ≥ 30 min: dispatch to server (`ssh jdl_wsl \"tmux send-keys -t work '... 2>&1 | tee logs/<name>.log' Enter\"`). For quick smokes (<10 min) and result analysis: keep on Mac. ALWAYS pipe long-run output through `tee` (capture-pane 2000-line buffer truncates beyond that).",
       "context": "CS470 A3 dispatch policy after pm17 server provisioning",
+      "source": "explicit",
+      "priority": "high"
+    },
+    {
+      "timestamp": 1776288245156,
+      "directive": "Dispatch decisions are case-by-case, not \"always server\". Server (jdl_wsl tmux work) is the right venue for: Phase 2 evolve runs ≥10h, Phase 4 tournament, Phase 5 server sweep. Mac is the right venue for: all coding (B1 features, C4 MCTS, D-series hybrid, M7 flatten), quick smokes (≤10 min), Phase 5 Mac re-validation (cross-platform reproducibility check), result analysis/report. The decision rule is \"what compute is needed AND what context does Claude need to see live\", NOT \"long = server, short = mac\".",
+      "context": "pm17 user clarification: 무조건 서버에서 돌리는건 아님. 상황에 따라 결정.",
       "source": "explicit",
       "priority": "high"
     }

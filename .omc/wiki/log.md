@@ -164,3 +164,7 @@
 - **Pages:** remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl.md
 - **Summary:** Created new page "Remote compute infra — WSL2 Ryzen 7950X server (jdl_wsl)"
 
+## [2026-04-15T21:23:56.407Z] ingest
+- **Pages:** next-session-execution-plan-performance-max-6-phase-pipeline.md
+- **Summary:** Created new page "Next-session execution plan — performance-max 6-phase pipeline"
+
