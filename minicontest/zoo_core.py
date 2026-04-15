@@ -125,6 +125,55 @@ TEAM = TeamGlobalState()
 
 
 # ---------------------------------------------------------------------------
+# Weight-override protocol (M4b-2, 2026-04-15 pm8)
+# ---------------------------------------------------------------------------
+# During CEM evolution (evolve.py M5/M6), each candidate genome encodes a
+# fresh (w_off, w_def, params) set that must be injected into a zoo agent
+# at runtime. We piggyback on capture.py's existing `--redOpts` / `--blueOpts`
+# channel: the tournament passes `weights=<json_path>` as an agent arg; the
+# agent's `createTeam(...)` forwards that to this loader, and the agent's
+# `_get_weights()` returns the loaded dict instead of the seed weights.
+#
+# JSON schema:
+#     { "w_off": {feature_name: weight, ...},
+#       "w_def": {feature_name: weight, ...} | null,
+#       "params": {param_name: value, ...} }
+#
+# Phase 2a of evolution uses a shared W (w_def == null → agents fall back to
+# w_off for both OFFENSE and DEFENSE roles). Phase 2b splits W_OFF ≠ W_DEF
+# and supplies both.
+def load_weights_override(spec):
+    """Load a weight override from a JSON-file path or from a pre-parsed dict.
+
+    Returns a dict with the canonical keys `w_off`, `w_def`, `params`. Keys
+    missing in the source are filled with a safe default (`{}` or `None`).
+    Never raises: on ANY failure (bad path, malformed JSON, wrong type) we
+    return an empty override so the agent cleanly falls back to seed weights.
+    The 15s registerInitialState budget cannot afford a crash here.
+    """
+    import json
+    empty = {"w_off": {}, "w_def": None, "params": {}}
+    try:
+        if isinstance(spec, dict):
+            data = spec
+        else:
+            with open(spec) as f:
+                data = json.load(f)
+        if not isinstance(data, dict):
+            return empty
+        w_off_raw = data.get("w_off") or {}
+        w_def_raw = data.get("w_def")
+        params_raw = data.get("params") or {}
+        return {
+            "w_off": dict(w_off_raw) if isinstance(w_off_raw, dict) else {},
+            "w_def": (dict(w_def_raw) if isinstance(w_def_raw, dict) else None),
+            "params": dict(params_raw) if isinstance(params_raw, dict) else {},
+        }
+    except Exception:
+        return empty
+
+
+# ---------------------------------------------------------------------------
 # CoreCaptureAgent — shared base for every zoo agent.
 # ---------------------------------------------------------------------------
 class CoreCaptureAgent(CaptureAgent):

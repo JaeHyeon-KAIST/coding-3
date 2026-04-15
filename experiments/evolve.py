@@ -32,12 +32,30 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 ARTIFACTS = REPO_ROOT / "experiments" / "artifacts"
+
+# Make run_match importable when running this script directly.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from run_match import run_match  # noqa: E402
+
+# The "container" zoo agent that accepts `weights=<path>` via --redOpts.
+# Its createTeam forwards the kwarg to zoo_core.load_weights_override and
+# attaches the override onto both teammates so _get_weights returns the
+# evolve.py-supplied dict instead of seed weights.
+EVOLVE_CONTAINER_AGENT = "zoo_reflex_tuned"
+
+# Default dry-run opponent pool / layouts when the caller passes empty lists.
+# Chosen from the pm4/M4-v2 top-3 so the genome gets measurably different
+# responses: a strong opponent (h1test), the best net agent (h1b), and the
+# grading anchor (baseline). Keep it small so M5 dry-run stays under ~30 min.
+DEFAULT_DRY_RUN_OPPONENTS = ("baseline", "zoo_reflex_h1test", "zoo_reflex_h1b")
+DEFAULT_DRY_RUN_LAYOUTS = ("defaultCapture", "RANDOM")
 
 # Feature names (from zoo_features.py — must stay in sync)
 FEATURE_NAMES = [
@@ -80,12 +98,162 @@ def sample_gaussian(mean: np.ndarray, sigma: np.ndarray, n: int, seed: int) -> n
     return rng.normal(loc=mean, scale=sigma, size=(n, mean.shape[0]))
 
 
-def evaluate_genome(genome_id: int, genome: np.ndarray, phase: str, opponents: list, layouts: list, games_per_opponent: int, master_seed: int) -> dict:
+def _decode_genome(genome: np.ndarray, phase: str) -> tuple:
+    """Split a flat genome vector into (w_off, w_def, params_dict).
+
+    Phase 2a shared-W encoding (length = N_FEATURES + |PARAM_NAMES|):
+        [f0..fN-1] = shared weights (w_off = w_def)
+        [fN..end]  = params
+    Phase 2b split-W encoding (length = 2*N_FEATURES + |PARAM_NAMES|):
+        [f0..fN-1]        = w_off
+        [fN..f(2N-1)]     = w_def
+        [f2N..end]        = params
+
+    Returns (w_off: dict, w_def: dict | None, params: dict). `w_def` is None
+    in phase 2a so the zoo agent falls back to w_off for the DEFENSE role.
     """
-    TODO: spawn tournament games using run_match.py + custom-weight mechanism.
-    Returns a dict: {pool_win_rate, crash_rate, stddev_win_rate, monster_win_rate}
+    if phase == "2a":
+        feats = genome[:N_FEATURES]
+        params = genome[N_FEATURES:]
+        w_off = dict(zip(FEATURE_NAMES, feats.tolist()))
+        w_def = None
+    elif phase == "2b":
+        w_off = dict(zip(FEATURE_NAMES, genome[:N_FEATURES].tolist()))
+        w_def = dict(zip(FEATURE_NAMES, genome[N_FEATURES:2 * N_FEATURES].tolist()))
+        params = genome[2 * N_FEATURES:]
+    else:
+        raise ValueError(f"unknown phase: {phase}")
+    params_dict = dict(zip(PARAM_NAMES, params.tolist()))
+    return w_off, w_def, params_dict
+
+
+def _dump_genome_json(genome_id: int, phase: str, master_seed: int,
+                      w_off: dict, w_def, params: dict) -> Path:
+    """Write the genome spec to a temp JSON file under ARTIFACTS/genomes/
+    and return the path. The zoo agent's createTeam will load it via
+    `--redOpts weights=<this path>`.
     """
-    raise NotImplementedError("blocked on M2/M3 delivering a weight-override protocol for zoo agents")
+    genome_dir = ARTIFACTS / "genomes"
+    genome_dir.mkdir(parents=True, exist_ok=True)
+    path = genome_dir / f"tmp_{phase}_s{master_seed}_g{genome_id}.json"
+    with path.open("w") as f:
+        json.dump({"w_off": w_off, "w_def": w_def, "params": params}, f)
+    return path
+
+
+def evaluate_genome(genome_id: int, genome: np.ndarray, phase: str,
+                    opponents: list, layouts: list,
+                    games_per_opponent: int, master_seed: int) -> dict:
+    """Play the candidate genome against every opponent on every layout,
+    both colors, and aggregate into the fitness inputs expected by
+    `compute_fitness`.
+
+    Uses `EVOLVE_CONTAINER_AGENT` (zoo_reflex_tuned) as the host — it
+    accepts `weights=<json_path>` via capture.py's --redOpts/--blueOpts
+    channel (M4b-2 protocol). The genome JSON is written once per call
+    and reused across every match to keep disk I/O minimal.
+
+    Parameters:
+      genome_id           : population index, used to name the temp JSON.
+      genome              : 1-D numpy array (shape matches genome_dims).
+      phase               : "2a" (shared W) or "2b" (split W).
+      opponents           : list of agent names; empty → DEFAULT_DRY_RUN_OPPONENTS.
+      layouts             : list of layouts; empty → DEFAULT_DRY_RUN_LAYOUTS.
+      games_per_opponent  : TOTAL games per opponent, distributed evenly
+                            across layouts × 2 colors (floor-div; min 2).
+      master_seed         : base seed for layout-RANDOM variance injection.
+
+    Returns dict: {pool_win_rate, crash_rate, stddev_win_rate, monster_win_rate}.
+    pool_win_rate, crash_rate, stddev_win_rate are floats in [0, 1];
+    stddev_win_rate is the standard deviation of per-opponent win rates.
+    monster_win_rate is 0.0 when no monster_* opponents participate.
+    """
+    # 1) Decode and persist the genome so child capture.py processes can load it.
+    w_off, w_def, params = _decode_genome(genome, phase)
+    genome_file = _dump_genome_json(genome_id, phase, master_seed,
+                                    w_off, w_def, params)
+
+    try:
+        # 2) Resolve pool / layouts.
+        if not opponents:
+            opponents = list(DEFAULT_DRY_RUN_OPPONENTS)
+        if not layouts:
+            layouts = list(DEFAULT_DRY_RUN_LAYOUTS)
+
+        # 3) Build the match list. Each opponent gets games_per_opponent
+        # games total, distributed evenly across (layout × color).
+        per_config = max(1, games_per_opponent // max(1, len(layouts) * 2))
+        weights_arg = f"weights={genome_file}"
+
+        matches = []  # (opp, our_is_red, red, blue, layout, seed, red_opts, blue_opts)
+        for opp in opponents:
+            for li, layout in enumerate(layouts):
+                for rep in range(per_config):
+                    seed = master_seed + li * 997 + rep
+                    # Our agent as RED
+                    matches.append((
+                        opp, True,
+                        EVOLVE_CONTAINER_AGENT, opp,
+                        layout, seed,
+                        weights_arg, "",
+                    ))
+                    # Our agent as BLUE (color swap for CRN variance reduction)
+                    matches.append((
+                        opp, False,
+                        opp, EVOLVE_CONTAINER_AGENT,
+                        layout, seed,
+                        "", weights_arg,
+                    ))
+
+        # 4) Run every match sequentially (evolve.py's outer gen-loop is
+        # where parallelism lives; each genome is fast to evaluate here).
+        per_opp_wins: dict = defaultdict(list)
+        monster_wins: list = []
+        total_games = 0
+        total_crashes = 0
+
+        for opp, our_is_red, red, blue, layout, seed, red_opts, blue_opts in matches:
+            try:
+                result = run_match(
+                    red=red, blue=blue, layout=layout, seed=seed,
+                    timeout_s=120.0,
+                    red_opts=red_opts, blue_opts=blue_opts,
+                )
+            except Exception as e:
+                # Treat a wrapper-level crash as a loss; keep iterating.
+                result = {"crashed": True, "red_win": 0, "blue_win": 0}
+
+            total_games += 1
+            if result.get("crashed"):
+                total_crashes += 1
+                win = 0  # crashed → our loss
+            else:
+                win = int(result.get("red_win" if our_is_red else "blue_win", 0))
+            per_opp_wins[opp].append(win)
+            if opp.startswith("monster_"):
+                monster_wins.append(win)
+
+        # 5) Aggregate.
+        all_wins = [w for ws in per_opp_wins.values() for w in ws]
+        pool_win_rate = (sum(all_wins) / len(all_wins)) if all_wins else 0.0
+        crash_rate = (total_crashes / total_games) if total_games else 0.0
+        per_opp_wr = [sum(ws) / len(ws) for ws in per_opp_wins.values() if ws]
+        stddev_win_rate = float(np.std(per_opp_wr)) if per_opp_wr else 0.0
+        monster_win_rate = (sum(monster_wins) / len(monster_wins)) if monster_wins else 0.0
+
+        return {
+            "pool_win_rate": pool_win_rate,
+            "crash_rate": crash_rate,
+            "stddev_win_rate": stddev_win_rate,
+            "monster_win_rate": monster_win_rate,
+        }
+    finally:
+        # 6) Clean up temp genome JSON (keeps artifacts/ from bloating
+        # with N*G*gens files over a long campaign).
+        try:
+            genome_file.unlink()
+        except Exception:
+            pass
 
 
 def compute_fitness(eval_result: dict, phase: str) -> float:
@@ -134,12 +302,17 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
         fitnesses = []
         eval_results = []
         for gid, genome in enumerate(population):
-            try:
-                result = evaluate_genome(gid, genome, phase, [], [], games_per_opponent, master_seed=seed_gen + gid)
-                f = compute_fitness(result, phase)
-            except NotImplementedError:
-                f = 0.0
-                result = {"pool_win_rate": 0.0, "crash_rate": 0.0, "stddev_win_rate": 0.0}
+            # FAIL-FAST: do not silently swallow NotImplementedError or any
+            # other exception from evaluate_genome. A 20h campaign masking
+            # f=0.0 across every genome would emit final_weights.py of
+            # random noise (wiki debugging/experiments-infrastructure-audit).
+            # If evaluate_genome raises, abort the whole run loudly so the
+            # operator notices within minutes, not hours.
+            result = evaluate_genome(
+                gid, genome, phase, [], [],
+                games_per_opponent, master_seed=seed_gen + gid,
+            )
+            f = compute_fitness(result, phase)
             fitnesses.append(f)
             eval_results.append(result)
 

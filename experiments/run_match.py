@@ -54,6 +54,8 @@ def run_match(
     seed: int | None = None,
     timeout_s: float = 120.0,
     pin_core: int | None = None,
+    red_opts: str = "",
+    blue_opts: str = "",
 ) -> dict:
     """Run one capture.py match; return structured result.
 
@@ -96,6 +98,15 @@ def run_match(
         "-q",  # quiet
     ]
     # IMPORTANT: do NOT append --fixRandomSeed. See docstring above.
+
+    # Forward team-specific options (e.g. "weights=/tmp/genome.json") to
+    # capture.py so evolve.py (M5/M6) can inject a custom weight set via
+    # the zoo agent's `createTeam(weights=...)` kwarg. Empty strings are
+    # skipped so the default-empty path stays byte-compatible with pm7.
+    if red_opts:
+        cmd += ["--redOpts", red_opts]
+    if blue_opts:
+        cmd += ["--blueOpts", blue_opts]
 
     env = os.environ.copy()
     if seed is not None:
@@ -185,6 +196,14 @@ def main() -> int:
     ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--timeout", type=float, default=120.0)
     ap.add_argument("--pin-core", type=int, default=None)
+    ap.add_argument(
+        "--red-opts", default="",
+        help="Pass-through to capture.py --redOpts (e.g. 'weights=/tmp/g.json')",
+    )
+    ap.add_argument(
+        "--blue-opts", default="",
+        help="Pass-through to capture.py --blueOpts",
+    )
     args = ap.parse_args()
 
     result = run_match(
@@ -194,6 +213,8 @@ def main() -> int:
         seed=args.seed,
         timeout_s=args.timeout,
         pin_core=args.pin_core,
+        red_opts=args.red_opts,
+        blue_opts=args.blue_opts,
     )
     print(json.dumps(result))
     return 0 if not result["crashed"] else 2
