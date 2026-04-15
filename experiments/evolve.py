@@ -114,6 +114,64 @@ def _default_workers() -> int:
     return max(1, min(cores - 1, 8))
 
 
+def _load_last_checkpoint(phase: str, artifacts_dir: Path):
+    """Scan artifacts_dir for `{phase}_gen<N>.json` and return the latest.
+
+    Returns a dict with keys {gen, mean, sigma, stagnation_count,
+    best_ever_fitness, best_ever_genome} or None if no matching file.
+
+    Forward-compat: `best_ever_fitness` and `best_ever_genome` were added
+    to the per-gen record in α-2. Older gen JSONs without them resume
+    cleanly — we default `best_ever_fitness = -inf` and `best_ever_genome
+    = None`, so the best-of-history tracker restarts from the resume
+    point. Worst case: we lose track of a pre-resume best that did not
+    persist past the killed gen, which is acceptable.
+    """
+    if not artifacts_dir.is_dir():
+        return None
+    prefix = f"{phase}_gen"
+    candidates = []
+    for p in artifacts_dir.iterdir():
+        if not (p.is_file() and p.name.startswith(prefix) and p.name.endswith(".json")):
+            continue
+        stem = p.stem  # e.g. "2a_gen007"
+        try:
+            idx = int(stem[len(prefix):])
+        except ValueError:
+            continue
+        candidates.append((idx, p))
+    if not candidates:
+        return None
+    last_idx, last_path = max(candidates, key=lambda kv: kv[0])
+    try:
+        with last_path.open() as f:
+            record = json.load(f)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"[evolve] resume: failed to read {last_path}: {e}", file=sys.stderr)
+        return None
+    mean = np.array(record["mean_genome"])
+    sigma = np.array(record["sigma"])
+    stagnation = int(record.get("stagnation_count", 0))
+    best_fit_raw = record.get("best_ever_fitness")
+    if best_fit_raw is None:
+        best_fit = -np.inf
+    else:
+        try:
+            best_fit = float(best_fit_raw)
+        except (TypeError, ValueError):
+            best_fit = -np.inf
+    best_gen_raw = record.get("best_ever_genome")
+    best_gen_arr = np.array(best_gen_raw) if best_gen_raw is not None else None
+    return {
+        "gen": last_idx,
+        "mean": mean,
+        "sigma": sigma,
+        "stagnation_count": stagnation,
+        "best_ever_fitness": best_fit,
+        "best_ever_genome": best_gen_arr,
+    }
+
+
 def _decode_genome(genome: np.ndarray, phase: str) -> tuple:
     """Split a flat genome vector into (w_off, w_def, params_dict).
 
@@ -289,8 +347,34 @@ def compute_fitness(eval_result: dict, phase: str) -> float:
 def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: int,
               master_seed: int, initial_mean=None, initial_sigma=None,
               workers: int | None = None,
-              opponents: list | None = None, layouts: list | None = None):
+              opponents: list | None = None, layouts: list | None = None,
+              resume_from: Path | None = None):
     dims = genome_dims(phase)
+
+    # α-2 resume: if resume_from points at an artifacts dir with a
+    # {phase}_gen<N>.json file, load the latest and override initial
+    # mean / sigma / stagnation / best-of-history.
+    checkpoint = None
+    start_gen = 0
+    if resume_from is not None:
+        checkpoint = _load_last_checkpoint(phase, Path(resume_from))
+        if checkpoint is not None:
+            print(
+                f"[evolve] resume: phase={phase} gen={checkpoint['gen']} "
+                f"best_ever_fitness={checkpoint['best_ever_fitness']:.4f} "
+                f"stagnation={checkpoint['stagnation_count']}",
+                file=sys.stderr,
+            )
+            initial_mean = checkpoint["mean"]
+            initial_sigma = checkpoint["sigma"]
+            start_gen = checkpoint["gen"] + 1
+        else:
+            print(
+                f"[evolve] resume: no {phase}_gen*.json found under "
+                f"{resume_from}; starting fresh",
+                file=sys.stderr,
+            )
+
     if initial_mean is None:
         mean = np.zeros(dims)
     else:
@@ -309,9 +393,15 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
     else:
         sigma = np.array(initial_sigma)
 
-    stagnation_count = 0
-    best_ever_fitness = -np.inf
-    best_ever_genome = None
+    # Resume restores stagnation + best-of-history; fresh starts zero them.
+    if checkpoint is not None:
+        stagnation_count = checkpoint["stagnation_count"]
+        best_ever_fitness = checkpoint["best_ever_fitness"]
+        best_ever_genome = checkpoint["best_ever_genome"]
+    else:
+        stagnation_count = 0
+        best_ever_fitness = -np.inf
+        best_ever_genome = None
     elite_count = int(np.ceil(rho * N))
 
     # Resolve worker count and opponents/layouts pool (α-1 + α-3 glue).
@@ -323,7 +413,7 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
     lay_for_eval = list(layouts) if layouts else []
 
     gen_records = []
-    for gen in range(n_gens):
+    for gen in range(start_gen, n_gens):
         seed_gen = master_seed + gen * 1000
         population = sample_gaussian(mean, sigma, N, seed_gen)
 
@@ -399,6 +489,12 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
             "stagnation_count": stagnation_count,
             "mean_genome": mean.tolist(),
             "sigma": sigma.tolist(),
+            # α-2 forward-compat fields — let a future `--resume-from`
+            # pick up best-of-history across the kill boundary.
+            "best_ever_fitness": (float(best_ever_fitness)
+                                   if best_ever_fitness != -np.inf else None),
+            "best_ever_genome": (best_ever_genome.tolist()
+                                  if best_ever_genome is not None else None),
         }
         gen_records.append(record)
 
@@ -450,6 +546,18 @@ def main():
             "DEFAULT_DRY_RUN_LAYOUTS."
         ),
     )
+    ap.add_argument(
+        "--resume-from", type=Path, default=None,
+        help=(
+            "Path to an artifacts directory containing {phase}_gen<N>.json "
+            "checkpoint files (written each generation). The latest matching "
+            "checkpoint for the current --phase is read and run_phase "
+            "continues at gen N+1 with its persisted mean, sigma, "
+            "stagnation_count, best_ever_fitness, best_ever_genome. If no "
+            "matching checkpoint is found, a normal fresh run begins. "
+            "Typical use: `--phase both --resume-from experiments/artifacts/`."
+        ),
+    )
     args = ap.parse_args()
 
     result_2a = None
@@ -463,6 +571,7 @@ def main():
             master_seed=args.master_seed,
             workers=args.workers,
             opponents=args.opponents, layouts=args.layouts,
+            resume_from=args.resume_from,
         )
 
     if args.phase in ("2b", "both"):
@@ -478,6 +587,7 @@ def main():
             initial_mean=init_mean, initial_sigma=init_sigma,
             workers=args.workers,
             opponents=args.opponents, layouts=args.layouts,
+            resume_from=args.resume_from,
         )
         # Emit final weights as Python literal
         best = np.array(result_2b["best_ever_genome"])
