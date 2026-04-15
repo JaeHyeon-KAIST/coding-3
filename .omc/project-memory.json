@@ -1,41 +1,104 @@
 {
-  "project": {
-    "name": "CS470 Coding Assignment #3",
-    "course": "KAIST CS470 인공지능개론 2026 Spring",
-    "student_id": "20200492",
-    "due_context": "배포일 2026-04-13, CS470 스프링 과제 3",
-    "goal": "Pacman capture-the-flag 토너먼트 승률 극대화 / 상위 랭킹"
+  "version": "1.0.0",
+  "lastScanned": 1776155453866,
+  "projectRoot": "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3",
+  "techStack": {
+    "languages": [],
+    "frameworks": [],
+    "packageManager": null,
+    "runtime": null
   },
-  "techStack": "Python 3.9 (uv venv), numpy, pandas. No other deps. No multithreading.",
-  "build": "uv venv --python 3.9 .venv && uv pip install --python .venv/bin/python numpy pandas",
-  "run_smoke": ".venv/bin/python minicontest/capture.py -r baseline -b baseline -n 1 -q",
-  "run_eval": ".venv/bin/python minicontest/capture.py -r your_best -b baseline -n 10 -q",
-  "conventions": "All Python via .venv/bin/python. Never global python/pip. Log AI usage to docs/AI_USAGE.md on every submission-file edit.",
-  "structure": "minicontest/ (game engine + editable agent files), icml2021_style/ (LaTeX report template), docs/ (AI usage log + project notes), .omc/ (session state/plans/memory)",
-  "editable": [
-    "minicontest/your_best.py",
-    "minicontest/your_baseline1.py",
-    "minicontest/your_baseline2.py",
-    "minicontest/your_baseline3.py",
-    "minicontest/myTeam.py"
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1776155453862,
+      "keyFiles": [
+        "AI_USAGE.md"
+      ]
+    },
+    "experiments": {
+      "path": "experiments",
+      "purpose": null,
+      "fileCount": 6,
+      "lastAccessed": 1776155453862,
+      "keyFiles": [
+        "README.md",
+        "evolve.py",
+        "run_match.py",
+        "select_top4.py",
+        "tournament.py"
+      ]
+    },
+    "icml2021_style": {
+      "path": "icml2021_style",
+      "purpose": null,
+      "fileCount": 15,
+      "lastAccessed": 1776155453862,
+      "keyFiles": [
+        "algorithm.sty",
+        "algorithmic.sty",
+        "example_paper.aux",
+        "example_paper.bbl",
+        "example_paper.bib"
+      ]
+    },
+    "minicontest": {
+      "path": "minicontest",
+      "purpose": null,
+      "fileCount": 37,
+      "lastAccessed": 1776155453862,
+      "keyFiles": [
+        "baseline.py",
+        "capture.py",
+        "captureAgents.py",
+        "captureGraphicsDisplay.py",
+        "distanceCalculator.py"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": ".claude/settings.local.json",
+      "accessCount": 4,
+      "lastAccessed": 1776155868505,
+      "type": "file"
+    },
+    {
+      "path": "docs/AI_USAGE.md",
+      "accessCount": 1,
+      "lastAccessed": 1776210814775,
+      "type": "file"
+    },
+    {
+      "path": "CLAUDE.md",
+      "accessCount": 1,
+      "lastAccessed": 1776212519247,
+      "type": "file"
+    }
   ],
-  "frozen": [
-    "minicontest/baseline.py",
-    "minicontest/capture.py",
-    "minicontest/captureAgents.py",
-    "minicontest/game.py",
-    "minicontest/util.py",
-    "minicontest/layout.py",
-    "minicontest/distanceCalculator.py",
-    "minicontest/graphicsDisplay.py",
-    "minicontest/captureGraphicsDisplay.py",
-    "minicontest/graphicsUtils.py",
-    "minicontest/keyboardAgents.py",
-    "minicontest/mazeGenerator.py",
-    "minicontest/textDisplay.py"
-  ],
-  "grading": "40pt code (winrate vs baseline.py: 51%+ = full) + 60pt report (LaTeX ICML: intro 8 / methods 20 / results 20 / conclusion 12) + 30pt extra tournament ranking (top5=30, 6-10=20, 11-15=15, 16-20=10, 21-25=5)",
-  "error_policy": "error rate <=10% no penalty, 10-30% decayed, >30% score=0. Must guarantee robust no-exception agents.",
-  "time_limits": "15s init / 1s per move / 1200 moves per game / no multithreading",
-  "submission": "ZIP '20200492.zip' containing 20200492.py, 20200492.pdf, 20200492.pptx. Rename your_best.py -> 20200492.py before submit."
+  "userDirectives": []
 }

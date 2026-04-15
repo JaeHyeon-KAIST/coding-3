@@ -83,3 +83,59 @@ KAIST 인공지능개론 (2026 봄학기) 코딩 과제 3. UC Berkeley CS188 기
 ## Q&A TA
 
 Injae Kim (Lead, injae.kim@kaist.ac.kr), 배민성, 이태훈, 윤승민, 서진우
+
+---
+
+## 🧭 Multi-session continuity (장기 5+ 세션 프로젝트)
+
+이 프로젝트는 5 세션 이상 가로질러 진행. 새 세션 시작할 때 다음 순서:
+
+1. **`.omc/SESSION_RESUME.md`** — 5분 onboarding. 무조건 첫 번째 읽기.
+2. **`.omc/STATUS.md`** — 마일스톤 진척 + 열린 blocker.
+3. `git log --oneline -10` — 최근 진척.
+4. 필요 시 wiki 검색: `wiki_query --query "<topic>"` 또는 `wiki_list`.
+
+### 영속 저장소 매트릭스
+
+| 정보 종류 | 어디에 적나 / 어디서 읽나 |
+|---|---|
+| 프로젝트 규칙·금지사항 | 이 파일 (`CLAUDE.md`) |
+| 플랜 / ADR / 마일스톤 | `.omc/plans/STRATEGY.md` |
+| 미해결 stretch 질문 | `.omc/plans/open-questions.md` |
+| 현재 마일스톤 상태 1줄 요약 | `.omc/STATUS.md` |
+| 새 세션 5분 onboarding | `.omc/SESSION_RESUME.md` |
+| 결정·디버깅·패턴·세션로그·용어집 (영구) | `.omc/wiki/` (`wiki_query/read/list/ingest`) |
+| 단기 working memory (7일 prune) | `.omc/notepad.md` |
+| 사용자/프로젝트 영구 메모리 (Auto Dream 정리 대상) | `~/.claude/projects/.../memory/MEMORY.md` |
+| 코드 변경 로그 (과제 채점 자료) | `docs/AI_USAGE.md` |
+| 외부 advisor 응답 (Codex/Gemini) | `.omc/artifacts/ask/` (gitignored) |
+
+### Session-log discipline (필수)
+
+> `wiki/convention/session-log-protocol-multi-session-continuity-discipline` 참고
+
+- 30분 이상 작업 / 마일스톤 완료 / 비자명한 결정 후 → `wiki_ingest` 로 `category=session-log` 엔트리 추가
+- 엔트리 포맷: Date / Focus / Activities / Observations / Decisions / Open items / Next-session priority
+
+### 카테고리 가이드 (`.omc/wiki/`)
+
+- `decision/` — ADR 외 결정. WHY 중심.
+- `debugging/` — hypothesis 추적, 재현 노트. STATUS=OPEN/CLOSED.
+- `pattern/` — 코드 패턴 (crash-proof, CRN sampling 등).
+- `reference/` — 외부 인사이트, baseline 분석, glossary.
+- `session-log/` — 매 세션 진척 일지 (`YYYY-MM-DD - <topic>` 슬러그).
+- `convention/` — 프로젝트 컨벤션 문서.
+- `architecture/` — 고수준 구조 (CoreCaptureAgent, evolution pipeline 등).
+- `environment/` — 자주 쓰는 명령, 환경 설정 메모.
+
+### Auto Dream 자동 발동
+
+- 5 세션 + 24h 누적 시 `~/.claude/projects/.../memory/` 자동 정리
+- `.omc/wiki/` 는 영향 받지 않음 (수동 영속)
+
+### 종료 시 체크리스트
+
+- [ ] 마일스톤 완료 시 `STATUS.md` 갱신
+- [ ] 30분+ 세션 시 `wiki_ingest` session-log 엔트리
+- [ ] 제출 대상 코드 수정 시 `docs/AI_USAGE.md` append
+- [ ] 새 hypothesis 발견 시 wiki `debugging/` 페이지 추가
