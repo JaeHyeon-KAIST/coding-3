@@ -33,10 +33,12 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 | **H1b-verify** | Role-split variant test (zoo_reflex_h1b) | ✅ Done — RESURRECTED | 12W/4L/24T in 40 games (30% W / 10% L, highest net +8) | (uncommitted) |
 | **H1c-verify** | Capsule-exploit variant (zoo_reflex_h1c) | ✅ Done — below H1 | 8W/2L/30T in 40 games (20% win, but pm3 run had 10% — variance large) | (uncommitted) |
 | **Reverify pm4** | 40-game apples-to-apples for H1/H1b/H1c + ReflexTuned control | ✅ Done | Canonical table in Headline; single-dict saturated | (uncommitted) |
-| **M4a-infra** | `tournament.py` CSV-append + fsync + `--resume-from` (autopilot pm5) | ✅ Done | 4/4 QA tests + code-reviewer APPROVED (2 🟡 orthogonal scope-out, 3 🟢 nit) | (uncommitted) |
-| **M4b-infra** | `evolve.py` NotImplementedError swallow fix + `evaluate_genome` impl | ⏳ Pending | — | — |
-| **M4c-infra** | `run_match.py` seed workaround (`-l RANDOM<seed>`) + `start_new_session` | ⏳ Pending | — | — |
-| **M4** | Tournament pipeline activation | ⏳ Deferred until M4b/c patches | — | — |
+| **M4a-infra** | `tournament.py` CSV-append + fsync + `--resume-from` (autopilot pm5) | ✅ Done | 4/4 QA tests + code-reviewer APPROVED (2 🟡 orthogonal scope-out, 3 🟢 nit) | `4dcbced` |
+| **M4-v1** | First tournament run pm6: 15 agents × defaultCapture × seed 1 | ✅ Done (weak signal — superseded by v2) | 210 matches / 0 crashes / 7m10s wall; **95.2% tie** (seed lock) | `4dcbced` |
+| **M4c-1-infra** | `run_match.py` drop `--fixRandomSeed` + route seed via `-l RANDOM<seed>` (autopilot pm7) | ✅ Done | variance smoke 5 reps → 3 distinct outcomes; code-reviewer APPROVED (0 🔴 2 🟡 maintainability 3 🟢 nit) | (uncommitted) |
+| **M4-v2** | Re-tournament post-M4c-1: 15 agents × (defaultCapture + RANDOM) × seeds 1 2 = 840 games | ✅ Done | 840 matches / 0 crashes / 32m28s wall; **tie 90.6%** (down from 95.2%); h1test 50% vs baseline (ELO 1584, #2 overall); h1b 37.5% (#4); h1c 12.5% (map-sensitive); all minimax/expectimax/monster tie baseline | (uncommitted CSV) |
+| **M4b-infra** | `evolve.py` NotImplementedError swallow fix + `evaluate_genome` impl | ⏳ Pending (now critical) | — | — |
+| **M4c-2-infra** | `run_match.py` `start_new_session=True` + `killpg` on timeout | ⏳ Pending | — | — |
 | M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | — | — |
 | M6 | Full evolution campaign (~20h) | ⏳ Pending | — | — |
 | M7 | select_top4 + flatten + populate slots | ⏳ Pending | — | — |
@@ -57,7 +59,30 @@ Key reversals: (1) **H1b was wrongly rejected** — 40-game sample gives 30% win
 
 🔴 **Evolution silent-failure risk (`evolve.py:140-142`)** — `evaluate_genome` raises `NotImplementedError`; the enclosing try/except swallows it into `f=0.0`. A 20h M6 campaign would "complete successfully" and emit `final_weights.py` of random noise. MUST fix before any M5 dry-run. See wiki `debugging/experiments-infrastructure-audit-...`.
 
-🔴 **Seed plumbing broken (`run_match.py:72`)** — seed value is dropped; only `--fixRandomSeed` flag passed to `capture.py` which hardcodes `random.seed('cs188')`. CRN seed-axis variance is a no-op. Workaround: use `-l RANDOM<seed>` layout-generator flag. See audit page.
+🟢 **Seed workaround applied & validated (pm7 autopilot)** — `run_match.py` no longer passes `--fixRandomSeed` (which hardcoded `random.seed('cs188')` in capture.py, dropping the seed VALUE and causing pm6's 95.2% tie lock); seed is now routed through the `-l RANDOM<seed>` layout-generator form. Variance smoke 5 reps produced 3 distinct outcomes. M4-v2 tie rate dropped 95.2% → 90.6% with real cross-layout signal. Code-reviewer APPROVED (0 🔴). Trade-off: named-layout reproducibility lost, but usable ELO restored.
+
+🟢 **M4-v2 canonical ELO (pm7) — 15 agents × defaultCapture+RANDOM × 2 seeds × 1 rep = 840 games / 0 crashes / 32m28s wall**. Top-3 by ELO (all rankings relative, baseline as reference anchor):
+| Agent | ELO | vs baseline (8g) | Win% | Net |
+|---|---|---|---|---|
+| baseline | 1610.7 | — | — | — |
+| **zoo_reflex_h1test** | **1584.6** | 4W/3L/1T | **50%** | +1 |
+| zoo_reflex_h1c | 1532.5 | 1W/5L/2T | 12.5% | -4 |
+| **zoo_reflex_h1b** | 1503.8 | 3W/1L/4T | 37.5% | +2 |
+| (other reflex/minimax/expectimax/monster_rule) | ~1470-1490 | all 0W/0L/8T | 0% | 0 |
+| zoo_approxq_{v1,v2_deeper}, zoo_dummy | ~1468-1479 | 0W/{7,8}L | 0% | -7 to -8 |
+
+**3-way corroboration across pm4 (40g on defaultCapture) / M4-v1 (2g deterministic) / M4-v2 (8g varied)**:
+- **h1test is the single-dict winner**: pm4 35% → v2 50% (RANDOM layouts amplify 2-OFFENSE formation's attack advantage). Preferred M6 evolution seed.
+- **h1b is the robust runner-up**: pm4 30% → v2 37.5%. Consistent profile.
+- **h1c is map-sensitive**: pm4 20% on defaultCapture, v2 12.5% when RANDOM layouts rotate capsule position — capsule-exploit fails outside favourable layouts.
+- **All minimax/expectimax/monster_rule agents** are 0W/0L/8T vs baseline — tie-deadlock persists across layouts, confirming the structural issue is not layout-specific.
+- **approxQ_{v1,v2_deeper} + zoo_dummy** are decisively the weakest (q-learning is UNLEARNED; require M6 evolution to become meaningful).
+
+Artifact: `experiments/artifacts/tournament_results/m4_full_pm7_v2.csv`.
+
+**Statistical caveat**: n=8 vs baseline per agent still wide CI. For 51% grading threshold at 95%: need ~100 games per agent. Either M4-v3 scale-up (same pipeline, more seeds/layouts, ~4h) OR M6 evolution which naturally runs thousands.
+
+🟡 **MCTS/deep-minimax time budget issue (pm6)** — `zoo_mcts_heuristic` (MAX_ITERS=1000, no time polling) timed out 10/10 matches in M4 smoke. Excluded in M4-v1 along with `zoo_mcts_random`, `zoo_mcts_q_guided`, `monster_mcts_hand`, `monster_minimax_d4`. These 5 need MAX_ITERS/ROLLOUT_DEPTH reduction or real-time budget polling — deferred to M7.5 time calibration.
 
 🟢 **Tournament CSV durability — CSV-append + fsync + resume DONE (pm5, autopilot run)** — `tournament.py` now writes each row with `flush()+fsync()` + parent-dir fsync on first-write (hard-crash survival on APFS). Added `_load_completed_keys()` helper + `--resume-from` CLI flag; (red,blue,layout,seed) dedup on resume. Code-reviewer APPROVED (0 🔴, 2 🟡 orthogonal, 3 🟢 nits). 4-test QA: fresh run (2 jobs, 7s, 0 crash), rerun (skip 2, nothing to do), partial skip (seed 1 2 → skip 2 + append 2, single header), regression after dir-fsync add (pass). See wiki session-log `2026-04-15-pm5-tournament-csv-append-resume-patch`. Residual (separate patch): sliding futures window for 85MB memory footprint at M6 scale.
 

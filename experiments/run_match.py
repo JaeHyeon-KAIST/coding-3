@@ -55,25 +55,51 @@ def run_match(
     timeout_s: float = 120.0,
     pin_core: int | None = None,
 ) -> dict:
-    """Run one capture.py match; return structured result."""
+    """Run one capture.py match; return structured result.
+
+    Seed policy (CS470 A3 workaround, applied 2026-04-15 pm7):
+    - capture.py's ``--fixRandomSeed`` handler hardcodes
+      ``random.seed('cs188')`` — a constant — so the seed VALUE we pass
+      is dropped on the floor. Passing the flag therefore collapses
+      every invocation to an identical PRNG state. pm6 empirical
+      confirmation: 200/210 tournament matches tied.
+    - Instead we route the seed through the layout axis. When ``layout``
+      is the bare string "RANDOM" and ``seed`` is given, the effective
+      layout becomes ``f"RANDOM{seed}"`` so capture.py's mazeGenerator
+      uses our seed to deterministically pick a layout variant.
+    - For named layouts (e.g., "defaultCapture"), the seed has no
+      honored injection point, so we omit ``--fixRandomSeed`` entirely.
+      capture.py then uses its default (system-clock-seeded) RNG,
+      giving real per-invocation variance across repeats. We lose
+      bit-for-bit reproducibility in exchange for usable signal in an
+      averaged tournament. The tournament's seed field remains a
+      repetition index and CSV dedup key.
+    """
     if pin_core is not None:
         pin_to_core(pin_core)
+
+    # Translate the tournament's seed into capture.py's one honored
+    # seed axis: the RANDOM<N> layout-generator form. Named layouts
+    # have no seed injection point; we rely on clock-seeded PRNG there.
+    if seed is not None and layout == "RANDOM":
+        effective_layout = f"RANDOM{seed}"
+    else:
+        effective_layout = layout
 
     cmd = [
         str(VENV_PYTHON),
         "capture.py",
         "-r", red,
         "-b", blue,
-        "-l", layout,
+        "-l", effective_layout,
         "-n", "1",
         "-q",  # quiet
     ]
-    if seed is not None:
-        cmd += ["--fixRandomSeed"]  # capture.py supports this flag; see game engine
+    # IMPORTANT: do NOT append --fixRandomSeed. See docstring above.
 
     env = os.environ.copy()
     if seed is not None:
-        env["PYTHONHASHSEED"] = str(seed)
+        env["PYTHONHASHSEED"] = str(seed)  # dict iteration only; harmless
 
     start = time.time()
     try:

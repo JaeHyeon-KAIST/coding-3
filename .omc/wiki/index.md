@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 15 pages | Last updated: 2026-04-15T05:28:55.645Z
+> 18 pages | Last updated: 2026-04-15T07:42:19.957Z
 
 ## convention
 
@@ -22,7 +22,10 @@
 - [2026-04-15 pm3 - H1c rejected + capture.py 4-loop discovery](2026-04-15-pm3-h1c-rejected-capture-py-4-loop-discovery.md) — # 2026-04-15 pm3 - H1c rejected + capture.py 4-loop discovery
 - [2026-04-15 pm4 - 40-game apples-to-apples reverification + H1b redemption](2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem.md) — # 2026-04-15 pm4 - 40-game apples-to-apples reverification + H1b redemption
 - [2026-04-15 pm5 - tournament.py CSV-append + resume patch (autopilot)](2026-04-15-pm5-tournament-py-csv-append-resume-patch-autopilot.md) — # 2026-04-15 pm5 - tournament.py CSV-append + resume patch (autopilot)
+- [2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation](2026-04-15-pm6-m4-v1-first-tournament-seed-lock-confirmation.md) — # 2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation
+- [2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)](2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md) — # 2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
+- [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-6a8aeb98.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-a4b5c271.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-c692acaf.md) — # Session Log 2026-04-15

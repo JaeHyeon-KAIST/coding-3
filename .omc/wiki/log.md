@@ -88,3 +88,11 @@
 - **Pages:** session-log-2026-04-15-11207029.md
 - **Summary:** Auto-captured session log for a2532070-d5c0-46c6-9ab7-d5b311207029
 
+## [2026-04-15T06:51:07.853Z] ingest
+- **Pages:** 2026-04-15-pm6-m4-v1-first-tournament-seed-lock-confirmation.md
+- **Summary:** Created new page "2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation"
+
+## [2026-04-15T07:42:19.942Z] ingest
+- **Pages:** 2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md
+- **Summary:** Created new page "2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)"
+
