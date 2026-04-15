@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 29 pages | Last updated: 2026-04-15T16:17:18.428Z
+> 30 pages | Last updated: 2026-04-15T16:32:10.598Z
 
 ## convention
 
@@ -34,6 +34,7 @@
 - [2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation](2026-04-15-pm6-m4-v1-first-tournament-seed-lock-confirmation.md) — # 2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation
 - [2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)](2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md) — # 2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)
 - [2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot discovered](2026-04-16-pm13-m4b-4-m5-dry-run-5-killed-m6-budget-5-overshoot-.md) — # 2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot disco...
+- [2026-04-16 pm14 Option A complete — 4-loop bypass, 4.55× speedup, M6 budget restored](2026-04-16-pm14-option-a-complete-4-loop-bypass-4-55-speedup-m6-.md) — # 2026-04-16 pm14 Option A complete — 4-loop bypass, 4.55× speedup, M6 budget...
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-2437996d.md) — # Session Log 2026-04-15

@@ -37,6 +37,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MINICONTEST = REPO_ROOT / "minicontest"
 VENV_PYTHON = REPO_ROOT / ".venv" / "bin" / "python"
 
+# pm14 α-post Option A: we now call a wrapper that imports capture.py's
+# runGames directly instead of shelling out to capture.py (whose __main__
+# block runs a 4-loop over your_baseline1..3+baseline, inflating wall
+# time ~4×). single_game.py skips the 4-loop while leaving capture.py
+# untouched. See single_game.py docstring for the full rationale.
+SINGLE_GAME = REPO_ROOT / "experiments" / "single_game.py"
+
 
 def pin_to_core(core: int) -> None:
     """Pin the current process to a single CPU core (Linux only; macOS is no-op)."""
@@ -90,7 +97,7 @@ def run_match(
 
     cmd = [
         str(VENV_PYTHON),
-        "capture.py",
+        str(SINGLE_GAME),
         "-r", red,
         "-b", blue,
         "-l", effective_layout,
@@ -99,10 +106,10 @@ def run_match(
     ]
     # IMPORTANT: do NOT append --fixRandomSeed. See docstring above.
 
-    # Forward team-specific options (e.g. "weights=/tmp/genome.json") to
-    # capture.py so evolve.py (M5/M6) can inject a custom weight set via
-    # the zoo agent's `createTeam(weights=...)` kwarg. Empty strings are
-    # skipped so the default-empty path stays byte-compatible with pm7.
+    # Forward team-specific options (e.g. "weights=/tmp/genome.json") so
+    # evolve.py (M5/M6) can inject a custom weight set via the zoo agent's
+    # `createTeam(weights=...)` kwarg. Empty strings skipped for
+    # backward-compat with callers that pass red_opts="".
     if red_opts:
         cmd += ["--redOpts", red_opts]
     if blue_opts:
@@ -135,48 +142,40 @@ def run_match(
 
     wall = time.time() - start
 
-    # Parse capture.py stdout. Typical lines:
-    #   "The Red team has returned at least N of the opponents' dots."
-    #   "The Blue team has returned at least N of the opponents' dots."
-    #   "Time is up.\nTie game!"  OR  "The Red team wins by N points." / "The Blue team wins by N points."
-    #   "Average Score: X.X"
-    #   "Red Win Rate:  n/m (p)"  "Blue Win Rate:  n/m (p)"
-    red_win, blue_win, tie = 0, 0, 0
+    # pm14 α-post Option A: single_game.py writes a canonical one-line
+    # JSON on stdout: {winner, score, red_win, blue_win, tie, crashed,
+    # crash_reason}. The old regex-based parsing against capture.py's
+    # human-readable log lines is gone — it only existed because we
+    # couldn't modify capture.py, and now we never read capture.py's
+    # prints (single_game.py suppresses them through `-q`).
     winner = None
-    score = None
-    crashed = False
-    crash_reason = None
+    score: float | None = None
+    red_win = blue_win = tie = 0
+    crashed = (exit_code != 0)
+    crash_reason = f"nonzero_exit:{exit_code}" if crashed else None
 
-    if exit_code != 0:
+    try:
+        lines = [ln for ln in stdout.strip().splitlines() if ln.strip()]
+        if lines:
+            payload = json.loads(lines[-1])
+            winner = payload.get("winner")
+            score = payload.get("score")
+            red_win = int(payload.get("red_win", 0))
+            blue_win = int(payload.get("blue_win", 0))
+            tie = int(payload.get("tie", 0))
+            # single_game.py's self-reported crash (import, parser, or
+            # runGames failure) takes precedence over exit_code alone,
+            # because the script may exit 0 even after emitting a crash
+            # payload.
+            sg_crashed = bool(payload.get("crashed", False))
+            sg_reason = payload.get("crash_reason")
+            if sg_crashed:
+                crashed = True
+                if sg_reason:
+                    crash_reason = sg_reason
+    except (json.JSONDecodeError, ValueError, KeyError) as e:
         crashed = True
-        crash_reason = f"nonzero_exit:{exit_code}"
-
-    if "Red agent crashed" in stderr or "Red agent crashed" in stdout:
-        crashed = True
-        crash_reason = "red_crashed"
-        blue_win = 1
-        winner = "Blue"
-    elif "Blue agent crashed" in stderr or "Blue agent crashed" in stdout:
-        crashed = True
-        crash_reason = "blue_crashed"
-        red_win = 1
-        winner = "Red"
-    elif "The Red team wins" in stdout or "The Red team has returned" in stdout:
-        red_win = 1
-        winner = "Red"
-    elif "The Blue team wins" in stdout or "The Blue team has returned" in stdout:
-        blue_win = 1
-        winner = "Blue"
-    elif "Tie game" in stdout or "Time is up" in stdout:
-        tie = 1
-        winner = "Tie"
-
-    m = re.search(r"Average Score:\s*(-?[\d.]+)", stdout)
-    if m:
-        try:
-            score = float(m.group(1))
-        except ValueError:
-            score = None
+        crash_reason = f"parse_fail:{type(e).__name__}:{e}"
 
     return {
         "red": red, "blue": blue, "layout": layout, "seed": seed,

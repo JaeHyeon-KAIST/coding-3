@@ -152,3 +152,7 @@
 - **Pages:** 2026-04-16-pm13-m4b-4-m5-dry-run-5-killed-m6-budget-5-overshoot-.md
 - **Summary:** Created new page "2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot discovered"
 
+## [2026-04-15T16:32:10.586Z] ingest
+- **Pages:** 2026-04-16-pm14-option-a-complete-4-loop-bypass-4-55-speedup-m6-.md
+- **Summary:** Created new page "2026-04-16 pm14 Option A complete — 4-loop bypass, 4.55× speedup, M6 budget restored"
+

@@ -86,6 +86,24 @@
       "accessCount": 6,
       "lastAccessed": 1776262577109,
       "type": "file"
+    },
+    {
+      "path": "experiments/run_match.py",
+      "accessCount": 3,
+      "lastAccessed": 1776270417605,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/capture.py",
+      "accessCount": 1,
+      "lastAccessed": 1776270292221,
+      "type": "file"
+    },
+    {
+      "path": "experiments/single_game.py",
+      "accessCount": 1,
+      "lastAccessed": 1776270387566,
+      "type": "file"
     }
   ],
   "userDirectives": []
