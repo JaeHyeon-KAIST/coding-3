@@ -82,15 +82,57 @@
   },
   "hotPaths": [
     {
+      "path": "minicontest/capture.py",
+      "accessCount": 7,
+      "lastAccessed": 1776215232490,
+      "type": "directory"
+    },
+    {
       "path": ".claude/settings.local.json",
       "accessCount": 4,
       "lastAccessed": 1776155868505,
       "type": "file"
     },
     {
+      "path": "minicontest/zoo_core.py",
+      "accessCount": 3,
+      "lastAccessed": 1776215181968,
+      "type": "file"
+    },
+    {
       "path": "docs/AI_USAGE.md",
       "accessCount": 2,
       "lastAccessed": 1776213537550,
+      "type": "file"
+    },
+    {
+      "path": "experiments/tournament.py",
+      "accessCount": 2,
+      "lastAccessed": 1776215151476,
+      "type": "file"
+    },
+    {
+      "path": "experiments/run_match.py",
+      "accessCount": 2,
+      "lastAccessed": 1776215151831,
+      "type": "file"
+    },
+    {
+      "path": "experiments/evolve.py",
+      "accessCount": 2,
+      "lastAccessed": 1776215153108,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/util.py",
+      "accessCount": 2,
+      "lastAccessed": 1776215178251,
+      "type": "directory"
+    },
+    {
+      "path": "experiments/README.md",
+      "accessCount": 2,
+      "lastAccessed": 1776215190788,
       "type": "file"
     },
     {
@@ -118,16 +160,40 @@
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_core.py",
-      "accessCount": 1,
-      "lastAccessed": 1776213793084,
-      "type": "file"
-    },
-    {
       "path": "minicontest/zoo_reflex_h1test.py",
       "accessCount": 1,
       "lastAccessed": 1776213892713,
       "type": "file"
+    },
+    {
+      "path": "minicontest/baseline.py",
+      "accessCount": 1,
+      "lastAccessed": 1776215146665,
+      "type": "file"
+    },
+    {
+      "path": "experiments/select_top4.py",
+      "accessCount": 1,
+      "lastAccessed": 1776215160251,
+      "type": "file"
+    },
+    {
+      "path": "experiments/verify_flatten.py",
+      "accessCount": 1,
+      "lastAccessed": 1776215160839,
+      "type": "file"
+    },
+    {
+      "path": "experiments",
+      "accessCount": 1,
+      "lastAccessed": 1776215189850,
+      "type": "directory"
+    },
+    {
+      "path": "minicontest/game.py",
+      "accessCount": 1,
+      "lastAccessed": 1776215233697,
+      "type": "directory"
     }
   ],
   "userDirectives": []

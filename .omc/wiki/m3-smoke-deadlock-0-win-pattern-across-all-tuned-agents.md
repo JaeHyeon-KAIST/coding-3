@@ -1,8 +1,8 @@
 ---
 title: "M3 smoke deadlock — 0-win pattern across all tuned agents"
-tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open", "h1-confirmed", "resolved-partial"]
+tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open", "h1-confirmed", "resolved-partial", "baseline-analysis"]
 created: 2026-04-15T00:20:09.516Z
-updated: 2026-04-15T00:47:29.500Z
+updated: 2026-04-15T01:16:36.861Z
 sources: []
 links: []
 category: debugging
@@ -149,4 +149,62 @@ The 3 wins are narrow (`+1` — single-food advantage); the 2 losses are decisiv
 1. **M4 tournament activation** — run `experiments/tournament.py` on full zoo + monsters across multiple layouts × color swaps × seeds. Confirms whether tie rate persists across opponent diversity or is baseline-specific.
 2. **Before M5/M6**: optional re-tune `SEED_WEIGHTS_OFFENSIVE` to mid-values (`f_onDefense=20`, `f_numInvaders=-200`) so CEM gen-0 has a competitive starting pop.
 3. **Keep `zoo_reflex_h1test.py`** in the zoo as an ablation reference — documents the deadlock cause in the final report.
+
+---
+
+## Update (2026-04-15T01:16:36.861Z)
+
+## Deeper analysis — baseline.py weaknesses + 10-game breakdown (2026-04-15 pm)
+
+### Game-by-game H1 smoke breakdown (defaultCapture, zoo_reflex_h1test as Red)
+
+| # | Starter | Result | Score | Interp |
+|---|---|---|---|---|
+| 1 | Red | Tie | 0 | deadlock |
+| 2 | Blue | Tie | 0 | deadlock |
+| 3 | Red | Tie | 0 | deadlock |
+| 4 | Red | Tie | 0 | deadlock |
+| 5 | Red | Tie | 0 | deadlock |
+| 6 | Red | Red win | +1 | narrow win |
+| 7 | Red | Red win | +1 | narrow win |
+| 8 | Blue | **Blue win** | **-18** | baseline 18 food unopposed |
+| 9 | Red | Red win | +1 | narrow win |
+| 10 | Blue | **Blue win** | **-18** | baseline 18 food unopposed |
+
+**Perfect asymmetric pattern:**
+
+| Starter | W | L | T |
+|---|---|---|---|
+| Red (us) starts | 3 | 0 | 5 |
+| Blue (baseline) starts | 0 | 2 | 0 |
+
+Mechanism: `capture.py:381` runs `starter = random.randint(0, 1)` each game. When baseline's `OffensiveReflexAgent` gets the first-mover move, it enters our territory one tick earlier. Both our H1 agents are OFFENSE (no defender), so baseline raids freely → cashes 18 food.
+
+### baseline.py structural weaknesses (baseline.py:130-188)
+
+**`OffensiveReflexAgent` — weights:** `{successorScore: 100, distanceToFood: -1}` — only 2 features.
+
+Missing from baseline Offense (exploitable):
+- ❌ **Ghost avoidance** — walks into ghost paths freely
+- ❌ **Capsule awareness** — never uses capsule for scared-window attack
+- ❌ **`numCarrying` sensitivity** — never returns home; keeps eating until caught (then dumps all)
+- ❌ **Dead-end detection** — follows food into 1-exit corridors blindly
+
+**`DefensiveReflexAgent` — weights:** `{numInvaders: -1000, onDefense: 100, invaderDistance: -10, stop: -100, reverse: -2}` — structurally near-identical to our own `SEED_WEIGHTS_DEFENSIVE`.
+
+Missing from baseline Defense (exploitable):
+- ❌ **`scaredTimer` ignored** — when scared, `invaderDistance: -10` still drives it TOWARD invaders. Self-sacrifice bug.
+
+### Implications for next variant design
+
+H1 (both OFFENSE) broke the deadlock BUT created defense vacuum → asymmetric loss pattern.
+
+The correct patch is **H1b — keep 1 OFFENSE + 1 DEFENSE split from `ReflexTunedAgent`, override only the OFFENSIVE weight dict** (`f_onDefense=0, f_numInvaders=-50`), leave DEFENSIVE weights untouched.
+
+Prediction: asymmetric losses should resolve because the DEFENSE role agent holds home during Blue-starter games. Tie rate might stay similar (if tie rate is baseline-driven) or drop (if H1 was over-patching).
+
+### Stretch follow-ups (documented for later sessions)
+
+- **H1c**: exploit baseline's capsule-blindness. Boost `f_distToCapsule: 8.0 → 40.0` in OFFENSIVE. When baseline Defender stays scared 40 ticks but our `zoo_features` correctly handles scared (via `f_scaredFlee`), we can raid freely.
+- **H2 diagnostic**: instrument `CoreCaptureAgent._safeFallback` with a call counter. If counter > 5 per game → STOP fallback is over-firing (confirming H2 as residual tie-rate driver).
 

@@ -33,7 +33,15 @@ Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight
 
 🟡 **DEADLOCK PATTERN — H1 CONFIRMED (partial) on 2026-04-15** — one variant (`zoo_reflex_h1test.py`) with `f_onDefense=0` + `f_numInvaders=-50` patched went from 0/47 wins (M1-M3) to **3/10 wins** vs baseline on defaultCapture (30% win rate, 2 losses, 5 ties). H1 confirmed: deadlock was seed-weight overweight on defense, NOT structural. **M6 safe to pursue** (~20h compute not wasted). 50% tie rate persists → possibly baseline itself timid, or H2 residual. See wiki `debugging/m3-smoke-deadlock-...` Resolution log.
 
-🟡 **Submission flatten not yet implemented** — `experiments/select_top4.py` is a skeleton; the `flatten_agent` function raises `NotImplementedError`. Required by M7. Plan has the recipe, but the AST-based concatenation logic needs implementation.
+🔴 **Evolution silent-failure risk (`evolve.py:140-142`)** — `evaluate_genome` raises `NotImplementedError`; the enclosing try/except swallows it into `f=0.0`. A 20h M6 campaign would "complete successfully" and emit `final_weights.py` of random noise. MUST fix before any M5 dry-run. See wiki `debugging/experiments-infrastructure-audit-...`.
+
+🔴 **Seed plumbing broken (`run_match.py:72`)** — seed value is dropped; only `--fixRandomSeed` flag passed to `capture.py` which hardcodes `random.seed('cs188')`. CRN seed-axis variance is a no-op. Workaround: use `-l RANDOM<seed>` layout-generator flag. See audit page.
+
+🟡 **Tournament CSV + memory robustness** — `tournament.py` writes CSV only at run-end and submits all futures upfront. Mid-run kill discards all progress; at M6 scale (~280K games) futures dict alone is ~85MB. Patch set: CSV-append + fsync per row, sliding futures window (workers×4). ~40 lines total.
+
+🟡 **Subprocess process-group leakage** — `run_match.py:80` lacks `start_new_session=True`; on TimeoutExpired, grandchildren can orphan. 1-line fix + `os.killpg` on timeout.
+
+🟡 **Submission flatten not yet implemented** — `experiments/select_top4.py` is a skeleton; the `flatten_agent` function raises `NotImplementedError`. Required by M7. Plan has the recipe, but the AST-based concatenation logic needs implementation. Also: `FAMILY_MAP` missing entries for `zoo_dummy`, `zoo_reflex_h1test` (and future h1b/h1c) — silent drop risk during selection.
 
 🟡 **Time calibration deferred to M7.5** — `MOVE_BUDGET = 0.80s` is a placeholder. Algorithmic bounds (`MAX_ITERS=1000`, `MAX_DEPTH=3`, `ROLLOUT_DEPTH=20`) are the actual time controllers during dev. Final values come from M7.5 measurement on dev hardware + `taskset/cpulimit` TA simulation.
 
@@ -68,6 +76,7 @@ Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight
   - `debugging/m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents`
   - `session-log/session-2026-04-15-m3-smoke-completion-deadlock-observation`
   - `session-log/2026-04-15-pm-h1-deadlock-validation-confirmed`
+  - `debugging/experiments-infrastructure-audit-pre-m4-m6`
 - `docs/AI_USAGE.md` — per-milestone code change log (assignment requirement)
 - `.omc/notepad.md` — priority context + working memory
 - `.omc/STATUS.md` (this file)

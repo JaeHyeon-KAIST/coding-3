@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 6 pages | Last updated: 2026-04-15T00:48:17.211Z
+> 7 pages | Last updated: 2026-04-15T01:16:36.872Z
 
 ## convention
 
@@ -8,6 +8,7 @@
 
 ## debugging
 
+- [Experiments infrastructure audit — pre-M4/M6](experiments-infrastructure-audit-pre-m4-m6.md) — # Experiments infrastructure audit — pre-M4/M6
 - [M3 smoke deadlock — 0-win pattern across all tuned agents](m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md) — # M3 smoke deadlock — 0-win pattern across all tuned agents
 
 ## reference

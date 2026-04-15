@@ -32,3 +32,11 @@
 - **Pages:** 2026-04-15-pm-h1-deadlock-validation-confirmed.md
 - **Summary:** Created new page "2026-04-15 pm - H1 deadlock validation confirmed"
 
+## [2026-04-15T01:16:10.392Z] ingest
+- **Pages:** experiments-infrastructure-audit-pre-m4-m6.md
+- **Summary:** Created new page "Experiments infrastructure audit — pre-M4/M6"
+
+## [2026-04-15T01:16:36.861Z] ingest
+- **Pages:** m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md
+- **Summary:** Updated "M3 smoke deadlock — 0-win pattern across all tuned agents" with new content
+
