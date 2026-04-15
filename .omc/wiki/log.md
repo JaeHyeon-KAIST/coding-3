@@ -108,3 +108,47 @@
 - **Pages:** 2026-04-15-pm12-core-complete-t1-t4-all-pass-1-2-3-4-verified.md
 - **Summary:** Created new page "2026-04-15 pm12 α-core complete — T1-T4 all PASS (α-1/2/3/4 verified)"
 
+## [2026-04-15T14:03:55.682Z] ingest
+- **Pages:** session-log-2026-04-15-6a8aeb98.md
+- **Summary:** Auto-captured session log for 925b3c0f-7840-4c8d-a84b-cc476a8aeb98
+
+## [2026-04-15T14:04:14.312Z] ingest
+- **Pages:** session-log-2026-04-15-942f5ef2.md
+- **Summary:** Auto-captured session log for 791b3245-d139-42d2-be77-dc53942f5ef2
+
+## [2026-04-15T14:04:27.020Z] ingest
+- **Pages:** session-log-2026-04-15-3008e8db.md
+- **Summary:** Auto-captured session log for c77a106e-1999-4702-93aa-ff473008e8db
+
+## [2026-04-15T14:04:34.679Z] ingest
+- **Pages:** session-log-2026-04-15-942f5ef2.md
+- **Summary:** Auto-captured session log for 791b3245-d139-42d2-be77-dc53942f5ef2
+
+## [2026-04-15T14:04:58.601Z] ingest
+- **Pages:** session-log-2026-04-15-c692acaf.md
+- **Summary:** Auto-captured session log for aac64f29-0348-4701-8603-8688c692acaf
+
+## [2026-04-15T14:05:13.480Z] ingest
+- **Pages:** session-log-2026-04-15-3cd78f98.md
+- **Summary:** Auto-captured session log for eb253d20-7795-4864-b18d-1c8f3cd78f98
+
+## [2026-04-15T14:05:18.346Z] ingest
+- **Pages:** session-log-2026-04-15-c1762e61.md
+- **Summary:** Auto-captured session log for dd8ddf54-1fe9-418f-9635-071cc1762e61
+
+## [2026-04-15T14:11:08.712Z] ingest
+- **Pages:** session-log-2026-04-15-bd1cab0f.md
+- **Summary:** Auto-captured session log for 49251345-3c7b-4971-a782-d9ebbd1cab0f
+
+## [2026-04-15T14:11:58.524Z] ingest
+- **Pages:** session-log-2026-04-15-cf5242cf.md
+- **Summary:** Auto-captured session log for ed705062-a83f-44f7-ac34-015fcf5242cf
+
+## [2026-04-15T14:12:10.098Z] ingest
+- **Pages:** session-log-2026-04-15-2437996d.md
+- **Summary:** Auto-captured session log for 5d0292e3-5ff8-4598-8a1a-634f2437996d
+
+## [2026-04-15T16:17:18.409Z] ingest
+- **Pages:** 2026-04-16-pm13-m4b-4-m5-dry-run-5-killed-m6-budget-5-overshoot-.md
+- **Summary:** Created new page "2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot discovered"
+

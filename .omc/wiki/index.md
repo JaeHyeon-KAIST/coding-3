@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 21 pages | Last updated: 2026-04-15T09:57:48.011Z
+> 29 pages | Last updated: 2026-04-15T16:17:18.428Z
 
 ## convention
 
@@ -33,10 +33,18 @@
 - [2026-04-15 pm5 - tournament.py CSV-append + resume patch (autopilot)](2026-04-15-pm5-tournament-py-csv-append-resume-patch-autopilot.md) — # 2026-04-15 pm5 - tournament.py CSV-append + resume patch (autopilot)
 - [2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation](2026-04-15-pm6-m4-v1-first-tournament-seed-lock-confirmation.md) — # 2026-04-15 pm6 - M4-v1 first tournament + seed-lock confirmation
 - [2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)](2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md) — # 2026-04-15 pm7 - M4c-1 seed workaround + M4-v2 canonical ELO (autopilot)
+- [2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot discovered](2026-04-16-pm13-m4b-4-m5-dry-run-5-killed-m6-budget-5-overshoot-.md) — # 2026-04-16 pm13 M4b-4 M5 dry-run — α-5 killed, M6 budget 5× overshoot disco...
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-2437996d.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-3008e8db.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-3cd78f98.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-6a8aeb98.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-942f5ef2.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-a4b5c271.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-bd1cab0f.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-c1762e61.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-c692acaf.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-c6f8c8b7.md) — # Session Log 2026-04-15
+- [Session Log 2026-04-15](session-log-2026-04-15-cf5242cf.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-dd721afb.md) — # Session Log 2026-04-15

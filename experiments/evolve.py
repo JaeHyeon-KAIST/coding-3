@@ -33,6 +33,7 @@ import argparse
 import json
 import os
 import sys
+import time
 from collections import defaultdict
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
@@ -414,6 +415,7 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
 
     gen_records = []
     for gen in range(start_gen, n_gens):
+        gen_start = time.time()
         seed_gen = master_seed + gen * 1000
         population = sample_gaussian(mean, sigma, N, seed_gen)
 
@@ -501,7 +503,13 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
         ARTIFACTS.mkdir(parents=True, exist_ok=True)
         with (ARTIFACTS / f"{phase}_gen{gen:03d}.json").open("w") as f:
             json.dump(record, f, indent=2)
-        print(f"[evolve] phase={phase} gen={gen} best={record['best_fitness']:.3f} mean={record['mean_fitness']:.3f} snr={snr:.2f}", file=sys.stderr)
+        gen_wall = time.time() - gen_start
+        print(
+            f"[evolve] phase={phase} gen={gen} "
+            f"best={record['best_fitness']:.3f} mean={record['mean_fitness']:.3f} "
+            f"snr={snr:.2f} wall={gen_wall:.1f}s",
+            file=sys.stderr,
+        )
 
     return {
         "final_mean": mean.tolist(),
