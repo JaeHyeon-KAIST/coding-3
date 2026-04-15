@@ -31,8 +31,10 @@ argparse flag to pass custom weights to a zoo agent at load time).
 from __future__ import annotations
 import argparse
 import json
+import os
 import sys
 from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 import numpy as np
@@ -96,6 +98,20 @@ def genome_dims(phase: str) -> int:
 def sample_gaussian(mean: np.ndarray, sigma: np.ndarray, n: int, seed: int) -> np.ndarray:
     rng = np.random.default_rng(seed)
     return rng.normal(loc=mean, scale=sigma, size=(n, mean.shape[0]))
+
+
+def _default_workers() -> int:
+    """Default ProcessPoolExecutor worker count for genome-level parallelism.
+
+    Caps at 8 to match STRATEGY §3.4 guidance (oversubscription biases
+    selection toward shallow/fast agents). Reserves 1 core for the parent
+    evolve.py process + OS. For a 12-core box: `min(11, 8) = 8`.
+    """
+    try:
+        cores = os.cpu_count() or 1
+    except Exception:
+        cores = 1
+    return max(1, min(cores - 1, 8))
 
 
 def _decode_genome(genome: np.ndarray, phase: str) -> tuple:
@@ -270,7 +286,10 @@ def compute_fitness(eval_result: dict, phase: str) -> float:
     )
 
 
-def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: int, master_seed: int, initial_mean=None, initial_sigma=None):
+def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: int,
+              master_seed: int, initial_mean=None, initial_sigma=None,
+              workers: int | None = None,
+              opponents: list | None = None, layouts: list | None = None):
     dims = genome_dims(phase)
     if initial_mean is None:
         mean = np.zeros(dims)
@@ -295,28 +314,52 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
     best_ever_genome = None
     elite_count = int(np.ceil(rho * N))
 
+    # Resolve worker count and opponents/layouts pool (α-1 + α-3 glue).
+    # Passing opponents=None / layouts=None lets evaluate_genome fall back
+    # to DEFAULT_DRY_RUN_* — the existing M4b-3 behaviour.
+    if workers is None:
+        workers = _default_workers()
+    opp_for_eval = list(opponents) if opponents else []
+    lay_for_eval = list(layouts) if layouts else []
+
     gen_records = []
     for gen in range(n_gens):
         seed_gen = master_seed + gen * 1000
         population = sample_gaussian(mean, sigma, N, seed_gen)
-        fitnesses = []
-        eval_results = []
-        for gid, genome in enumerate(population):
-            # FAIL-FAST: do not silently swallow NotImplementedError or any
-            # other exception from evaluate_genome. A 20h campaign masking
-            # f=0.0 across every genome would emit final_weights.py of
-            # random noise (wiki debugging/experiments-infrastructure-audit).
-            # If evaluate_genome raises, abort the whole run loudly so the
-            # operator notices within minutes, not hours.
-            result = evaluate_genome(
-                gid, genome, phase, [], [],
-                games_per_opponent, master_seed=seed_gen + gid,
-            )
-            f = compute_fitness(result, phase)
-            fitnesses.append(f)
-            eval_results.append(result)
 
-        fitnesses = np.array(fitnesses)
+        # Preallocate so results land at the genome's own index even though
+        # futures complete out-of-order.
+        fitnesses_list: list = [0.0] * N
+        eval_results: list = [None] * N
+
+        # Genome-level parallel evaluation (α-1). Worker-level exceptions
+        # are logged LOUDLY and the genome is demoted (crash_rate=1.0) —
+        # this is the counterpart to the M4b-1 fail-fast rule applied
+        # inside the pool. A bad genome does NOT silently look like f=0.0
+        # (that pattern was how 20h of evolution would emit noise weights).
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = {
+                pool.submit(
+                    evaluate_genome,
+                    gid, population[gid], phase,
+                    opp_for_eval, lay_for_eval,
+                    games_per_opponent, seed_gen + gid,
+                ): gid
+                for gid in range(N)
+            }
+            for fut in as_completed(futures):
+                gid = futures[fut]
+                try:
+                    result = fut.result()
+                except Exception as e:
+                    print(f"[evolve] genome {gid} worker error: {type(e).__name__}: {e}",
+                          file=sys.stderr)
+                    result = {"pool_win_rate": 0.0, "crash_rate": 1.0,
+                              "stddev_win_rate": 0.0, "monster_win_rate": 0.0}
+                eval_results[gid] = result
+                fitnesses_list[gid] = compute_fitness(result, phase)
+
+        fitnesses = np.array(fitnesses_list)
         elite_idx = np.argsort(fitnesses)[-elite_count:]
         elite = population[elite_idx]
 
@@ -383,19 +426,49 @@ def main():
     ap.add_argument("--games-per-opponent-2a", type=int, default=24)  # 264/11 pool
     ap.add_argument("--games-per-opponent-2b", type=int, default=16)  # 224/14 pool
     ap.add_argument("--master-seed", type=int, default=42)
+    ap.add_argument(
+        "--workers", type=int, default=None,
+        help=(
+            "ProcessPoolExecutor worker count for genome-level parallelism. "
+            "Default: min(os.cpu_count()-1, 8) — leaves 1 core for the parent "
+            "process + OS, caps at 8 per STRATEGY §3.4 oversubscription rule."
+        ),
+    )
+    ap.add_argument(
+        "--opponents", nargs="+", default=None,
+        help=(
+            "Opponent agent names (e.g. baseline zoo_reflex_h1test ...). "
+            "Passed to evaluate_genome. When omitted, evaluate_genome falls "
+            "back to DEFAULT_DRY_RUN_OPPONENTS."
+        ),
+    )
+    ap.add_argument(
+        "--layouts", nargs="+", default=None,
+        help=(
+            "Layout names. `RANDOM` gets promoted per-seed in run_match.py "
+            "(seed→RANDOM<seed>). When omitted, falls back to "
+            "DEFAULT_DRY_RUN_LAYOUTS."
+        ),
+    )
     args = ap.parse_args()
 
     result_2a = None
     if args.phase in ("2a", "both"):
-        print("[evolve] starting Phase 2a (32-dim shared W, 10 gens, 264 games/genome)", file=sys.stderr)
+        print(f"[evolve] starting Phase 2a (shared W, {args.n_gens_2a} gens, "
+              f"pop={args.pop}, workers={args.workers or _default_workers()})",
+              file=sys.stderr)
         result_2a = run_phase(
             phase="2a", n_gens=args.n_gens_2a, N=args.pop, rho=args.rho,
             games_per_opponent=args.games_per_opponent_2a,
             master_seed=args.master_seed,
+            workers=args.workers,
+            opponents=args.opponents, layouts=args.layouts,
         )
 
     if args.phase in ("2b", "both"):
-        print("[evolve] starting Phase 2b (52-dim split W, 20 gens, 224 games/genome)", file=sys.stderr)
+        print(f"[evolve] starting Phase 2b (split W, {args.n_gens_2b} gens, "
+              f"pop={args.pop}, workers={args.workers or _default_workers()})",
+              file=sys.stderr)
         init_mean = np.array(result_2a["final_mean"]) if result_2a else None
         init_sigma = np.array(result_2a["final_sigma"]) * 0.5 + 10.0 if result_2a else None
         result_2b = run_phase(
@@ -403,6 +476,8 @@ def main():
             games_per_opponent=args.games_per_opponent_2b,
             master_seed=args.master_seed + 10000,
             initial_mean=init_mean, initial_sigma=init_sigma,
+            workers=args.workers,
+            opponents=args.opponents, layouts=args.layouts,
         )
         # Emit final weights as Python literal
         best = np.array(result_2b["best_ever_genome"])
