@@ -5,7 +5,7 @@
 
 ## Headline
 
-Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight bias (not structural)** via `zoo_reflex_h1test` variant (3W/2L/5T vs baseline on defaultCapture, 2026-04-15 pm). **M4 tournament activation is the next step**; deadlock is calibrational and addressable by M6 CEM evolution.
+Plan validated, infrastructure built, **deadlock = seed-weight bias (H1 confirmed, 3W/2L/5T)**. H1b role-split variant REJECTED (1W/2L/7T): simple role+OFFENSIVE patch insufficient — DEFENSIVE weights themselves weak, and "2-OFFENSE formation" has real attacking advantage over "1+1 split". New critical path: H1c (capsule exploit) + H1d (DEFENSIVE rebalance) + **M4 infra patches** (architect audit surfaced 2 🔴 + 3 🟡 findings). M6 evolution dimensionality doubled vs plan.
 
 ## Milestone progress (M-series from `.omc/plans/STRATEGY.md` §10)
 
@@ -19,8 +19,9 @@ Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight
 | M2d | 2 approxQ variants (v1, v2_deeper) | ✅ Done | 6/6 exit 0 | `927b4ce` |
 | M3 | 3 hand-tuned monster agents | ✅ Done | 3/3 exit 0 | `9e278b4` |
 | **M3-verify** | Smoke for skipped MCTS + monsters | ✅ Done | 7/7 exit 0 | `9e278b4` |
-| **H1-verify** | Deadlock-hypothesis validation (zoo_reflex_h1test) | ✅ Done | 3W/2L/5T in 10 games | (uncommitted) |
-| **M4** | Tournament pipeline activation | ⏳ NEXT | — | — |
+| **H1-verify** | Deadlock-hypothesis validation (zoo_reflex_h1test) | ✅ Done | 3W/2L/5T in 10 games | `a512863` |
+| **H1b-verify** | Role-split variant test (zoo_reflex_h1b) | ✅ Done — REJECTED | 1W/2L/7T in 10 games (below H1) | (uncommitted) |
+| **M4** | Tournament pipeline activation | ⏳ Deferred until M4 infra patches | — | — |
 | M5 | Evolution dry run (N=8, G=2) | ⏳ Pending | — | — |
 | M6 | Full evolution campaign (~20h) | ⏳ Pending | — | — |
 | M7 | select_top4 + flatten + populate slots | ⏳ Pending | — | — |
@@ -52,12 +53,12 @@ Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight
 - 1 `zoo_features.py` (17-feature extractor)
 - 1 `zoo_dummy.py` (M1 smoke target)
 - 4 reflex variants (`zoo_reflex_{tuned,capsule,aggressive,defensive}.py`)
-- 1 H1-validation variant (`zoo_reflex_h1test.py` — diagnostic, kept as permanent ablation reference)
+- 2 H1-family diagnostic variants (`zoo_reflex_h1test.py` both-OFFENSE, `zoo_reflex_h1b.py` role-split; kept as permanent ablation references)
 - 3 minimax variants (`zoo_minimax_{ab_d2,ab_d3_opp}.py`, `zoo_expectimax.py`)
 - 3 MCTS variants (`zoo_mcts_{random,heuristic,q_guided}.py`)
 - 2 approxQ variants (`zoo_approxq_{v1,v2_deeper}.py`)
 - 3 monster agents (`monster_{rule_expert,mcts_hand,minimax_d4}.py`)
-- **Total: 19 agents (16 zoo + 3 monsters)**
+- **Total: 20 agents (17 zoo + 3 monsters)**
 
 **Pipeline scripts (`experiments/`):**
 - `run_match.py` — single-game subprocess wrapper (CPU pin support)
@@ -77,6 +78,7 @@ Plan validated, infrastructure built, deadlock was **H1-confirmed as seed-weight
   - `session-log/session-2026-04-15-m3-smoke-completion-deadlock-observation`
   - `session-log/2026-04-15-pm-h1-deadlock-validation-confirmed`
   - `debugging/experiments-infrastructure-audit-pre-m4-m6`
+  - `session-log/2026-04-15-pm2-h1b-rejected-strategic-replanning`
 - `docs/AI_USAGE.md` — per-milestone code change log (assignment requirement)
 - `.omc/notepad.md` — priority context + working memory
 - `.omc/STATUS.md` (this file)
@@ -92,10 +94,10 @@ If you skipped SESSION_RESUME: the immediate next action is **M4 tournament acti
 
 | Metric | Value | Health |
 |---|---|---|
-| Code crashes in 57 smoke games (47 + 10 H1) | 0 | 🟢 |
+| Code crashes in 67 smoke games (47 M1-M3 + 10 H1 + 10 H1b) | 0 | 🟢 |
 | Timeout forfeits | 0 | 🟢 |
-| Total agents implemented | 19 | 🟢 |
-| Agents that have beaten baseline | 1 (zoo_reflex_h1test 30%) | 🟡 (H1 confirmed, below 51% gate) |
+| Total agents implemented | 20 | 🟢 |
+| Best win rate vs baseline | 30% (H1 both-OFFENSE); H1b role-split = 10% | 🟡 (calibrational deadlock broken; but weight tuning alone not enough for 51%) |
 | Plan reviewers approving | 6 / 6 | 🟢 |
 | Compute budget for M6 (planned) | ~20h | 🟢 |
 | Days until submission deadline | TBD (check assignment PDF for due date) | 🟡 |

@@ -40,3 +40,11 @@
 - **Pages:** m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md
 - **Summary:** Updated "M3 smoke deadlock — 0-win pattern across all tuned agents" with new content
 
+## [2026-04-15T01:22:15.755Z] ingest
+- **Pages:** m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md
+- **Summary:** Updated "M3 smoke deadlock — 0-win pattern across all tuned agents" with new content
+
+## [2026-04-15T01:22:56.894Z] ingest
+- **Pages:** 2026-04-15-pm2-h1b-rejected-strategic-replanning.md
+- **Summary:** Created new page "2026-04-15 pm2 - H1b rejected + strategic replanning"
+

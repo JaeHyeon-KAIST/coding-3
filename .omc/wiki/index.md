@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 7 pages | Last updated: 2026-04-15T01:16:36.872Z
+> 8 pages | Last updated: 2026-04-15T01:22:56.903Z
 
 ## convention
 
@@ -18,5 +18,6 @@
 ## session-log
 
 - [2026-04-15 pm - H1 deadlock validation confirmed](2026-04-15-pm-h1-deadlock-validation-confirmed.md) — # 2026-04-15 pm - H1 deadlock validation confirmed
+- [2026-04-15 pm2 - H1b rejected + strategic replanning](2026-04-15-pm2-h1b-rejected-strategic-replanning.md) — # 2026-04-15 pm2 - H1b rejected + strategic replanning
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-c6f8c8b7.md) — # Session Log 2026-04-15

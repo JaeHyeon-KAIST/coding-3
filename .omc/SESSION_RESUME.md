@@ -1,19 +1,19 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-15 (pm — after H1 validation)
+**Last updated:** 2026-04-15 (pm2 — after H1b rejection + strategic replan)
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 
 ## Step 1 — Read this 30-second TL;DR
 
-This is **CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent for KAIST CS470 (UC Berkeley CS188 framework). Student ID `20200492`. We have a fully reviewed plan (6-way validation: Planner/Architect/Critic + Scientist/Codex/Gemini), 19 agents implemented (16 zoo + 3 monster; includes `zoo_reflex_h1test` diagnostic). **The M3 deadlock has been H1-CONFIRMED as seed-weight bias (NOT structural)** — 3W/2L/5T in 10 games on defaultCapture with `f_onDefense=0`, `f_numInvaders=-50` overrides. M4 tournament activation is the next action.
+This is **CS470 Coding Assignment #3**: Pacman Capture-the-Flag tournament agent for KAIST CS470 (UC Berkeley CS188 framework). Student ID `20200492`. Plan is 6-way validated; 20 agents implemented (17 zoo + 3 monster; includes H1/H1b diagnostics). **M3 deadlock resolved as seed-weight bias** (H1 confirmed: both-OFFENSE 3W/2L/5T). **H1b role-split rejected** (1W/2L/7T): simple fix insufficient. DEFENSIVE weights themselves weak; formation matters as much as weights. Next: H1c (capsule exploit, highest ROI) → M4 infra patches → M4 tournament.
 
 ## Step 2 — Run these commands (~30 sec)
 
 ```bash
 cd "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3"
 git log --oneline -5         # what was committed recently
-ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 19 expected (16 zoo + 3 monsters)
+ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 20 expected (17 zoo + 3 monsters)
 ```
 
 ## Step 3 — Read these in order (~3 min)
@@ -24,13 +24,13 @@ ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 19 expected (16 zoo
 
 ## Step 4 — Know what to do next
 
-Per the 2026-04-15 pm session-log (H1 validation), the **immediate next action** is:
+Per the 2026-04-15 pm2 session-log (H1b rejected), the **immediate next action** is:
 
-> **M4 activation**: run `experiments/tournament.py` with full zoo (16) + monsters (3) on 3 layouts × 2 color swaps × 5 seeds. Generate first ELO table. Confirms whether H1 win-pattern generalizes beyond defaultCapture. (~2-3h)
+> **H1c quick validation**: author `minicontest/zoo_reflex_h1c.py`. Inherits ReflexTunedAgent; both OFFENSE (H1 formation). Override `f_distToCapsule: 8 → 80` (10x). Goal: exploit baseline's capsule blindness — when we eat capsule, baseline defender scared 40 ticks; baseline weights ignore scared → it self-destructs chasing us. Prediction: 5W+ if hypothesis correct. ~15 min.
 
-If M4 tie rate stays ≥50% on multiple layouts, escalate to H2 instrumentation (STOP fallback over-firing — add a counter to `CoreCaptureAgent._safeFallback` and re-run one layout).
+If H1c fails too (< H1's 30%): pivot to H1d (DEFENSIVE rebalance: `f_patrolDist 30 → 5`, `f_invaderDist 80 → 400`). This is the signal that ALL single-dict tunings are insufficient, and M6 evolution is the only path — which makes fixing `evolve.py:140-142` NotImplementedError swallow the critical path.
 
-Stretch after M4: replicate H1 patch pattern for `zoo_minimax_h1test` / `zoo_mcts_h1test` for family consistency, then proceed to **M5 dry run (N=8, G=2)**.
+After a successful diagnostic hypothesis: activate **M4 infra patches** (architect audit: CSV append + resume, seed workaround via `-l RANDOM<seed>`, `start_new_session=True`, sliding futures window, tmux+caffeinate launch; ~1h). Then M4 tournament across 3 layouts × all zoo.
 
 ## Project rules — must respect
 

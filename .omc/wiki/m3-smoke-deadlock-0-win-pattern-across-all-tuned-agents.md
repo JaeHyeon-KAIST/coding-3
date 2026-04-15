@@ -1,8 +1,8 @@
 ---
 title: "M3 smoke deadlock — 0-win pattern across all tuned agents"
-tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open", "h1-confirmed", "resolved-partial", "baseline-analysis"]
+tags: ["m3", "deadlock", "tuning", "seed-weights", "scoreless", "open", "h1-confirmed", "resolved-partial", "baseline-analysis", "h1b-rejected", "defender-weakness"]
 created: 2026-04-15T00:20:09.516Z
-updated: 2026-04-15T01:16:36.861Z
+updated: 2026-04-15T01:22:15.755Z
 sources: []
 links: []
 category: debugging
@@ -207,4 +207,87 @@ Prediction: asymmetric losses should resolve because the DEFENSE role agent hold
 
 - **H1c**: exploit baseline's capsule-blindness. Boost `f_distToCapsule: 8.0 → 40.0` in OFFENSIVE. When baseline Defender stays scared 40 ticks but our `zoo_features` correctly handles scared (via `f_scaredFlee`), we can raid freely.
 - **H2 diagnostic**: instrument `CoreCaptureAgent._safeFallback` with a call counter. If counter > 5 per game → STOP fallback is over-firing (confirming H2 as residual tie-rate driver).
+
+---
+
+## Update (2026-04-15T01:22:15.755Z)
+
+## Resolution log — H1b test: role-aware patch (2026-04-15 pm)
+
+**STATUS: H1b REJECTED as primary fix. Below H1 in win rate (1/10 vs 3/10). But high information value — reveals that DEFENSIVE weights themselves fail to block baseline offense, and that "2-OFFENSE formation" has real attacking advantage over "1+1 split".**
+
+### Experiment
+
+- **Variant**: `minicontest/zoo_reflex_h1b.py` — inherits `ReflexTunedAgent`, overrides `_get_weights()` role-aware:
+  - role=OFFENSE → H1-patched offensive weights (`f_onDefense=0`, `f_numInvaders=-50`, rest unchanged)
+  - role=DEFENSE → `SEED_WEIGHTS_DEFENSIVE` **untouched** (intentional — test whether preserving defender resolves -18 losses)
+- **Smoke**: `cd minicontest && ../.venv/bin/python capture.py -r zoo_reflex_h1b -b baseline -l defaultCapture -n 10 -q` → 55s wall
+
+### Result
+
+| # | Starter | Result | Score |
+|---|---|---|---|
+| 1 | Red | Tie | 0 |
+| 2 | Blue | **Blue win** | **-18** |
+| 3 | Blue | Tie | 0 |
+| 4 | Blue | Red win | +1 |
+| 5 | Red | Tie | 0 |
+| 6 | Blue | Tie | 0 |
+| 7 | Blue | Tie | 0 |
+| 8 | Blue | Tie | 0 |
+| 9 | Red | Tie | 0 |
+| 10 | Blue | **Blue win** | **-18** |
+
+**Totals**: 1W / 2L / 7T. Average score -3.5.
+
+### Comparison with H1
+
+| Metric | H1 (both OFFENSE) | H1b (role split) | Delta |
+|---|---|---|---|
+| Wins | 3/10 (30%) | **1/10 (10%)** | ↓ 20 pp |
+| Losses | 2/10 | 2/10 | same |
+| Ties | 5/10 | **7/10** | ↑ 20 pp |
+| -18 rout occurrences | 2 | **2** (still!) | same |
+| Red-starter wins | 3/8 (37%) | 0/3 (0%) | ↓ |
+| Blue-starter wins | 0/2 (0%) | 1/7 (14%) | modest |
+
+### Diagnosis — why H1b underperformed
+
+**Failure mode 1: defender cannot actually stop baseline offense (the -18 pattern persists).**
+
+The `SEED_WEIGHTS_DEFENSIVE` mix is:
+```
+f_onDefense: 200, f_patrolDist: 30, f_invaderDist: 80, f_numInvaders: -2000
+```
+
+When baseline's OffensiveReflexAgent enters our territory, our defender should chase (`f_invaderDist=+80 × 1/dist`). But simultaneously:
+- `f_patrolDist=30 × 1/dist` pulls defender TOWARD the patrol anchor (home frontier bottleneck)
+- `f_onDefense=200` gives huge bonus just for being home-side
+- Defender ends up **oscillating between patrol anchor and invader**, arriving late. Baseline offender raids deep, cashes 18 food, returns.
+
+In Blue-starter games where baseline gets first move, defender's latency compounds — by the time defender engages, 10+ food already eaten.
+
+**Failure mode 2: lone offender can't penetrate baseline defender.**
+
+In H1 (both OFFENSE), two attackers on one baseline defender = at least one finds a path. In H1b, one attacker vs one defender = most games become tail-chasing stalemates → 70% tie rate.
+
+Red-starter games (3/10) are all ties in H1b — lone offender mostly fails to find unopposed entry.
+
+### Implications
+
+- **`SEED_WEIGHTS_DEFENSIVE` is weak** — `f_patrolDist=30` distracts defender from active threats. Patrol-first vs chase-first tuning needs rebalancing.
+- **"2 OFFENSE formation" has real attacking advantage** over "1 OFFENSE + 1 DEFENSE" — H1's higher win rate (30% vs 10%) isn't just seed-weight effect; it's formation effect.
+- **M6 CEM evolution must jointly optimize OFFENSE and DEFENSE weights + the role-formation decision.** Cannot just tune offensive values with defensive unchanged. This doubles (roughly) the effective dimensionality that evolution needs to explore.
+- **Single-weight-dict tweaks cannot solve both deadlock AND defense vacuum simultaneously** — deeper redesign (better DEFENSIVE weights; or different role-switching logic; or richer OFFENSIVE strategy that exploits baseline weaknesses) required.
+
+### Remaining hypotheses re-prioritized
+
+1. **H1c (NEW, highest ROI)**: exploit baseline capsule-blindness. OFFENSIVE `f_distToCapsule: 8 → 80` (10x). When baseline defender is scared (40 ticks), its `invaderDistance: -10` weight drives it suicidally TOWARD us (can't handle scared). During the 40-tick scared window, both our offense agents can raid safely.
+2. **H1d (NEW)**: rebalance DEFENSIVE weights. `f_patrolDist: 30 → 5`, `f_invaderDist: 80 → 400`, `f_onDefense: 200 → 50`. Test whether defender can actually block baseline offense when properly chase-prioritized.
+3. **H2 (diagnostic)**: `_safeFallback` call counter. Tie rate jumped 50% → 70% from H1 to H1b — needs an explanation beyond "offense weaker"; STOP-fallback over-firing plausible.
+4. **H1e (stretch)**: switch tested agent to `zoo_minimax_ab_d2` with same OFFENSIVE patch. Lookahead may penetrate baseline defender where reflex cannot.
+
+### Strategic note
+
+M4 tournament (with infra patches) becomes more important now, not less. We need to test H1c/H1d/H2/H1e **across layouts** and **against multiple opponent types** (not just baseline) to avoid overfitting to baseline-specific patterns. Small smoke tests on defaultCapture alone cannot generalize.
 
