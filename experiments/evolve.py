@@ -454,6 +454,14 @@ def run_phase(phase: str, n_gens: int, N: int, rho: float, games_per_opponent: i
         sigma = np.full(dims, 30.0)
     else:
         sigma = np.array(initial_sigma)
+        # pm18 fix: expand sigma for 2a→2b transition (mirrors mean expansion)
+        if sigma.shape[0] != dims:
+            if phase == "2b" and sigma.shape[0] == N_FEATURES + len(PARAM_NAMES):
+                feat_sigma = sigma[:N_FEATURES]
+                param_sigma = sigma[N_FEATURES:]
+                sigma = np.concatenate([feat_sigma, feat_sigma, param_sigma])
+            else:
+                raise ValueError(f"sigma dim mismatch: {sigma.shape} vs expected {dims}")
 
     # Resume restores stagnation + best-of-history; fresh starts zero them.
     if checkpoint is not None:
