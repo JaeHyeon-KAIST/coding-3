@@ -36,6 +36,12 @@ SEED_WEIGHTS_OFFENSIVE = {
     'f_patrolDist': 5.0,
     'f_distToCapsuleDefend': -3.0,
     'f_scaredFlee': -1.0,
+    # B1 (pm18): 3 new features extending zoo_features from 17 → 20 dims.
+    # Seed weights = 0.0 so the current behaviour matches pre-B1 exactly —
+    # evolution discovers useful weight magnitudes over Phase 2a/b.
+    'f_scaredGhostChase': 0.0,
+    'f_returnUrgency': 0.0,
+    'f_teammateSpread': 0.0,
 }
 
 SEED_WEIGHTS_DEFENSIVE = {
@@ -56,6 +62,10 @@ SEED_WEIGHTS_DEFENSIVE = {
     'f_patrolDist': 30.0,
     'f_distToCapsuleDefend': -20.0,
     'f_scaredFlee': -10.0,
+    # B1 (pm18): see SEED_WEIGHTS_OFFENSIVE comment.
+    'f_scaredGhostChase': 0.0,
+    'f_returnUrgency': 0.0,
+    'f_teammateSpread': 0.0,
 }
 
 # Preferred action order for deterministic tiebreak.
@@ -109,6 +119,10 @@ def extract_features(agent, gameState, action):
         'f_patrolDist': 0.0,
         'f_distToCapsuleDefend': 0.0,
         'f_scaredFlee': 0.0,
+        # B1 (pm18): zero-defaults; computed below before the clip pass.
+        'f_scaredGhostChase': 0.0,
+        'f_returnUrgency': 0.0,
+        'f_teammateSpread': 0.0,
     }
 
     # --- Compute successor state ---
@@ -371,6 +385,94 @@ def extract_features(agent, gameState, action):
             features['f_scaredFlee'] = 0.0
     except Exception:
         features['f_scaredFlee'] = 0.0
+
+    # -----------------------------------------------------------------------
+    # f_scaredGhostChase (B1, pm18): 1/dist to nearest SCARED enemy ghost.
+    # Positive value = closer to scared ghost. Evolved +weight → chase for
+    # points & ghost-kill. Currently no other feature captures this bonus.
+    # -----------------------------------------------------------------------
+    try:
+        scared_ghost_dists = []
+        if myPos is not None:
+            for opp_idx, opp_pos in opponentPositions.items():
+                if opp_pos is None:
+                    continue
+                try:
+                    opp_state = successor.getAgentState(opp_idx)
+                    if getattr(opp_state, 'isPacman', False):
+                        continue
+                    opp_scared = int(getattr(opp_state, 'scaredTimer', 0) or 0)
+                    if opp_scared <= 0:
+                        continue
+                    d = agent.getMazeDistance(myPos, opp_pos)
+                    scared_ghost_dists.append(d)
+                except Exception:
+                    continue
+        if scared_ghost_dists:
+            features['f_scaredGhostChase'] = 1.0 / max(min(scared_ghost_dists), 1)
+        else:
+            features['f_scaredGhostChase'] = 0.0
+    except Exception:
+        features['f_scaredGhostChase'] = 0.0
+
+    # -----------------------------------------------------------------------
+    # f_returnUrgency (B1, pm18): non-linear return-home pressure.
+    #   numCarrying² × (1/home_dist) × (0.5 + time_factor)
+    # time_factor = 1 − timeleft/1200 grows 0→1 as the game advances; the
+    # 0.5 floor keeps baseline return pressure present from move 0, and the
+    # squared carrying term lets a large hoard dominate the expression even
+    # at long home distances. Existing f_distToHome is linear in both;
+    # this gives evolution an extra lever for late-game scoring rushes.
+    # -----------------------------------------------------------------------
+    try:
+        try:
+            time_left = int(gameState.data.timeleft)
+        except Exception:
+            time_left = 1200
+        time_factor = 1.0 - (max(0, min(time_left, 1200)) / 1200.0)
+        homeFrontier = agent.homeFrontier if agent.homeFrontier else []
+        if myPos is not None and numCarrying > 0 and homeFrontier:
+            min_home_dist = min(agent.getMazeDistance(myPos, h) for h in homeFrontier)
+            features['f_returnUrgency'] = (
+                (float(numCarrying) ** 2)
+                * (1.0 / max(min_home_dist, 1))
+                * (0.5 + time_factor)
+            )
+        else:
+            features['f_returnUrgency'] = 0.0
+    except Exception:
+        features['f_returnUrgency'] = 0.0
+
+    # -----------------------------------------------------------------------
+    # f_teammateSpread (B1, pm18): 1/dist to the closest teammate. A
+    # NEGATIVE weight → the agent disperses (being close is bad). Prevents
+    # both offense agents from dogpiling the same food path. No existing
+    # feature expresses teammate geometry.
+    # -----------------------------------------------------------------------
+    try:
+        teammate_dists = []
+        if myPos is not None:
+            try:
+                team_indices = list(agent.getTeam(successor))
+            except Exception:
+                team_indices = []
+            for tm_idx in team_indices:
+                if tm_idx == agent.index:
+                    continue
+                try:
+                    tm_pos = successor.getAgentPosition(tm_idx)
+                    if tm_pos is None:
+                        continue
+                    d = agent.getMazeDistance(myPos, tm_pos)
+                    teammate_dists.append(d)
+                except Exception:
+                    continue
+        if teammate_dists:
+            features['f_teammateSpread'] = 1.0 / max(min(teammate_dists), 1)
+        else:
+            features['f_teammateSpread'] = 0.0
+    except Exception:
+        features['f_teammateSpread'] = 0.0
 
     # -----------------------------------------------------------------------
     # Final clip pass — ensure no inf/NaN in output.

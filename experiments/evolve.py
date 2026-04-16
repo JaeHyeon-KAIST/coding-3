@@ -67,7 +67,8 @@ FEATURE_NAMES = [
     "f_inDeadEnd", "f_stop", "f_reverse",
     "f_numInvaders", "f_invaderDist", "f_onDefense", "f_patrolDist",
     "f_distToCapsuleDefend", "f_scaredFlee",
-    # ... 3 more to reach 20 if needed
+    # B1 (pm18): 3 new features extending the vector from 17 → 20 dims.
+    "f_scaredGhostChase", "f_returnUrgency", "f_teammateSpread",
 ]
 N_FEATURES = len(FEATURE_NAMES)
 
@@ -126,6 +127,11 @@ _H1TEST_FEAT_SEED = [
     5.0,     # f_patrolDist
     -3.0,    # f_distToCapsuleDefend
     -1.0,    # f_scaredFlee
+    # B1 (pm18): seed at 0.0 so the h1test behaviour matches pre-B1 exactly
+    # on gen 0; evolution discovers useful magnitudes across Phase 2a/b.
+    0.0,     # f_scaredGhostChase
+    0.0,     # f_returnUrgency
+    0.0,     # f_teammateSpread
 ]
 
 # H1b OFFENSIVE weights are identical to h1test at the feature-vector level
