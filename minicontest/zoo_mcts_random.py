@@ -18,8 +18,9 @@ from __future__ import annotations
 
 import math
 import random
+import time
 
-from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH
+from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH, MOVE_BUDGET
 from zoo_features import (
     extract_features,
     evaluate,
@@ -265,18 +266,28 @@ class MCTSRandomAgent(CoreCaptureAgent):
             cur = cur.parent
 
     def _mcts_search(self, gameState):
-        """Run MAX_ITERS iterations of MCTS. Return best action."""
+        """Run MCTS until MOVE_BUDGET wall-clock deadline or MAX_ITERS cap.
+
+        C4 time-budget polling (pm18): see zoo_mcts_heuristic.py docstring
+        for rationale. Random rollouts are cheaper per step than the
+        heuristic variant, so the iter count at 0.8s budget is usually
+        higher (~50-100).
+        """
+        turn_start = time.time()
+        deadline = turn_start + MOVE_BUDGET
         root = self._make_node(gameState, None, None)
         # Root must be visited once before UCB1 is meaningful.
         root.visits = 1
 
-        for _ in range(MAX_ITERS):
+        iters = 0
+        while iters < MAX_ITERS and time.time() < deadline:
             # 1. Tree policy (selection + expansion)
             leaf, leaf_state = self._tree_policy(root, gameState)
             # 2. Rollout
             value = self._rollout(leaf_state)
             # 3. Backpropagation
             self._backpropagate(leaf, value)
+            iters += 1
 
         # Return action of robust child (most visited).
         robust = root.robust_child()

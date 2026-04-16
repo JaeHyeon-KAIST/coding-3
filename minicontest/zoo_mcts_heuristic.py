@@ -19,8 +19,9 @@ from __future__ import annotations
 
 import math
 import random
+import time
 
-from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH
+from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH, MOVE_BUDGET
 from zoo_features import (
     extract_features,
     evaluate,
@@ -301,14 +302,25 @@ class MCTSHeuristicAgent(CoreCaptureAgent):
             cur = cur.parent
 
     def _mcts_search(self, gameState):
-        """Run MAX_ITERS iterations of MCTS. Return best action."""
+        """Run MCTS until MOVE_BUDGET wall-clock deadline or MAX_ITERS cap.
+
+        C4 time-budget polling (pm18): check `time.time() < deadline` before
+        each iter. MOVE_BUDGET (0.80s per zoo_core) stays under capture.py's
+        1s warning threshold. MAX_ITERS retained as a hard cap against
+        clock misbehavior. Typical iter count at 0.8s budget ≈ 30-50
+        (heuristic rollout is ~20 steps per iter).
+        """
+        turn_start = time.time()
+        deadline = turn_start + MOVE_BUDGET
         root = self._make_node(gameState, None, None)
         root.visits = 1
 
-        for _ in range(MAX_ITERS):
+        iters = 0
+        while iters < MAX_ITERS and time.time() < deadline:
             leaf, leaf_state = self._tree_policy(root, gameState)
             value = self._rollout(leaf_state)
             self._backpropagate(leaf, value)
+            iters += 1
 
         robust = root.robust_child()
         if robust is not None:

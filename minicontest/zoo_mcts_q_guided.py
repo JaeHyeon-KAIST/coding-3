@@ -26,8 +26,9 @@ from __future__ import annotations
 
 import math
 import random
+import time
 
-from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH
+from zoo_core import CoreCaptureAgent, TEAM, Directions, MAX_ITERS, ROLLOUT_DEPTH, MOVE_BUDGET
 from zoo_features import (
     extract_features,
     evaluate,
@@ -249,17 +250,26 @@ class MCTSQGuidedAgent(CoreCaptureAgent):
             cur = cur.parent
 
     def _search(self, gameState):
-        """Run MAX_ITERS iterations of UCB-guided leaf search. Return best action."""
+        """Run UCB-guided leaf search until MOVE_BUDGET deadline or MAX_ITERS.
+
+        C4 time-budget polling (pm18): leaf-eval-only, so each iter is
+        ~10× faster than heuristic rollout. Typical iter count at 0.8s
+        budget ≈ 500-1000 (often saturating MAX_ITERS on simple maps).
+        """
+        turn_start = time.time()
+        deadline = turn_start + MOVE_BUDGET
         root = self._make_node(gameState, None, None)
         root.visits = 1
 
-        for _ in range(MAX_ITERS):
+        iters = 0
+        while iters < MAX_ITERS and time.time() < deadline:
             # 1. Tree policy (selection + expansion)
             leaf, leaf_state = self._tree_policy(root, gameState)
             # 2. Leaf evaluation (direct — no rollout)
             value = self._leaf_evaluate(leaf_state)
             # 3. Backpropagation
             self._backpropagate(leaf, value)
+            iters += 1
 
         # Return robust child (highest visit count).
         robust = root.robust_child()
