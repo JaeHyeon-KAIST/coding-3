@@ -96,8 +96,20 @@
   "hotPaths": [
     {
       "path": "experiments/evolve.py",
-      "accessCount": 12,
-      "lastAccessed": 1776280182809,
+      "accessCount": 15,
+      "lastAccessed": 1776289561800,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_features.py",
+      "accessCount": 5,
+      "lastAccessed": 1776289557175,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_mcts_heuristic.py",
+      "accessCount": 4,
+      "lastAccessed": 1776289258063,
       "type": "file"
     },
     {
@@ -107,9 +119,27 @@
       "type": "file"
     },
     {
+      "path": "minicontest/zoo_mcts_random.py",
+      "accessCount": 3,
+      "lastAccessed": 1776289207732,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_mcts_q_guided.py",
+      "accessCount": 3,
+      "lastAccessed": 1776289213686,
+      "type": "file"
+    },
+    {
       "path": ".claude/settings.local.json",
       "accessCount": 2,
       "lastAccessed": 1776287271029,
+      "type": "file"
+    },
+    {
+      "path": "experiments/single_game.py",
+      "accessCount": 2,
+      "lastAccessed": 1776289257383,
       "type": "file"
     },
     {
@@ -119,9 +149,9 @@
       "type": "file"
     },
     {
-      "path": "experiments/single_game.py",
+      "path": "minicontest/zoo_core.py",
       "accessCount": 1,
-      "lastAccessed": 1776270387566,
+      "lastAccessed": 1776288705364,
       "type": "file"
     }
   ],

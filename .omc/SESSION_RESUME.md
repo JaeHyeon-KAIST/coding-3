@@ -1,6 +1,6 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-15 (pm4 — after 40-game apples-to-apples reverification; single-dict saturated, M4 infra pivot)
+**Last updated:** 2026-04-16 (pm18 — Phase 1 B1+C4 done, committed; A1 17-dim Order 1 ▶️ running on server, gens 0-2 showing CEM learning 0.112→0.483)
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 
@@ -33,23 +33,44 @@ ls minicontest/zoo_*.py minicontest/monster_*.py | wc -l   # 21 expected (18 zoo
 
 ## Step 4 — Know what to do next
 
-**Current state (2026-04-15 pm9)**: M4a, M4b-1/2/3, M4c-1 infrastructure all landed and committed. M4-v1/v2 tournaments produced canonical ELO (h1test 50% vs baseline, h1b best net +8). Pre-α preflight complete: baseline measured at 7.74s/match, ADR written, test plan (T1-T4) ready.
+**Current state (2026-04-16 pm18 end)**: Phase 1 complete and committed. A1 17-dim (Order 1) launched and running on server with real learning signal.
 
-**α-core, Option A 4-loop bypass, init-mean fix, M6-a.1 smoke ALL DONE through pm17.** Latest commit: `ded4f05` (pm17 remote infra + dispatch policy). Server `jdl_wsl` (Ryzen 7950X, 16 phys cores, WSL2 Ubuntu) provisioned and validated, tmux session `work` running. Mac/server both at `ded4f05` (server pull pending — see step 4 below).
+**What's done since pm17**:
+- ✅ Phase 1 B1 (20-dim features, commit `379dc74`) — f_scaredGhostChase, f_returnUrgency, f_teammateSpread. seed_weights = 0.0 (evolution discovers magnitudes).
+- ✅ Phase 1 C4 (commit `a1b5569`) — MCTS time-budget polling 0.8s/move in zoo_mcts_{heuristic,random,q_guided}.py. Submission-safe under capture.py's 1s warning.
+- ✅ A1 17-dim Order 1 launched on server 06:37 with 11-opp no-MCTS pool + `--master-seed 42 --workers 16 --init-mean-from h1test --phase both`.
+
+**A1 in flight, first 3 gens**:
+| gen | best | mean | snr | wall |
+|---|---|---|---|---|
+| 0 | 0.112 | 0.007 | 0.61 | 2796.8s |
+| 1 | 0.181 | 0.026 | 0.91 | 2895.4s |
+| 2 | 0.483 | 0.099 | 1.10 | 2926.9s |
+
+CEM learning confirmed (best 4.3× over 3 gens, snr cleared 1.0 at gen 2). Wall stable ~47-48 min/gen → ETA finish ~00:40 next day. Per-gen wall is ~2× the wiki estimate, so total ~18-19h vs planned 10h — still within overnight budget.
+
+**Server commits needed**: `git pull origin main` to get `379dc74` + `a1b5569` (pm18 B1+C4). Mac already has them. A1 does NOT need these (it's running 17-dim reflex, not 20-dim or MCTS).
 
 ## ⚠️ Next-session immediate actions
 
 Read in order:
 1. THIS file
-2. `.omc/STATUS.md` (milestone table + Critical observations)
-3. **wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline`** — the FULL pm17 plan
-4. wiki `environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl` — server how-to
+2. `.omc/STATUS.md` (milestone table + Critical observations — look for "A1 17-dim full-scale evolution learning confirmed (pm18)" and "Order 6 blocker")
+3. wiki `session-log/2026-04-16-pm18-phase1-b1-c4-done-a1-launched-learning-confirmed` (the pm18 record)
+4. **wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline`** — the FULL pm17 plan (still canonical — Orders 2-8 unchanged)
+5. wiki `environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl` — server how-to
 
-Verify server alive (~10 sec):
+**FIRST: verify A1 state (A1 was running when pm18 ended):**
 ```bash
-ssh jdl_wsl "tmux list-sessions && cd ~/projects/coding-3 && git log --oneline -2 && git pull origin main 2>&1 | tail -3"
+ssh jdl_wsl "tmux capture-pane -t work -p -S -40 | tail -25 && echo --- && pgrep -af evolve.py | head -3 && echo --- && ls experiments/artifacts/2[ab]_gen*.json 2>/dev/null && echo --- && tail -25 logs/phase2_A1_17dim_20260416-0637.log"
 ```
-Expected: `work` session present, latest commit `ded4f05`. If pulling brings new commits = server was behind.
+
+Three possible outcomes:
+- **A1 STILL RUNNING**: `pgrep` shows 17 processes, artifacts has ≥3 `2a_gen*.json` files, log tail shows recent `[evolve] ... gen=N ...` line. → Wait for completion OR checkpoint-resume for Order 2.
+- **A1 FINISHED SUCCESSFULLY**: `pgrep` shows nothing, artifacts has `2a_gen000-009.json`, `2b_gen000-019.json`, `final_weights.py`. → Archive to `experiments/artifacts/phase2_A1_17dim/`, commit log, launch Order 2.
+- **A1 CRASHED / STUCK**: log ends with Traceback / BrokenProcessPool / OOM, OR pgrep shows 17 procs but log hasn't advanced in 60+ min. → Read the error, decide fix vs restart.
+
+**THEN**: if A1 done, archive artifacts + launch Order 2 (A1+B1 20-dim, init_mean=h1test, same 11-opp pool WITHOUT mcts until Order 6 fix). If A1 still running with good trajectory, leave it and do Phase 1 follow-up (Order 6 `ZOO_MCTS_MOVE_BUDGET` env override patch — see STATUS.md Order 6 blocker row).
 
 ## What we're doing (pm17 user decision)
 
