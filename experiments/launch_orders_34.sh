@@ -78,6 +78,19 @@ echo "[launch] log = $LOG_PATH"
 echo "[launch] ETA ≈ 18h"
 echo ""
 
+# Auto-detect HOF wrappers (zoo_reflex_O2.py, zoo_reflex_O3.py, ...) in
+# minicontest/ — each represents a previously-completed Order's champion.
+# Order N+1's opponent pool must include all prior Orders' wrappers so CEM
+# evolves against the real champion history (AlphaZero-lite Red Queen).
+HOF_WRAPPERS=()
+for wrapper in minicontest/zoo_reflex_O*.py; do
+    [[ -f "$wrapper" ]] || continue
+    stem=$(basename "$wrapper" .py)
+    HOF_WRAPPERS+=("$stem")
+done
+
+echo "[launch] HOF wrappers in pool: zoo_reflex_A1 ${HOF_WRAPPERS[@]:-(none)}"
+
 .venv/bin/python experiments/evolve.py --phase both \
     --master-seed "$MASTER_SEED" \
     --workers 16 \
@@ -92,7 +105,7 @@ echo ""
         baseline baseline \
         zoo_reflex_h1test zoo_reflex_h1b zoo_reflex_h1c \
         zoo_reflex_aggressive zoo_reflex_defensive \
-        zoo_reflex_A1 \
+        zoo_reflex_A1 "${HOF_WRAPPERS[@]}" \
         zoo_minimax_ab_d2 zoo_minimax_ab_d3_opp zoo_expectimax \
         monster_rule_expert \
     --layouts defaultCapture RANDOM \
