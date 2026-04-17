@@ -25,6 +25,7 @@
 from __future__ import annotations
 
 import math
+import os
 import random
 import time
 
@@ -40,13 +41,54 @@ from zoo_features import (
 _UCB_C = math.sqrt(2)
 
 
+def _get_move_budget() -> float:
+    """Read ZOO_MCTS_MOVE_BUDGET env var, fall back to MOVE_BUDGET constant.
+
+    This allows CEM training pipelines (evolve.py run_match.py) to set a
+    short budget (e.g. 0.1s) so full-game MCTS wall stays under run_match's
+    per-game timeout of 120s. Submission runs without the env var use the
+    calibrated MOVE_BUDGET=0.8s, preserving submission-time behavior.
+    """
+    v = os.environ.get("ZOO_MCTS_MOVE_BUDGET")
+    if v is None:
+        return float(MOVE_BUDGET)
+    try:
+        parsed = float(v)
+        if parsed <= 0:
+            return float(MOVE_BUDGET)
+        return parsed
+    except (ValueError, TypeError):
+        return float(MOVE_BUDGET)
+
+
 # ---------------------------------------------------------------------------
 # createTeam factory
 # ---------------------------------------------------------------------------
 
 def createTeam(firstIndex, secondIndex, isRed,
-               first='MCTSQGuidedAgent', second='MCTSQGuidedAgent'):
-    return [eval(first)(firstIndex), eval(second)(secondIndex)]
+               first='MCTSQGuidedAgent', second='MCTSQGuidedAgent',
+               weights=None):
+    """Build two teammate MCTS agents.
+
+    Extra kwarg (pm20, mirrors zoo_reflex_tuned's protocol):
+      weights — path to JSON weights file or pre-parsed dict. When present,
+                loaded via zoo_core.load_weights_override and attached to
+                each agent as `_weights_override`. `_get_weights()` then
+                returns the override instead of seed weights. Used by
+                Path 3 heterogeneous createTeams to inject A1 champion's
+                evolved weights into the MCTS leaf evaluator.
+    """
+    agents = [eval(first)(firstIndex), eval(second)(secondIndex)]
+    if weights:
+        try:
+            from zoo_core import load_weights_override
+            override = load_weights_override(weights)
+            if override.get('w_off') or override.get('w_def'):
+                for a in agents:
+                    a._weights_override = override
+        except Exception:
+            pass  # crash-proof: bad weights silently fall back to seed
+    return agents
 
 
 # ---------------------------------------------------------------------------
@@ -164,10 +206,22 @@ class MCTSQGuidedAgent(CoreCaptureAgent):
     """
 
     def _get_weights(self):
+        """Role-appropriate weights with runtime override support.
+
+        Priority: self._weights_override (if attached) > role-split seed weights.
+        Override schema: {'w_off': {...}, 'w_def': {...}|None, 'params': {...}}.
+        w_def=None (Phase 2a shared-W) -> DEFENSE also uses w_off.
+        """
         try:
             role = TEAM.role.get(self.index, 'OFFENSE')
         except Exception:
             role = 'OFFENSE'
+        override = getattr(self, '_weights_override', None)
+        if override:
+            if role == 'DEFENSE' and override.get('w_def'):
+                return override['w_def']
+            if override.get('w_off'):
+                return override['w_off']
         return SEED_WEIGHTS_DEFENSIVE if role == 'DEFENSE' else SEED_WEIGHTS_OFFENSIVE
 
     # ----- Search internals -------------------------------------------------
@@ -250,14 +304,18 @@ class MCTSQGuidedAgent(CoreCaptureAgent):
             cur = cur.parent
 
     def _search(self, gameState):
-        """Run UCB-guided leaf search until MOVE_BUDGET deadline or MAX_ITERS.
+        """Run UCB-guided leaf search until move-budget deadline or MAX_ITERS.
 
         C4 time-budget polling (pm18): leaf-eval-only, so each iter is
         ~10× faster than heuristic rollout. Typical iter count at 0.8s
         budget ≈ 500-1000 (often saturating MAX_ITERS on simple maps).
+
+        Budget sourced from ZOO_MCTS_MOVE_BUDGET env var (pm20) when set,
+        else MOVE_BUDGET constant. Enables short training-time budgets
+        (0.1s) without touching submission-time 0.8s behavior.
         """
         turn_start = time.time()
-        deadline = turn_start + MOVE_BUDGET
+        deadline = turn_start + _get_move_budget()
         root = self._make_node(gameState, None, None)
         root.visits = 1
 
