@@ -1,6 +1,10 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-17 (pm19 — A1 complete 18.5h best 1.065; HTH validated **79% vs baseline** PASS; Order 2 A1+B1 20-dim ▶️ running; plan pivoted to performance-max queue Orders 2-4)
+**Last updated:** 2026-04-17 pm20 — M7 flatten A1 → `minicontest/20200492.py` LOCKED; Order 2 still running; **CCG expanded roadmap 17-task 3-axis plan finalized** — see wiki `decision/pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced` (authoritative pm20 plan).
+
+## pm20 single-sentence TL;DR
+
+3-axis parallel development (CEM evolution + rule-based hybrids + paradigm hybrids) with 17 tasks tracked; CCG added particle filter + opponent classifier + endgame lockout + capsule proxy camping + stochasticity; robustness-first over peak (180-agent tournament); **never discard ≥50% baseline candidates** (all go to Phase 4 round-robin).
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 

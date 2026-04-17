@@ -140,6 +140,36 @@ _H1TEST_FEAT_SEED = [
 # clarity; the vector is identical.
 _H1B_FEAT_SEED = list(_H1TEST_FEAT_SEED)
 
+def _load_a1_feat_seed():
+    """Construct a Phase 2a feature-vector seed from A1's evolved W_OFF.
+    Returns a list of length N_FEATURES in FEATURE_NAMES order (missing keys
+    default to 0.0) — or None if the weights archive is absent. Lets Orders
+    3/4 explicitly start CEM from the pm19 champion's offensive weights, a
+    genuinely different region of weight space than h1test/h1b (which are
+    identical vectors)."""
+    import importlib.util
+    candidate_paths = [
+        REPO_ROOT / "experiments" / "artifacts" / "phase2_A1_17dim" / "final_weights.py",
+        REPO_ROOT / "experiments" / "artifacts" / "phase2_A1_17dim_final_weights.py",
+    ]
+    for p in candidate_paths:
+        if not p.exists():
+            continue
+        try:
+            spec = importlib.util.spec_from_file_location("_a1_for_init", str(p))
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            w_off = getattr(mod, "W_OFF", None) or {}
+            if not isinstance(w_off, dict):
+                continue
+            return [float(w_off.get(fname, 0.0)) for fname in FEATURE_NAMES]
+        except Exception:
+            continue
+    return None
+
+
+_A1_FEAT_SEED = _load_a1_feat_seed()
+
 KNOWN_SEEDS_PHASE_2A = {
     "h1test": np.array(_H1TEST_FEAT_SEED + [0.0] * len(PARAM_NAMES)),
     "h1b":    np.array(_H1B_FEAT_SEED    + [0.0] * len(PARAM_NAMES)),
@@ -147,6 +177,10 @@ KNOWN_SEEDS_PHASE_2A = {
     # a valid choice so users can explicitly opt out of seeding for ablation.
     "zero":   None,
 }
+# Optional A1-champion seed — only exposed when the pm19 weights archive is
+# reachable at evolve.py import time. Makes Orders 3/4 CLI validation happy.
+if _A1_FEAT_SEED is not None:
+    KNOWN_SEEDS_PHASE_2A["a1"] = np.array(_A1_FEAT_SEED + [0.0] * len(PARAM_NAMES))
 
 
 def genome_dims(phase: str) -> int:

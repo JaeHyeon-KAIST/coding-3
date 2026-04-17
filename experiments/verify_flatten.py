@@ -46,6 +46,8 @@ ALLOWED_IMPORTS = {
     "numpy", "pandas",
     # typing helpers
     "typing",
+    # PEP 236 future-annotations — required for PEP 604 `|` syntax under 3.9
+    "__future__",
     # imports from same-dir (allowed since all are in minicontest/)
 }
 
@@ -145,12 +147,18 @@ def check_identity(flattened: Path, pre_flatten: Path, func_name: str = "compute
 
 
 def check_import_smoke(path: Path) -> tuple[bool, str]:
-    # run `python -c 'import <module>'` where module = stem of the file
-    # CWD must be the file's parent so imports resolve as they would at game time
+    # Import via importlib so digit-prefix module names (e.g. 20200492.py)
+    # work — Python's plain `import 20200492` is a SyntaxError.
+    # CWD must be the file's parent so intra-dir imports resolve as they
+    # would at game time (the grader invokes capture.py from minicontest/).
     module_name = path.stem
     try:
         proc = subprocess.run(
-            [str(VENV_PYTHON), "-c", f"import {module_name}"],
+            [
+                str(VENV_PYTHON),
+                "-c",
+                f"import importlib; importlib.import_module({module_name!r})",
+            ],
             cwd=str(path.parent),
             capture_output=True,
             text=True,

@@ -98,6 +98,24 @@
   },
   "hotPaths": [
     {
+      "path": "experiments/flatten.py",
+      "accessCount": 4,
+      "lastAccessed": 1776400728129,
+      "type": "file"
+    },
+    {
+      "path": "experiments/verify_flatten.py",
+      "accessCount": 3,
+      "lastAccessed": 1776400752446,
+      "type": "file"
+    },
+    {
+      "path": "experiments/evolve.py",
+      "accessCount": 3,
+      "lastAccessed": 1776401160799,
+      "type": "file"
+    },
+    {
       "path": "experiments/hth_battery.py",
       "accessCount": 2,
       "lastAccessed": 1776392216518,
@@ -107,6 +125,48 @@
       "path": "CS470_Assignment_3-260413.pdf",
       "accessCount": 1,
       "lastAccessed": 1776391729736,
+      "type": "file"
+    },
+    {
+      "path": "experiments/select_top4.py",
+      "accessCount": 1,
+      "lastAccessed": 1776400329572,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_tuned.py",
+      "accessCount": 1,
+      "lastAccessed": 1776400357318,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_core.py",
+      "accessCount": 1,
+      "lastAccessed": 1776400358129,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_features.py",
+      "accessCount": 1,
+      "lastAccessed": 1776400358595,
+      "type": "file"
+    },
+    {
+      "path": "experiments/artifacts/phase2_A1_17dim_final_weights.py",
+      "accessCount": 1,
+      "lastAccessed": 1776400454711,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1.py",
+      "accessCount": 1,
+      "lastAccessed": 1776401143388,
+      "type": "file"
+    },
+    {
+      "path": "experiments/launch_orders_34.sh",
+      "accessCount": 1,
+      "lastAccessed": 1776402402172,
       "type": "file"
     }
   ],

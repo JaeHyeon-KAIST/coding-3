@@ -212,3 +212,11 @@
 - **Pages:** pm19-ccg-hybrid-paradigm-analysis-path-1-vs-2-vs-3-mcts-offense-.md
 - **Summary:** Created new page "pm19 CCG hybrid paradigm analysis — Path 1 vs 2 vs 3 + MCTS offense feasibility"
 
+## [2026-04-17T04:27:59.482Z] ingest
+- **Pages:** session-log-2026-04-17-eee75edc.md
+- **Summary:** Auto-captured session log for 3a14827e-1c88-407a-bd0a-32efeee75edc
+
+## [2026-04-17T05:15:24.152Z] ingest
+- **Pages:** pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced.md
+- **Summary:** Created new page "pm20 expanded roadmap — 17 tasks, 3-axis development, CCG-enhanced"
+

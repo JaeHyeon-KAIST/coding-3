@@ -1,7 +1,17 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-17 (pm19 — A1 validated 79% vs baseline HTH; Order 2 launched for performance-max push with 10-day budget)
+**Last updated:** 2026-04-17 (pm20 — M7 flatten A1 → 20200492.py LOCKED; CCG expanded roadmap 17-task 3-axis plan; Order 2 still running on server)
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
+
+## pm20 roadmap pointer (authoritative)
+
+→ **`wiki decision/pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced`** has the full 17-task plan + 13-day timeline + decision gates. This STATUS.md keeps the milestone table for historical continuity but strategic intent lives in that wiki page.
+
+**pm20 headline**:
+- ✅ M7 flatten A1 → `minicontest/20200492.py` (submission candidate hedge confirmed — 80% WR 5-game smoke; verify_flatten 5/5 PASS)
+- 🔄 Orders 3/4 diversification patch ready (`zoo_reflex_A1.py` HOF wrapper + `evolve.py` `a1` init option + `launch_orders_34.sh`) — awaits server pull tomorrow
+- ✅ CCG consultation (Codex + Gemini) → 13 new tasks added (D1/D2/D3, T4 classifier, T5 particle filter, T7 specialist split, T8 stochasticity, Red Queen HOF extension, Phase 4/5, M8-M10)
+- ⏳ Order 2 (A1+B1 20-dim) still running on server, ETA ~06:00 next day
 
 ## Headline
 
