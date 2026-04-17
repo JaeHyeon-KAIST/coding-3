@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 40 pages | Last updated: 2026-04-17T03:49:45.469Z
+> 41 pages | Last updated: 2026-04-17T04:25:45.874Z
 
 ## convention
 
@@ -16,6 +16,7 @@
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
 - [ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus](adr-pm19-phase-2-scope-revision-based-on-a1-validation-ccg-conse.md) — # ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus
 - [Next-session execution plan — performance-max 6-phase pipeline](next-session-execution-plan-performance-max-6-phase-pipeline.md) — # Next-session execution plan — performance-max 6-phase pipeline
+- [pm19 CCG hybrid paradigm analysis — Path 1 vs 2 vs 3 + MCTS offense feasibility](pm19-ccg-hybrid-paradigm-analysis-path-1-vs-2-vs-3-mcts-offense-.md) — # pm19 CCG hybrid paradigm analysis — Path 1 vs 2 vs 3 + MCTS offense feasibi...
 
 ## environment
 

@@ -85,6 +85,32 @@ Three outcomes and actions:
 - Dead-end-guard: hardcoded override when in dead-end with ghost ≤ 3 (overrides reflex evaluator)
 - Deliverable: 4 variants per champion (bare / +D1 / +D2 / +D1+D2+D3)
 
+## ⚡ pm20 KEY DECISIONS (must resolve before heavy compute)
+
+### Decision 1 — Orders 2-4 are BIT-IDENTICAL as currently configured (pm19 late discovery)
+
+pm17 plan's Orders 3 (h1b init), 4 (hybrid init) would produce IDENTICAL results to Order 2 because:
+- `_H1B_FEAT_SEED = list(_H1TEST_FEAT_SEED)` in evolve.py — same vector
+- `--master-seed 42` fixed across all → identical Gaussian sampling
+- Same 11-opp pool
+- Order 4 "hybrid" option NOT implemented in `--init-mean-from` CLI
+
+**Fix options** for real diversification in Orders 3/4:
+- (a) Different `--master-seed` per Order (e.g., 1001, 2026) — trivial
+- (b) Expand `KNOWN_SEEDS_PHASE_2A` + `--init-mean-from` with `"a1"` option (seed from A1 final_weights)
+- (c) HOF pool rotation — create `zoo_reflex_A1.py` wrapper, add to Order 3+ pool so evolution must beat A1 (AlphaZero-lite)
+
+Combo (a+c) recommended: different seeds + HOF pool → genuine champion diversity for Phase 4 ELO meaningfulness.
+
+### Decision 2 — Hybrid paradigm (Path 3) trial?
+
+CCG analysis (wiki `decision/pm19-ccg-hybrid-paradigm-analysis-path-1-vs-2-vs-3-mcts-offen`):
+- **Codex**: Path 3 tightly-scoped with hard kill. 1-2 days engineering + 18h CEM.
+- **Gemini**: Stick with Path 1, polish report. Overengineering risk.
+- **Claude synthesis**: given user's performance-max + 10-day budget, lean Codex. Prep: M7 flatten A1 first to LOCK submission candidate, then attempt Path 3 with clear abort criteria.
+
+**pm20 action**: after Order 2 HTH, decide: (A) Path 3 trial, (B) A1-only polish, (C) other.
+
 **Phase 4 tournament** (post Orders 2-4): round-robin ELO, ~1-2h server wall.
 
 **Phase 5 multi-seed** (server + Mac): top-3 × 200 games × 10 seeds × 4 layouts. ~1h server + 1-2h Mac cross-platform check.

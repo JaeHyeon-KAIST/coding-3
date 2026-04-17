@@ -208,3 +208,7 @@
 - **Pages:** adr-pm19-phase-2-scope-revision-based-on-a1-validation-ccg-conse.md
 - **Summary:** Created new page "ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus"
 
+## [2026-04-17T04:25:45.855Z] ingest
+- **Pages:** pm19-ccg-hybrid-paradigm-analysis-path-1-vs-2-vs-3-mcts-offense-.md
+- **Summary:** Created new page "pm19 CCG hybrid paradigm analysis — Path 1 vs 2 vs 3 + MCTS offense feasibility"
+
