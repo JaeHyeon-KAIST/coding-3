@@ -1,6 +1,6 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-16 (pm18 — Phase 1 B1+C4 done, committed; A1 17-dim Order 1 ▶️ running on server, gens 0-2 showing CEM learning 0.112→0.483)
+**Last updated:** 2026-04-17 (pm19 — A1 complete 18.5h best 1.065; HTH validated **79% vs baseline** PASS; Order 2 A1+B1 20-dim ▶️ running; plan pivoted to performance-max queue Orders 2-4)
 
 This is the **first thing to read** when resuming work on this project. STATUS.md and STRATEGY.md have more detail; this file makes you productive in 5 minutes.
 
@@ -55,22 +55,45 @@ CEM learning confirmed (best 4.3× over 3 gens, snr cleared 1.0 at gen 2). Wall 
 
 Read in order:
 1. THIS file
-2. `.omc/STATUS.md` (milestone table + Critical observations — look for "A1 17-dim full-scale evolution learning confirmed (pm18)" and "Order 6 blocker")
-3. wiki `session-log/2026-04-16-pm18-phase1-b1-c4-done-a1-launched-learning-confirmed` (the pm18 record)
-4. **wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline`** — the FULL pm17 plan (still canonical — Orders 2-8 unchanged)
-5. wiki `environment/remote-compute-infra-wsl2-ryzen-7950x-server-jdl-wsl` — server how-to
+2. `.omc/STATUS.md` (milestone table — look for "A1 HTH validation (pm19)" and "CCG plan review (pm19)")
+3. wiki `session-log/2026-04-17-pm19-a1-validated-order-2-launched-performance-max-pivot` (pm19 record — CCG advisor outputs archived there)
+4. (optional) wiki `decision/next-session-execution-plan-performance-max-6-phase-pipeline` — superseded by pm19 scope tweaks; keep only Orders 2-4 queue, drop Orders 5-7 per CCG consensus unless buffer remains
 
-**FIRST: verify A1 state (A1 was running when pm18 ended):**
+**FIRST: verify Order 2 state** (launched 2026-04-17 11:55, ~18h expected):
 ```bash
-ssh jdl_wsl "tmux capture-pane -t work -p -S -40 | tail -25 && echo --- && pgrep -af evolve.py | head -3 && echo --- && ls experiments/artifacts/2[ab]_gen*.json 2>/dev/null && echo --- && tail -25 logs/phase2_A1_17dim_20260416-0637.log"
+ssh jdl_wsl "tmux capture-pane -t work -p -S -40 | tail -25 && echo --- && pgrep -af evolve.py | wc -l && echo --- && ls experiments/artifacts/2[ab]_gen*.json 2>/dev/null | head -30 && echo --- && tail -25 logs/phase2_A1_B1_20dim_*.log"
 ```
 
-Three possible outcomes:
-- **A1 STILL RUNNING**: `pgrep` shows 17 processes, artifacts has ≥3 `2a_gen*.json` files, log tail shows recent `[evolve] ... gen=N ...` line. → Wait for completion OR checkpoint-resume for Order 2.
-- **A1 FINISHED SUCCESSFULLY**: `pgrep` shows nothing, artifacts has `2a_gen000-009.json`, `2b_gen000-019.json`, `final_weights.py`. → Archive to `experiments/artifacts/phase2_A1_17dim/`, commit log, launch Order 2.
-- **A1 CRASHED / STUCK**: log ends with Traceback / BrokenProcessPool / OOM, OR pgrep shows 17 procs but log hasn't advanced in 60+ min. → Read the error, decide fix vs restart.
+Three outcomes and actions:
+- **RUNNING**: `pgrep` shows ≥17 processes. Wait or work on Phase 3 D-series coding on Mac in parallel.
+- **FINISHED**: `pgrep` shows 0, artifacts has 2a_gen000-009 + 2b_gen000-019 + `final_weights.py`. → Archive to `experiments/artifacts/phase2_A1_B1_20dim/`, run HTH battery vs baseline+monster via `experiments/hth_battery.py`, compare to A1's 79% baseline WR. If Order 2 > A1: update champion. Then launch Order 3 (A2+B1 h1b init).
+- **CRASHED**: check log for Traceback. Fix, re-archive any partial artifacts, decide restart vs skip.
 
-**THEN**: if A1 done, archive artifacts + launch Order 2 (A1+B1 20-dim, init_mean=h1test, same 11-opp pool WITHOUT mcts until Order 6 fix). If A1 still running with good trajectory, leave it and do Phase 1 follow-up (Order 6 `ZOO_MCTS_MOVE_BUDGET` env override patch — see STATUS.md Order 6 blocker row).
+**Phase 2 queue status (pm19 revised — Orders 5/7 dropped per CCG low-ROI)**:
+- A1 (17-dim h1test) ✅ fitness 1.065, baseline 79% PASS
+- Order 2 (A1+B1 20-dim h1test init) ▶️ running
+- Order 3 (A2+B1 h1b init) — queued after Order 2
+- Order 4 (A5+B1 (h1test⊕h1b)/2 hybrid init) — queued after Order 3
+- Orders 5/7 (minimax / expectimax containers) — DROPPED (low ROI per Codex + Gemini consensus)
+- Order 6 (MCTS container) — DROPPED (MCTS wall >> 120s timeout + machine-dependent time polling)
+- Order 8 (h1c init) — stretch IF Orders 2-4 all underwhelm
+
+**Phase 3 D-series coding plan** (Mac, ~10-12h, parallel to server Orders 2-4):
+- D1 role-swap: dynamic OFFENSE↔DEFENSE swap on (carrying ≥ threshold → return) + (invaders ≥ 2 → both defensive)
+- D2 capsule timing: eat capsule only when (a) ghost_dist ≤ 3 AND carrying ≥ 5, OR (b) opponents ate our capsule
+- D3 endgame mode: last 100 moves, leading → defend; behind → all-in rush ignoring ghost penalty
+- Dead-end-guard: hardcoded override when in dead-end with ghost ≤ 3 (overrides reflex evaluator)
+- Deliverable: 4 variants per champion (bare / +D1 / +D2 / +D1+D2+D3)
+
+**Phase 4 tournament** (post Orders 2-4): round-robin ELO, ~1-2h server wall.
+
+**Phase 5 multi-seed** (server + Mac): top-3 × 200 games × 10 seeds × 4 layouts. ~1h server + 1-2h Mac cross-platform check.
+
+**Phase 6 submission** (Mac, ~15-20h report + misc):
+- M7 flatten_agent AST implementation (skeleton at `experiments/select_top4.py`)
+- M8 output.csv (auto via capture.py 4-loop)
+- M9 ICML 2+ page report with 4+ ablation figures
+- M10 package zip with sha256
 
 ## What we're doing (pm17 user decision)
 

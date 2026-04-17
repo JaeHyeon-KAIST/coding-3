@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776261851024,
+  "lastScanned": 1776386302726,
   "projectRoot": "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3",
   "techStack": {
     "languages": [],
@@ -27,7 +27,10 @@
     "mainDirectories": [
       "docs"
     ],
-    "gitBranches": null
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
   },
   "customNotes": [
     {
@@ -48,7 +51,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 1,
-      "lastAccessed": 1776261851016,
+      "lastAccessed": 1776386302719,
       "keyFiles": [
         "AI_USAGE.md"
       ]
@@ -56,21 +59,21 @@
     "experiments": {
       "path": "experiments",
       "purpose": null,
-      "fileCount": 6,
-      "lastAccessed": 1776261851016,
+      "fileCount": 7,
+      "lastAccessed": 1776386302720,
       "keyFiles": [
         "README.md",
         "evolve.py",
         "run_match.py",
         "select_top4.py",
-        "tournament.py"
+        "single_game.py"
       ]
     },
     "icml2021_style": {
       "path": "icml2021_style",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1776261851017,
+      "lastAccessed": 1776386302720,
       "keyFiles": [
         "algorithm.sty",
         "algorithmic.sty",
@@ -83,7 +86,7 @@
       "path": "minicontest",
       "purpose": null,
       "fileCount": 40,
-      "lastAccessed": 1776261851017,
+      "lastAccessed": 1776386302721,
       "keyFiles": [
         "baseline.py",
         "capture.py",
@@ -95,63 +98,15 @@
   },
   "hotPaths": [
     {
-      "path": "experiments/evolve.py",
-      "accessCount": 15,
-      "lastAccessed": 1776289561800,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_features.py",
-      "accessCount": 5,
-      "lastAccessed": 1776289557175,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_mcts_heuristic.py",
-      "accessCount": 4,
-      "lastAccessed": 1776289258063,
-      "type": "file"
-    },
-    {
-      "path": "experiments/run_match.py",
-      "accessCount": 3,
-      "lastAccessed": 1776270417605,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_mcts_random.py",
-      "accessCount": 3,
-      "lastAccessed": 1776289207732,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_mcts_q_guided.py",
-      "accessCount": 3,
-      "lastAccessed": 1776289213686,
-      "type": "file"
-    },
-    {
-      "path": ".claude/settings.local.json",
+      "path": "experiments/hth_battery.py",
       "accessCount": 2,
-      "lastAccessed": 1776287271029,
+      "lastAccessed": 1776392216518,
       "type": "file"
     },
     {
-      "path": "experiments/single_game.py",
-      "accessCount": 2,
-      "lastAccessed": 1776289257383,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/capture.py",
+      "path": "CS470_Assignment_3-260413.pdf",
       "accessCount": 1,
-      "lastAccessed": 1776270292221,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_core.py",
-      "accessCount": 1,
-      "lastAccessed": 1776288705364,
+      "lastAccessed": 1776391729736,
       "type": "file"
     }
   ],
