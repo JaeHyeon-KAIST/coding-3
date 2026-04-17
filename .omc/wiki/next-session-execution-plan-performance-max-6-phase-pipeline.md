@@ -12,6 +12,8 @@ schemaVersion: 1
 
 # Next-session execution plan — performance-max 6-phase pipeline
 
+> ⚠️ **PARTIALLY SUPERSEDED pm19 (2026-04-17)** — See `decision/adr-pm19-phase-2-scope-revision-based-on-a1-validation-ccg-conse` for current scope. A1 HTH validation (baseline 79%) + CCG consensus dropped Orders 5 (minimax), 6 (MCTS), 7 (expectimax). Current queue: Orders 1 ✅, 2 ▶️, 3, 4 only. Orders 5-7 dropped, Order 8 (h1c) stretch-only. Dispatch policy also tightened pm19: server default for all ≥10min compute, Mac coding-only (user directive). Phase 3-6 structure still canonical; Phase 2 roster is the delta.
+
 # Next-session execution plan — performance-max 6-phase
 
 **Decision (pm17 end)**: user has time slack, prioritizes ranking max (extra 30pt + code 40pt). Run the full 6-phase plan, NOT the minimal "M6-both-full only" path.

@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 37 pages | Last updated: 2026-04-17T02:59:07.568Z
+> 40 pages | Last updated: 2026-04-17T03:49:45.469Z
 
 ## convention
 
@@ -14,6 +14,7 @@
 ## decision
 
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
+- [ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus](adr-pm19-phase-2-scope-revision-based-on-a1-validation-ccg-conse.md) — # ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus
 - [Next-session execution plan — performance-max 6-phase pipeline](next-session-execution-plan-performance-max-6-phase-pipeline.md) — # Next-session execution plan — performance-max 6-phase pipeline
 
 ## environment
@@ -23,9 +24,11 @@
 ## pattern
 
 - [Option α test plan (T1-T4) for evolve.py parallelization + resume](option-test-plan-t1-t4-for-evolve-py-parallelization-resume.md) — # Option α test plan (T1-T4) for evolve.py parallelization + resume
+- [Server Order-queue operational runbook — launch/archive/verify cycle](server-order-queue-operational-runbook-launch-archive-verify-cyc.md) — # Server Order-queue operational runbook — launch/archive/verify cycle
 
 ## reference
 
+- [A1 champion weights HTH profile + strategy interpretation (pm19)](a1-champion-weights-hth-profile-strategy-interpretation-pm19.md) — # A1 champion weights HTH profile + strategy interpretation (pm19)
 - [Glossary — CS470 A3 project terms](glossary-cs470-a3-project-terms.md) — # Glossary — CS470 A3 project terms
 
 ## session-log
