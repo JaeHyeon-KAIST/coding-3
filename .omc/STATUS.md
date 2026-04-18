@@ -1,14 +1,27 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm22 end — Order 3 Phase 2b gen 6 done (best_ever=0.796, A1's 1.065 target 근접). Phase 2a best_ever 0.716 > A1 Phase 2a. 80 rc candidates 수집 완료. pm23 first action: `.omc/plans/pm23-handoff.md`.
+**Last updated:** 2026-04-19 pm23 mid — rc02-rc08 Tier 1 구현·smoke 완료. **rc02 Tarjan AP 40/40 (100%) vs baseline — A1 대비 +17.5pp**. Order 3 Phase 2b gen 7 (best=0.788) 서버 자동 진행 중.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
-## 🚨 pm23 entry point (authoritative)
+## 🚨 pm24 entry point (authoritative)
 
-→ **`.omc/plans/pm23-handoff.md`** — pm22 → pm23 handoff. 80 후보 implementation 시작.
-→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** (Tier 1~5 분류, 우선순위).
+→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** + pm23 변경 로그 (rc02-rc08 status).
+→ **`.omc/wiki/2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md`** — pm23 session log with full HTH table.
 
-**Autopilot** (서버 Order 3/4 자동) 계속 돌림. cron id `016b37d5` (pm22 session과 함께 소멸, pm23 재생성 필요).
+## pm23 headline (rc02-rc08 sprint)
+
+40-game HTH (20 Red + 20 Blue vs baseline):
+| Agent | Red | Blue | Total | WR | Notes |
+|---|---|---|---|---|---|
+| **rc02** Tarjan AP | 20/20 | 20/20 | **40/40** | **100%** 🥇 | Beats A1 by ~17.5pp |
+| **rc03** Dead-end trap | 20/20 | 18/20 | 38/40 | 95% | — |
+| **rc04** Hungarian v2 | 19/20 | 16/20 | 35/40 | 87.5% | v1 failed 0/4, v2 fix shipped |
+| **rc05** Prospect-theory | 18/20 | 15/20 | 33/40 | 82.5% | Matches A1 |
+| **rc06** Border denial | 15/20 | 15/20 | 30/40 | 75% | — |
+| **rc08** Dual-invader lane | 18/20 | 19/20 +1T | 37/40 +T | 92.5%+ | 2nd strongest new |
+| A1 reference (pm20) | | | — | **82.5%** | — |
+
+**Autopilot** cron `fc249310` re-armed for this session. Server Order 3 Phase 2b gen 7 observed (best=0.788), ~13 gens to Order 3 complete, ETA ~12:30 KST 2026-04-19.
 
 ## pm21 headline (autopilot gains)
 

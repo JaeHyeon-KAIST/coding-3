@@ -216,8 +216,9 @@
   - **rc03** Dead-end trap: **38/40 = 95%** (Red 20/20, Blue 18/20).
   - **rc04** Hungarian conflict-only v2: **35/40 = 87.5%** (Red 19/20, Blue 16/20).
   - **rc05** Prospect-theory risk: 40-game pending.
-  - **rc06** Border food denial: 40-game pending.
+  - **rc06** Border food denial: **30/40 = 75%** (Red 15/20, Blue 15/20 + 3T).
   - **rc07** Kamikaze: SKIPPED pm23 (high-risk; revisit Day 2+).
-  - **rc08** Lane assignment dual-invader: 40-game pending.
-  - Baseline reference: A1 champion = 82.5% (pm20 hth_t4 Red+Blue). **rc02 > A1 by ~17.5pp**.
+  - **rc08** Dual-invader lane: **37/40 + 1T = 92.5%+** (Red 18/20, Blue 19/20 + 1T).
+  - Baseline reference: A1 champion = 82.5% (pm20 hth_t4 Red+Blue).
+  - **Top 2 new candidates: rc02 (100%) and rc08 (92.5%+) both exceed A1.**
   - All implemented candidates pass 30% threshold → Phase 4 round-robin pool 포함.
