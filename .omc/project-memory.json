@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776386302726,
+  "lastScanned": 1776488650329,
   "projectRoot": "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3",
   "techStack": {
     "languages": [],
@@ -51,7 +51,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 1,
-      "lastAccessed": 1776386302719,
+      "lastAccessed": 1776488650322,
       "keyFiles": [
         "AI_USAGE.md"
       ]
@@ -59,21 +59,21 @@
     "experiments": {
       "path": "experiments",
       "purpose": null,
-      "fileCount": 7,
-      "lastAccessed": 1776386302720,
+      "fileCount": 12,
+      "lastAccessed": 1776488650323,
       "keyFiles": [
         "README.md",
         "evolve.py",
-        "run_match.py",
-        "select_top4.py",
-        "single_game.py"
+        "flatten.py",
+        "hth_agent_battery.py",
+        "hth_battery.py"
       ]
     },
     "icml2021_style": {
       "path": "icml2021_style",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1776386302720,
+      "lastAccessed": 1776488650323,
       "keyFiles": [
         "algorithm.sty",
         "algorithmic.sty",
@@ -85,18 +85,30 @@
     "minicontest": {
       "path": "minicontest",
       "purpose": null,
-      "fileCount": 40,
-      "lastAccessed": 1776386302721,
+      "fileCount": 51,
+      "lastAccessed": 1776488650323,
       "keyFiles": [
+        "20200492.py",
         "baseline.py",
         "capture.py",
         "captureAgents.py",
-        "captureGraphicsDisplay.py",
-        "distanceCalculator.py"
+        "captureGraphicsDisplay.py"
       ]
     }
   },
   "hotPaths": [
+    {
+      "path": "minicontest/zoo_mcts_q_guided.py",
+      "accessCount": 6,
+      "lastAccessed": 1776426665096,
+      "type": "file"
+    },
+    {
+      "path": "experiments/evolve.py",
+      "accessCount": 6,
+      "lastAccessed": 1776428448637,
+      "type": "file"
+    },
     {
       "path": "experiments/flatten.py",
       "accessCount": 4,
@@ -110,15 +122,87 @@
       "type": "file"
     },
     {
-      "path": "experiments/evolve.py",
+      "path": "experiments/hth_battery.py",
       "accessCount": 3,
-      "lastAccessed": 1776401160799,
+      "lastAccessed": 1776425584250,
       "type": "file"
     },
     {
-      "path": "experiments/hth_battery.py",
+      "path": "experiments/launch_orders_34.sh",
+      "accessCount": 3,
+      "lastAccessed": 1776465037690,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1.py",
       "accessCount": 2,
-      "lastAccessed": 1776392216518,
+      "lastAccessed": 1776538949837,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_core.py",
+      "accessCount": 2,
+      "lastAccessed": 1776538950841,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_features.py",
+      "accessCount": 2,
+      "lastAccessed": 1776538951390,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_tuned.py",
+      "accessCount": 2,
+      "lastAccessed": 1776538969551,
+      "type": "file"
+    },
+    {
+      "path": "experiments/artifacts/phase2_A1_17dim_final_weights.py",
+      "accessCount": 2,
+      "lastAccessed": 1776538970137,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_D1.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539019363,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_D2.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539019766,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_D3.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539020540,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_D13.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539020911,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_T4.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539021653,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_A1_T5.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539022041,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc04.py",
+      "accessCount": 2,
+      "lastAccessed": 1776539792638,
       "type": "file"
     },
     {
@@ -134,39 +218,69 @@
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_reflex_tuned.py",
+      "path": "experiments/make_hof_wrapper.py",
       "accessCount": 1,
-      "lastAccessed": 1776400357318,
+      "lastAccessed": 1776403350163,
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_core.py",
+      "path": "experiments/hth_agent_battery.py",
       "accessCount": 1,
-      "lastAccessed": 1776400358129,
+      "lastAccessed": 1776425629876,
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_features.py",
+      "path": "minicontest/zoo_hybrid_mcts_reflex.py",
       "accessCount": 1,
-      "lastAccessed": 1776400358595,
+      "lastAccessed": 1776426725305,
       "type": "file"
     },
     {
-      "path": "experiments/artifacts/phase2_A1_17dim_final_weights.py",
+      "path": "minicontest/zoo_belief.py",
       "accessCount": 1,
-      "lastAccessed": 1776400454711,
+      "lastAccessed": 1776430239559,
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_reflex_A1.py",
+      "path": "minicontest/zoo_reflex_h1b.py",
       "accessCount": 1,
-      "lastAccessed": 1776401143388,
+      "lastAccessed": 1776538950479,
       "type": "file"
     },
     {
-      "path": "experiments/launch_orders_34.sh",
+      "path": "minicontest/20200492.py",
       "accessCount": 1,
-      "lastAccessed": 1776402402172,
+      "lastAccessed": 1776539099634,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc02.py",
+      "accessCount": 1,
+      "lastAccessed": 1776539285287,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc03.py",
+      "accessCount": 1,
+      "lastAccessed": 1776539535263,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc05.py",
+      "accessCount": 1,
+      "lastAccessed": 1776539866003,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc06.py",
+      "accessCount": 1,
+      "lastAccessed": 1776539989943,
+      "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc08.py",
+      "accessCount": 1,
+      "lastAccessed": 1776540108846,
       "type": "file"
     }
   ],

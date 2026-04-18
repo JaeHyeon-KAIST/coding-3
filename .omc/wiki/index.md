@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 42 pages | Last updated: 2026-04-17T05:15:24.178Z
+> 46 pages | Last updated: 2026-04-18T18:58:45.686Z
 
 ## convention
 
@@ -48,6 +48,8 @@
 - [2026-04-16 pm16 — M6-a.1 smoke: CEM learns (best 0.16→0.77 in 4 gens)](2026-04-16-pm16-m6-a-1-smoke-cem-learns-best-0-16-0-77-in-4-gens.md) — # 2026-04-16 pm16 — M6-a.1 smoke: CEM learns (best 0.16→0.77 in 4 gens)
 - [2026-04-16 - pm18 Phase 1 B1+C4 done + A1 launched learning confirmed](2026-04-16-pm18-phase-1-b1-c4-done-a1-launched-learning-confirme.md) — # 2026-04-16 - pm18 Phase 1 B1+C4 done + A1 launched learning confirmed
 - [2026-04-17 pm19 A1 validated baseline 79 Order 2 launched performance-max pivot](2026-04-17-pm19-a1-validated-baseline-79-order-2-launched-perfor.md) — # 2026-04-17 pm19 A1 validated baseline 79 Order 2 launched performance-max p...
+- [2026-04-19 - pm22 rc-pool 80 candidates 수집 + autopilot Phase 2b 진행](2026-04-19-pm22-rc-pool-80-candidates-autopilot-phase-2b.md) — # 2026-04-19 - pm22 rc-pool 80 candidates 수집 + autopilot Phase 2b 진행
+- [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-2437996d.md) — # Session Log 2026-04-15
@@ -64,3 +66,5 @@
 - [Session Log 2026-04-15](session-log-2026-04-15-cf5242cf.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-dd721afb.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-17](session-log-2026-04-17-eee75edc.md) — # Session Log 2026-04-17
+- [Session Log 2026-04-18](session-log-2026-04-18-9985ce96.md) — # Session Log 2026-04-18
+- [Session Log 2026-04-18](session-log-2026-04-18-f3e8c591.md) — # Session Log 2026-04-18

@@ -1,11 +1,14 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-18 (pm21 → **pm22 AUTOPILOT handoff**) — Order 2 HTH 81.5% (A1 kept as submission, O2 pool). Order 3 running, autopilot stopped at session end. pm22 resumes autopilot per `.omc/plans/pm22-autopilot-resume.md`.
+**Last updated:** 2026-04-19 pm22 end — Order 3 Phase 2b gen 6 done (best_ever=0.796, A1's 1.065 target 근접). Phase 2a best_ever 0.716 > A1 Phase 2a. 80 rc candidates 수집 완료. pm23 first action: `.omc/plans/pm23-handoff.md`.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
-## 🚨 pm22 entry point (authoritative)
+## 🚨 pm23 entry point (authoritative)
 
-→ **`.omc/plans/pm22-autopilot-resume.md`** — 5-step handoff to resume autopilot in fresh session. Contains state detection, cron re-arm, S1 manual pipeline, hard-stops at Phase 4.
+→ **`.omc/plans/pm23-handoff.md`** — pm22 → pm23 handoff. 80 후보 implementation 시작.
+→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** (Tier 1~5 분류, 우선순위).
+
+**Autopilot** (서버 Order 3/4 자동) 계속 돌림. cron id `016b37d5` (pm22 session과 함께 소멸, pm23 재생성 필요).
 
 ## pm21 headline (autopilot gains)
 

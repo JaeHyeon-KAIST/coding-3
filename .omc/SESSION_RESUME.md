@@ -1,13 +1,21 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-18 pm21 end — Order 2 complete (HTH baseline 81.5% marginal over A1 — A1 kept as submission, O2 added to pool). Order 3 running on server (launched 13:14 KST). **pm22 (next session) is AUTOPILOT RESUME — see `.omc/plans/pm22-autopilot-resume.md`** for 5-step startup.
+**Last updated:** 2026-04-19 pm22 end — Order 3 Phase 2b gen 6 (best_ever=0.796). Phase 2a completed with best_ever 0.716 > A1. 80 rc candidates pool 수집 완료. pm23 실제 구현 시작 예정.
 
-## pm22 TL;DR (AUTOPILOT RESUME MODE)
+## pm23 TL;DR (CANDIDATE IMPLEMENTATION START)
 
-- Server auto-orchestration: Order 3 → Order 4, rule-based decisions at each HTH
-- **STOPS** at S2 (all Orders done) — Phase 4 tournament is MANUAL per user directive
-- First action: read `.omc/plans/pm22-autopilot-resume.md` → SSH check → re-arm 30-min cron
-- If Order already done when pm22 starts: run S1 pipeline manually (in handoff doc)
+- **pm22 주요 성과**: Round-robin 후보 80개 수집 (Codex 18 + Gemini 17 + 기존 50 + user 아이디어). `rc-pool.md`에 마스터 목록.
+- **pm23 할 일**: Tier 1 rc01 (D-series) 부터 Mac에서 실제 구현.
+- **서버 상태**: Order 3 진행 중, autopilot cron 재생성 필요.
+- **First actions**: `.omc/plans/pm23-handoff.md` 읽기 → `.omc/plans/rc-pool.md` 훑기 → 서버 상태 체크 → cron 재생성 → rc01 시작.
+
+## pm22 TL;DR (historical)
+
+- Autopilot cron으로 Order 3 자동 실행 (Phase 2a 완료, Phase 2b gen 6/20 진행 중)
+- 후보군 총 정리 세션 (코드 구현 X)
+- CCG advisor (Codex + Gemini) 사용해 추가 후보 35개 수집
+- `rc##` naming 도입 (pm은 세션 타임라인, rc는 작업 항목)
+- 문서 신규 2개: `rc-pool.md`, `pm23-handoff.md`
 
 ## pm20 TL;DR (historical)
 

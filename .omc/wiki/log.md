@@ -220,3 +220,23 @@
 - **Pages:** pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced.md
 - **Summary:** Created new page "pm20 expanded roadmap — 17 tasks, 3-axis development, CCG-enhanced"
 
+## [2026-04-18T05:01:43.351Z] ingest
+- **Pages:** pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md
+- **Summary:** Created new page "pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff"
+
+## [2026-04-18T05:04:05.859Z] ingest
+- **Pages:** session-log-2026-04-18-f3e8c591.md
+- **Summary:** Auto-captured session log for e16e69a3-1f2d-4274-8787-ddc2f3e8c591
+
+## [2026-04-18T18:13:42.286Z] ingest
+- **Pages:** session-log-2026-04-18-9985ce96.md
+- **Summary:** Auto-captured session log for dbc4da73-e298-4e4a-a872-21f69985ce96
+
+## [2026-04-18T18:58:45.666Z] ingest
+- **Pages:** 2026-04-19-pm22-rc-pool-80-candidates-autopilot-phase-2b.md
+- **Summary:** Created new page "2026-04-19 - pm22 rc-pool 80 candidates 수집 + autopilot Phase 2b 진행"
+
+## [2026-04-18T19:00:04.999Z] ingest
+- **Pages:** session-log-2026-04-18-98627e94.md
+- **Summary:** Auto-captured session log for c47117bb-fc9b-4d07-9e77-665d98627e94
+
