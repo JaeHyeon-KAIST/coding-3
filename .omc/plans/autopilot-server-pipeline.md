@@ -137,39 +137,23 @@ sleep 5 && ssh jdl_wsl "tmux capture-pane -t work -p | tail -5 && pgrep -af evol
 
 Expect 17-18 processes. If 0/1, launch failed — PushNotification error + diagnose.
 
-#### S2: All Orders done → Phase 4 tournament
+#### S2: All Orders done → STOP + notify (pm21 user directive: Phase 4 is MANUAL)
 
-Launch round-robin across ALL candidates:
-- A1, Order 2/3/4 champion wrappers + zoo_reflex_A1 + zoo_reflex_O{2,3,4}
-- Mac-generated hybrids: zoo_reflex_A1_{D1,D2,D3,D13,T4,T5}
+User decision (pm21): **Do NOT auto-launch Phase 4 round-robin tournament**.
+Phase 4 needs human kick-off so user can review candidate pool composition,
+decide opponent pool composition, and pick tournament parameters (seeds,
+layouts, game count). Round-robin is where "important judgment" starts.
 
-```bash
-ssh jdl_wsl "cd ~/projects/coding-3 && git pull origin main 2>&1 | tail -3 && \
-  .venv/bin/python experiments/tournament.py \
-    --agents zoo_reflex_A1 zoo_reflex_O2 zoo_reflex_O3 zoo_reflex_O4 \
-             zoo_reflex_A1_D1 zoo_reflex_A1_D2 zoo_reflex_A1_D3 \
-             zoo_reflex_A1_D13 zoo_reflex_A1_T4 zoo_reflex_A1_T5 \
-    --anchor baseline --layouts defaultCapture RANDOM \
-    --seeds 101 202 303 404 505 --workers 16 \
-    --out experiments/artifacts/phase4_tournament.csv 2>&1 | tee logs/phase4_tournament.log | tail -20"
-```
+When S2 detected (all 3 Orders 2/3/4 archived):
+1. Run final summary: list all candidates ready for Phase 4, with WR results.
+2. PushNotification: "All Orders done. Phase 4 manual. Run `bash experiments/launch_phase4.sh` (to be written) when ready."
+3. CronDelete — autopilot done, no more auto-action.
+4. State file: stage="S2_awaiting_human_phase4".
 
-(May need to adapt to actual tournament.py CLI — check arg compatibility first.)
+#### S3: Reserved (not used in pm21)
 
-**S2 commit**: copy phase4_tournament.csv back to Mac, commit.
-
-```bash
-scp jdl_wsl:~/projects/coding-3/experiments/artifacts/phase4_tournament.csv experiments/artifacts/
-```
-
-PushNotification: "Phase 4 complete. Top-3: [list]"
-
-#### S3: Tournament done → terminate
-
-```
-CronDelete {cron_id}
-PushNotification "🎉 Autopilot pipeline complete. Phase 4 results in experiments/artifacts/phase4_tournament.csv. Next: Phase 5 multi-seed top-3 validation (manual)."
-```
+S3 is no longer reached by autopilot per pm21 user directive. User manually
+triggers Phase 4 → Phase 5 → M7-M10 pipeline in separate sessions.
 
 ---
 
