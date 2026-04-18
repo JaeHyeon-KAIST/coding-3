@@ -222,3 +222,12 @@
   - Baseline reference: A1 champion = 82.5% (pm20 hth_t4 Red+Blue).
   - **Top 2 new candidates: rc02 (100%) and rc08 (92.5%+) both exceed A1.**
   - All implemented candidates pass 30% threshold → Phase 4 round-robin pool 포함.
+- **2026-04-19 pm23 Day 2 (rc09/rc11/rc15/rc16/rc17/rc19) 40-game HTH**:
+  - **rc09** 24-dim features extension: **37/40 = 92.5%**.
+  - **rc11** Border juggling (anti-suicide): **35/40 = 87.5%**.
+  - **rc15** A1+rc02+D13 ensemble voting: **38/40 = 95%**.
+  - **rc16** Voronoi territorial control: **40/40 = 100%** 🥇 (tied with rc02).
+  - **rc17** Influence map (squared-inverse field): 34/40 = 85%.
+  - **rc19** Phase-conditional weights (opening/mid/endgame): **37/40 = 92.5%**.
+  - **rc18** History features — **FAILED 1/4, dropped**. Anti-pattern penalties too aggressive; revisit with softer coefficients.
+  - **pm23 총합 (12 rc new in one session, 2 committed at 100%)**: rc02, rc16 공동 1위; rc15, rc03 95%; rc19, rc09, rc08 92.5%; rc04, rc11 87.5%; rc17 85%; rc05 82.5%; rc06 75%.

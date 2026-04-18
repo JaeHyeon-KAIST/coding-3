@@ -18,7 +18,13 @@
 | **rc04** Hungarian v2 | 19/20 | 16/20 | 35/40 | 87.5% | v1 failed 0/4, v2 fix shipped |
 | **rc05** Prospect-theory | 18/20 | 15/20 | 33/40 | 82.5% | Matches A1 |
 | **rc06** Border denial | 15/20 | 15/20 | 30/40 | 75% | — |
-| **rc08** Dual-invader lane | 18/20 | 19/20 +1T | 37/40 +T | 92.5%+ | 2nd strongest new |
+| **rc08** Dual-invader lane | 18/20 | 19/20 +1T | 37/40 +T | 92.5%+ | — |
+| **rc09** 24-dim features | 20/20 | 17/20 | 37/40 | 92.5% | — |
+| **rc11** Border juggling | 18/20 | 17/20 | 35/40 | 87.5% | — |
+| **rc15** A1+rc02+D13 ensemble | 18/20 | 20/20 | 38/40 | 95% | — |
+| **rc16** Voronoi territory | 20/20 | 20/20 | **40/40** | **100%** 🥇 | Tied with rc02 |
+| **rc17** Influence map | 16/20 | 18/20 | 34/40 | 85% | — |
+| **rc19** Phase-conditional | 19/20 | 18/20 | 37/40 | 92.5% | — |
 | A1 reference (pm20) | | | — | **82.5%** | — |
 
 **Autopilot** cron `fc249310` re-armed for this session. Server Order 3 Phase 2b gen 7 observed (best=0.788), ~13 gens to Order 3 complete, ETA ~12:30 KST 2026-04-19.
