@@ -1,17 +1,22 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-17 (pm20 — M7 flatten A1 → 20200492.py LOCKED; CCG expanded roadmap 17-task 3-axis plan; Order 2 still running on server)
+**Last updated:** 2026-04-18 (pm21 → **pm22 AUTOPILOT handoff**) — Order 2 HTH 81.5% (A1 kept as submission, O2 pool). Order 3 running, autopilot stopped at session end. pm22 resumes autopilot per `.omc/plans/pm22-autopilot-resume.md`.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
-## pm20 roadmap pointer (authoritative)
+## 🚨 pm22 entry point (authoritative)
 
-→ **`wiki decision/pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced`** has the full 17-task plan + 13-day timeline + decision gates. This STATUS.md keeps the milestone table for historical continuity but strategic intent lives in that wiki page.
+→ **`.omc/plans/pm22-autopilot-resume.md`** — 5-step handoff to resume autopilot in fresh session. Contains state detection, cron re-arm, S1 manual pipeline, hard-stops at Phase 4.
 
-**pm20 headline**:
-- ✅ M7 flatten A1 → `minicontest/20200492.py` (submission candidate hedge confirmed — 80% WR 5-game smoke; verify_flatten 5/5 PASS)
-- 🔄 Orders 3/4 diversification patch ready (`zoo_reflex_A1.py` HOF wrapper + `evolve.py` `a1` init option + `launch_orders_34.sh`) — awaits server pull tomorrow
-- ✅ CCG consultation (Codex + Gemini) → 13 new tasks added (D1/D2/D3, T4 classifier, T5 particle filter, T7 specialist split, T8 stochasticity, Red Queen HOF extension, Phase 4/5, M8-M10)
-- ⏳ Order 2 (A1+B1 20-dim) still running on server, ETA ~06:00 next day
+## pm21 headline (autopilot gains)
+
+- ✅ Order 2 complete: baseline Wilson LB 0.755 (A1 0.728). Marginal improvement, CI overlap → **A1 kept** as submission; `zoo_reflex_O2.py` added to Phase 4 pool
+- ✅ `experiments/make_hof_wrapper.py` + dynamic pool in `launch_orders_34.sh` (HOF auto-detect)
+- ✅ Autopilot 30-min cron design + `.omc/plans/autopilot-server-pipeline.md` — rule-based S0→S1→S2, **Phase 4 is manual per user directive**
+- 🔄 Order 3 running, ETA ~2026-04-19 09:15 KST; Order 4 auto-launch after (pm22 cron)
+
+## pm20 roadmap pointer (historical)
+
+→ **`wiki decision/pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced`** for full 17-task plan.
 
 ## Headline
 

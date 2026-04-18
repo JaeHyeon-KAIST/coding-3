@@ -1,8 +1,15 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-17 pm20 — M7 flatten A1 → `minicontest/20200492.py` LOCKED; Order 2 still running; **CCG expanded roadmap 17-task 3-axis plan finalized** — see wiki `decision/pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced` (authoritative pm20 plan).
+**Last updated:** 2026-04-18 pm21 end — Order 2 complete (HTH baseline 81.5% marginal over A1 — A1 kept as submission, O2 added to pool). Order 3 running on server (launched 13:14 KST). **pm22 (next session) is AUTOPILOT RESUME — see `.omc/plans/pm22-autopilot-resume.md`** for 5-step startup.
 
-## pm20 single-sentence TL;DR
+## pm22 TL;DR (AUTOPILOT RESUME MODE)
+
+- Server auto-orchestration: Order 3 → Order 4, rule-based decisions at each HTH
+- **STOPS** at S2 (all Orders done) — Phase 4 tournament is MANUAL per user directive
+- First action: read `.omc/plans/pm22-autopilot-resume.md` → SSH check → re-arm 30-min cron
+- If Order already done when pm22 starts: run S1 pipeline manually (in handoff doc)
+
+## pm20 TL;DR (historical)
 
 3-axis parallel development (CEM evolution + rule-based hybrids + paradigm hybrids) with 17 tasks tracked; CCG added particle filter + opponent classifier + endgame lockout + capsule proxy camping + stochasticity; robustness-first over peak (180-agent tournament); **never discard ≥50% baseline candidates** (all go to Phase 4 round-robin).
 
