@@ -57,7 +57,7 @@
 | **rc19** | Mode-based Policy (opening/mid/endgame) | L4 | M | 1일 | game phase 판단 + 다른 weights |
 | **rc20** | Flow Field Pathfinding | L5 | M | 1일 | multi-target A* 대체 |
 | **rc21** | Layout Clustering (width/corridor/capsule pattern) | L10 | M | 1일 | layout detect + weights swap |
-| **rc22** | E1/E2 Policy Distillation (teacher=A1/O2, student=small MLP) | E1 | M | 1.5일 | GPU 학습 → numpy distill |
+| **rc22** ✅ PASS 88% | E1/E2 Policy Distillation (teacher=rc82, student=numpy MLP 20→32→1) | E1 | M | pm25 done | 100-game HTH: 88/100 [0.80,0.93]; CPU-only, no GPU used |
 | **rc23** | A3 Coevolutionary CEM (공격 pop ↔ 수비 pop) | A3 | M | 2일 | 서로 elite 대상 학습 |
 | **rc24** | G2 Particle Filter Opponent Belief | G2 | M | 1일 | 보이지 않는 적 추적 |
 | **rc25** | Quiescence Search (minimax 확장) | H4 | M | 1일 | horizon effect 완화 |
@@ -372,3 +372,12 @@
   - **pm24 FINAL total (A-Q, 17 batches)**: **68 new rc, 66 pass** (40 strong + 26 weak), **2 drop** (rc30/34).
   - **Final Champion Tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
   - **Phase 4 pool**: 68 pm24 rc + ~30 pm23 rc + HOF wrappers + D/T series ≈ **~75 candidates**. Rich diversity for tournament.
+- **2026-04-19 pm25 Tier 3 rc22 Policy Distillation (FIRST learning-based rc)**:
+  - **Teacher**: rc82 (rc29+rc44 combo, pm24 100% WR champion).
+  - **Student**: numpy MLP 20→32→1 (per-action Q-score), softmax over legal, argmax inference. **~2K parameters**, pure numpy forward pass (submission-safe).
+  - **Data**: 100 games rc82 vs baseline, both colors, 59,828 (φ(s,a), teacher_action) records. Teacher WR in collection = 96/100 = **96%** (baseline confirmed).
+  - **Training**: 50 epochs, SGD+momentum, lr=1e-3. **Train acc 90.9%, val acc 90.3%** (information-bottleneck ceiling — MLP can't capture rc82's full internal state from 20-dim features).
+  - **rc22 100-game HTH vs baseline**: **88/100 = 88%** (Wilson [0.802, 0.930]), 0 crashes. **PASS** (>> 51% threshold, beats A1 82.5%).
+  - **Pipeline artifacts**: `experiments/distill_rc22.py` (orchestrator), `minicontest/zoo_distill_collector.py` (teacher + logger), `minicontest/zoo_distill_rc22.py` (student inference, 2K params numpy-only), `experiments/artifacts/rc22/weights.npz` (trained MLP), `experiments/artifacts/rc22/data.jsonl` (59,828 records).
+  - **Insight**: Action-level accuracy ≠ game-level WR. 9% action-error compounds over 300-turn games → initial expectation was 55-65% WR, **observed 88%** because rc22 doesn't need to match teacher EVERY turn — just enough to execute the strategy. Lossy distillation still captures most of rc82's skill.
+  - **Value for Phase 4**: First ARCHITECTURALLY DIFFERENT pool member (neural vs hand-rule). Adds diversity. Also demonstrates feasibility of Tier 3 → opens rc52/rc61 etc.

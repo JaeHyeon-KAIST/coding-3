@@ -1,13 +1,23 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 FINAL — **68 new rc** (A-Q batches, 17 batches). **66 pass** (40 strong, 26 weak), 2 drop. **🎉 8 champions at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131), 12 at 97.5%+, 21 at 95%+. Phase 4 pool ~75 candidates. Server Order 4 Phase 2a gen 2/30.
+**Last updated:** 2026-04-19 pm25 — **FIRST Tier 3 learning-based rc**: rc22 Policy Distillation PASS at **88/100 = 88.0%** (Wilson [0.80, 0.93]) vs baseline. Teacher rc82 (100%) → numpy MLP student (20→32→1, 2K params, submission-safe). pm24 headline: 68 rc, 8 @100%. Server Order 4 Phase 2a gen 3/10 running (best=0.712, ETA ~24h).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
 
-→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** + pm23/pm24 변경 로그.
-→ **pm24 session log** — `.omc/wiki/` 하위 `2026-04-19-pm24-*` page (when ingested).
+→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** + pm23/pm24/pm25 변경 로그.
+→ **pm25 session log** — `.omc/wiki/2026-04-19-pm25-rc22-policy-distillation-first-tier3-pass.md`.
+→ **pm24 session log** — `.omc/wiki/2026-04-19-pm24-mega-sprint-68-rc-8-champions.md`.
 → **pm23 session log** — `.omc/wiki/2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md`.
+
+## pm25 headline (rc22 Tier 3 FIRST pass)
+
+**rc22 Policy Distillation** — numpy MLP (20→32→1, ~2K params) distilled from rc82 teacher.
+- **Data**: 100 games rc82 vs baseline → 59,828 (φ(s,a), teacher_action) records. Teacher collected at 96% WR.
+- **Training**: 50 epochs, SGD+momentum lr=1e-3, val_acc 90.3% (info-bottleneck ceiling).
+- **HTH**: 88/100 = **88%** vs baseline Wilson [0.802, 0.930], 0 crashes. Beats A1 (82.5%).
+- **Files**: `experiments/distill_rc22.py`, `minicontest/zoo_distill_collector.py` (teacher+logger), `minicontest/zoo_distill_rc22.py` (student, numpy-only inference).
+- **Strategic value**: First architecturally different Phase 4 pool member (neural vs hand-rule) → adds diversity. Demonstrates Tier 3 feasibility.
 
 ## pm24 headline (+16 rc total, +14 pass; 3 new 100%-WR)
 

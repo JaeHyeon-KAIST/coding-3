@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 51 pages | Last updated: 2026-04-19T06:39:06.230Z
+> 53 pages | Last updated: 2026-04-19T07:43:02.470Z
 
 ## convention
 
@@ -52,6 +52,7 @@
 - [2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint](2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md) — # 2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint
 - [2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop](2026-04-19-pm24-8-new-rc-implemented-6-pass-2-drop.md) — # 2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop
 - [2026-04-19 - pm24 MEGA sprint 68 rc 8 champions](2026-04-19-pm24-mega-sprint-68-rc-8-champions.md) — # 2026-04-19 - pm24 MEGA sprint 68 rc 8 champions
+- [2026-04-19 pm25 - rc22 Policy Distillation FIRST Tier 3 pass](2026-04-19-pm25-rc22-policy-distillation-first-tier-3-pass.md) — # 2026-04-19 pm25 - rc22 Policy Distillation FIRST Tier 3 pass
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
@@ -72,4 +73,5 @@
 - [Session Log 2026-04-18](session-log-2026-04-18-98627e94.md) — # Session Log 2026-04-18
 - [Session Log 2026-04-18](session-log-2026-04-18-9985ce96.md) — # Session Log 2026-04-18
 - [Session Log 2026-04-18](session-log-2026-04-18-f3e8c591.md) — # Session Log 2026-04-18
+- [Session Log 2026-04-19](session-log-2026-04-19-5427c373.md) — # Session Log 2026-04-19
 - [Session Log 2026-04-19](session-log-2026-04-19-a0d467b9.md) — # Session Log 2026-04-19

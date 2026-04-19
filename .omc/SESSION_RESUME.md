@@ -1,6 +1,48 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-19 pm24 FINAL — **68 new rc** in one autopilot session (17 batches A-Q). **8 at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131). Order 4 Phase 2a gen 2/30 still cooking (~30h total ETA).
+**Last updated:** 2026-04-19 pm25 — **rc22 Policy Distillation SHIPPED** (FIRST Tier 3 learning-based rc). Student = numpy MLP 20→32→1, distilled from rc82 teacher, **88/100 = 88%** vs baseline Wilson [0.80, 0.93]. Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~20-24h.
+
+## pm26 TL;DR (NEXT SESSION)
+
+### pm25 주요 성과
+
+- **rc22 shipped**: numpy MLP policy distillation pipeline working end-to-end.
+  - `experiments/distill_rc22.py` (orchestrator, collect/train/both subcommands)
+  - `minicontest/zoo_distill_collector.py` (teacher logger wrapper on rc82)
+  - `minicontest/zoo_distill_rc22.py` (student inference, 2K params, numpy-only)
+  - 100-game HTH: **88%** — beats A1 (82.5%), first ARCHITECTURALLY DIFFERENT pool member.
+
+### 중요 lessons (pm25)
+
+1. **40-game HTH too noisy for learning agents** — use ≥100 games for Tier 3 authoritative numbers. pm25 saw 65% / 82.5% variance on same weights at 40 games, stabilized to 88% at 100 games.
+2. **Info-bottleneck**: val_acc plateau at ~91% regardless of data size. Adding more games (20 → 100) didn't help val_acc. Feature extension needed for further lift.
+3. **Default path absolute, env var paths can bite** — `RC22_WEIGHTS` with relative path failed silently because `single_game.py` cwd=minicontest/. Always absolute.
+4. **CPU-only sufficient** for 2K-param MLP; GPU not needed. Data collection (Pacman simulation) dominates wall time (~95%).
+
+### pm26 우선순위
+
+**A. 서버 Order 4 완료 모니터링** (ETA ~2026-04-20 evening if gen wall ~60min ×  ~25 gens remaining)
+  - Gen 0-3 trajectory: 0.555 → 0.539 → 0.597 → **0.712** (CEM learning confirmed, +29% over gen 0)
+  - Expected final: fitness close to A1's 1.065 or exceed
+  - Next: HTH battery vs baseline, update champion if beats A1's 79%
+
+**B. 다음 Tier 3 rc 후보 (우선순위 선택 필요):**
+  - **rc46 Opponent-type classifier** (1-2d, novel) — K-means on opponent's first 50 moves → counter-policy switch. Strategic value: adapts to tournament opponents.
+  - **rc52 Q-learning v3** (2d, real RL) — replay buffer + SGD on linear Q. zoo_approxq revival. Expected WR ~60-70%.
+  - **rc61 AlphaZero-lite** (5d, highest ceiling) — MCTS + policy/value net + self-play. Research-grade.
+  - **rc22-v2 feature extension** (stretch) — add 15-dim history + AP flag + phase bucket → 34-dim student. Expected WR 88% → 92%+.
+
+**C. Phase 4 + M7 prep (parallel track):**
+  - Lock 8 pm24 100% champions (rc02/16/82/105/109/116/123/131) + rc22 + O4 (pending) + A1 = ~11 candidates for top tier.
+  - Pool size ~75 total (pm24 + pm23 + HOF + D/T + rc22).
+  - Tournament infra: `experiments/tournament.py` already ready. Dispatch to server when Order 4 done.
+
+**추천 순서**: pm26 동안 **Mac**에서 (1) rc46 Opponent classifier 시작 (2d) + (2) Phase 4 prep + M7 flatten 스켈레톤. **서버**는 Order 4 계속. Order 4 완료 시 pm27에서 Phase 4 런칭.
+
+**참고 문서**:
+- `.omc/wiki/2026-04-19-pm25-rc22-policy-distillation-first-tier-3-pass.md` — 상세 기록
+- `.omc/plans/rc-pool.md` 끝부분 — pm25 log + rc22 status row
+- `experiments/artifacts/rc22/` — weights + data + hth CSV
 
 ## pm25 TL;DR (NEXT SESSION — 🚨 READ CAREFULLY)
 
