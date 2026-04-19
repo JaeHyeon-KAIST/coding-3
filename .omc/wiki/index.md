@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 53 pages | Last updated: 2026-04-19T07:43:02.470Z
+> 54 pages | Last updated: 2026-04-19T08:44:39.771Z
 
 ## convention
 
@@ -52,6 +52,7 @@
 - [2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint](2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md) — # 2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint
 - [2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop](2026-04-19-pm24-8-new-rc-implemented-6-pass-2-drop.md) — # 2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop
 - [2026-04-19 - pm24 MEGA sprint 68 rc 8 champions](2026-04-19-pm24-mega-sprint-68-rc-8-champions.md) — # 2026-04-19 - pm24 MEGA sprint 68 rc 8 champions
+- [2026-04-19 pm25 - FULL Tier 3 sprint (4 rc's) + REINFORCE honesty correction](2026-04-19-pm25-full-tier-3-sprint-4-rc-s-reinforce-honesty-corr.md) — # 2026-04-19 pm25 - FULL Tier 3 sprint (4 rc's) + REINFORCE honesty correction
 - [2026-04-19 pm25 - rc22 Policy Distillation FIRST Tier 3 pass](2026-04-19-pm25-rc22-policy-distillation-first-tier-3-pass.md) — # 2026-04-19 pm25 - rc22 Policy Distillation FIRST Tier 3 pass
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
