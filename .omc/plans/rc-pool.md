@@ -364,3 +364,11 @@
   - **pm24 total (A-P, 16 batches)**: **64 new rc, 62 pass** (38 strong + 24 weak), **2 drop**.
   - **Champion tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
   - **Insight (Batch P)**: rc29 REVERSE overlay lifts both rc16 offense (→ rc109 100%) AND rc32 offense (→ rc131 100%) to perfect scores when paired with rc82 DEF. The disruption pattern is universal across champion offense bases. rc94 as DEF is materially weaker than rc82 DEF (92.5%+ vs 100%).
+- **2026-04-19 pm24 Batch Q (final) 40-game HTH (diversity sweep)**:
+  - **rc135** rc31 kite OFF + rc82 DEF: **37/40 + 1T = 92.5%+** ✅ PASS.
+  - **rc136** rc11 border-juggle OFF + rc82 DEF: **38/40 = 95%** ✅ PASS.
+  - **rc137** rc27 stigmergy OFF + rc82 DEF: **39/40 = 97.5%** ✅ PASS.
+  - **rc138** rc33 persona-shift OFF + rc82 DEF: **37/40 + 1T = 92.5%+** ✅ PASS.
+  - **pm24 FINAL total (A-Q, 17 batches)**: **68 new rc, 66 pass** (40 strong + 26 weak), **2 drop** (rc30/34).
+  - **Final Champion Tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
+  - **Phase 4 pool**: 68 pm24 rc + ~30 pm23 rc + HOF wrappers + D/T series ≈ **~75 candidates**. Rich diversity for tournament.
