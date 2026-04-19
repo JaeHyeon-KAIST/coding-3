@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **40 new rc** (A-J batches). **38 pass** (28 strong, 10 weak), 2 drop. **🎉 5 champions at 100%** (rc02, rc16, rc82, **rc105**, **rc109** NEW), 5 at 97.5%+, 12 at 95%+. rc109 = rc16+rc29 OFF + rc82 DEF — rc29 tactical disruption orthogonal to Voronoi offense. Server Order 4 Phase 2a still early.
+**Last updated:** 2026-04-19 pm24 end — **44 new rc** (A-K batches, 11 batches). **42 pass** (31 strong, 11 weak), 2 drop. **5 champions at 100%** (rc02, rc16, rc82, rc105, rc109), 8 at 97.5%+, 14 at 95%+. rc109 is stable peak; more overlays regress to 97.5%. Server Order 4 Phase 2a still early.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)

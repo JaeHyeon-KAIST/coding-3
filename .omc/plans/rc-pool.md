@@ -318,3 +318,11 @@
   - **pm24 total (A-J, 10 batches)**: **40 new rc, 38 pass** (28 strong + 10 weak), **2 drop** (rc30/34).
   - **Final champion tier**: **5 at 100%** (rc02, rc16, rc82, **rc105**, **rc109**).
   - **Insight (Batch J)**: Adding rc29 REVERSE to the rc16 offense half of rc105 maintains 100% — tactical disruption is orthogonal to Voronoi-based offense. rc108/rc107 show overlays on rc105 don't break its ceiling but don't hurt.
+- **2026-04-19 pm24 Batch K 40-game HTH (rc109 extensions + rc113)**:
+  - **rc111** (NEW) rc109 + rc21 layout mult: **39/40 + 1T = 97.5%+** ✅ PASS. Slightly below rc109 100%.
+  - **rc112** (NEW) rc109 + rc48 WHCA*: **39/40 = 97.5%** ✅ PASS. Same.
+  - **rc113** (NEW) rc02+rc29 OFF + rc82 DEF: **37/40 + 1T = 92.5%+** ✅ PASS. rc29 on rc02 gives less than on rc16 — AP override interacts differently.
+  - **rc114** (NEW) rc109 + rc21 + rc48 triple: **38/40 + 1T = 95%+** ✅ PASS. Triple stack slightly below single overlays.
+  - **pm24 total (A-K, 11 batches)**: **44 new rc, 42 pass** (31 strong + 11 weak), **2 drop** (rc30/34).
+  - **Final champion tier**: 5 at 100% (rc02, rc16, rc82, rc105, rc109), 8 at 97.5%+ (rc90, rc32, rc97, rc101, rc108, rc111, rc112, rc87-pre-drop-era).
+  - **Insight (Batch K)**: rc109 is a stable peak. Adding overlays on top of it regresses to 97.5% slightly. rc29 offense disruption helps rc16 base (→ rc109 100%) more than rc02 base (rc113 92.5%+) — AP override already fires on rc02 when appropriate, rc29 may double-override.
