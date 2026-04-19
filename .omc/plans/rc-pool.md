@@ -310,3 +310,11 @@
   - **pm24 total (A-I, 9 batches)**: **36 new rc, 34 pass** (25 strong + 9 weak), **2 drop** (rc30/34).
   - **Final Phase 4 champion tier**: **4 at 100%** (rc02, rc16, rc82, **rc105**), 4 at 97.5% (rc90/rc32/rc97/rc101), 10 at 95%+ (rc100/102/103/106/93/94/96/84/86/21/15).
   - **Insight (Batch I)**: The 2×2 champion pairwise asym matrix (rc02/rc16 × rc32/rc82) all cleared 90%+. Best non-rc82-offense asym is **rc105 rc16+rc82** at 100% — surprising: Voronoi on offense + full combo on defense. This beats rc90 (97.5%) and ties the solo champions. Opens a whole new direction: perhaps defensive-role agents running rc82 exploit rc44 stacking to score counter-attacks on food.
+- **2026-04-19 pm24 Batch J 40-game HTH (rc105 explorations)**:
+  - **rc107** (NEW) rc105 + rc48 WHCA* deconflict: **38/40 + 1T = 95%+** ✅ PASS. WHCA* on rc105 doesn't break 100% ceiling.
+  - **rc108** (NEW) rc105 + rc21 layout mult: **39/40 + 1T = 97.5%+** ✅ PASS. Layout mult marginal lift.
+  - **rc109** (NEW) rc16+rc29 OFF + rc82 DEF (rc29 REVERSE added to rc16 offense): **40/40 = 100%** 🥇 — **5TH PERFECT CHAMPION**!
+  - **rc110** (NEW) rc02 OFF + rc82 DEF + rc48 WHCA* (rc100 + rc48): **36/40 = 90%** ✅ PASS. WHCA* doesn't help rc100 as much.
+  - **pm24 total (A-J, 10 batches)**: **40 new rc, 38 pass** (28 strong + 10 weak), **2 drop** (rc30/34).
+  - **Final champion tier**: **5 at 100%** (rc02, rc16, rc82, **rc105**, **rc109**).
+  - **Insight (Batch J)**: Adding rc29 REVERSE to the rc16 offense half of rc105 maintains 100% — tactical disruption is orthogonal to Voronoi-based offense. rc108/rc107 show overlays on rc105 don't break its ceiling but don't hurt.
