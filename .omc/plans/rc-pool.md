@@ -294,3 +294,11 @@
   - **pm24 total (A-G, 7 batches)**: **28 new rc, 26 pass** (20 strong + 6 weak), **2 drop** (rc30/34).
   - **Final top pool (≥95%)**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32/rc97 = 97.5%, rc93/rc94/rc96/rc84/rc86/rc21 = 95%+.
   - **Insights (Batch G)**: Veto of rc82's overrides hurts because rc82's rc29/rc44 layers exploit subtle state info that 2-ply A1 evaluation misses. Time-based strategy switching without smooth blending is brittle. Rc97 ≈ rc90 shows WHCA* is useful but limited on top of already-strong asym.
+- **2026-04-19 pm24 Batch H 40-game HTH (adaptive/inverted/quad-stack)**:
+  - **rc99** (NEW) Adaptive defender by layout class: **29/40 + 11T = 72.5%** ✅ PASS (Red 10/20 + 10T, Blue 19/20 + 1T). 11 ties — adaptive defender too conservative.
+  - **rc100** (NEW) Inverted asym rc02 OFF + rc82 DEF: **38/40 = 95%** ✅ PASS (Red 20/20, Blue 18/20). Surprising — rc02 on offense ≈ A1 on offense (AP never triggers), rc82 on defense has rc44 stacking.
+  - **rc101** (NEW) Quad stack rc82+rc32 + WHCA* + layout mult: **39/40 = 97.5%** 🥈 PASS (Red 19/20, Blue 20/20). Ties rc90/rc97 — no further lift from stacking.
+  - **rc102** (NEW) 5-member weighted vote (rc02+rc16+rc82+D13+rc21 weighted by WR): **38/40 = 95%** ✅ PASS (Red 19/20, Blue 19/20). Matches rc94 equal-weight — weight-by-WR doesn't help over equal weight.
+  - **pm24 total (A-H, 8 batches)**: **32 new rc, 30 pass** (22 strong + 8 weak), **2 drop** (rc30/34).
+  - **Final top pool (≥95%)**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32/rc97/rc101 = 97.5%, rc100/rc102/rc93/rc94/rc96/rc84/rc86/rc21 = 95%+.
+  - **Insight (Batch H)**: Ceiling is 97.5% for role-asym compositions — additional overlays (rc101 quad) don't break through. rc100 inverted-asym works because "rc02 on offense" is effectively A1 on offense. Vote schemes (rc94 equal, rc102 weighted) both saturate at 95% — weighting strategy doesn't break ceiling.
