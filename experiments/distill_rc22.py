@@ -35,30 +35,25 @@ VENV_PY = REPO_ROOT / ".venv" / "bin" / "python"
 SINGLE_GAME = REPO_ROOT / "experiments" / "single_game.py"
 
 
-# Same canonical order used by the collector and the student agent.
-FEATURE_KEYS = [
-    'f_bias',
-    'f_successorScore',
-    'f_distToFood',
-    'f_distToCapsule',
-    'f_numCarrying',
-    'f_distToHome',
-    'f_ghostDist1',
-    'f_ghostDist2',
-    'f_inDeadEnd',
-    'f_stop',
-    'f_reverse',
-    'f_numInvaders',
-    'f_invaderDist',
-    'f_onDefense',
-    'f_patrolDist',
-    'f_distToCapsuleDefend',
-    'f_scaredFlee',
-    'f_scaredGhostChase',
-    'f_returnUrgency',
-    'f_teammateSpread',
+# Canonical feature-key lists. Feature dim is inferred from the JSONL data
+# at train time, so the training code works for either v1 (20-dim) or v2
+# (39-dim) or future variants without modification. The student-agent file
+# bakes in the variant it was trained for — loaded weights carry the shape.
+FEATURE_KEYS_V1 = [
+    'f_bias', 'f_successorScore', 'f_distToFood', 'f_distToCapsule',
+    'f_numCarrying', 'f_distToHome', 'f_ghostDist1', 'f_ghostDist2',
+    'f_inDeadEnd', 'f_stop', 'f_reverse', 'f_numInvaders',
+    'f_invaderDist', 'f_onDefense', 'f_patrolDist',
+    'f_distToCapsuleDefend', 'f_scaredFlee',
+    'f_scaredGhostChase', 'f_returnUrgency', 'f_teammateSpread',
 ]
-NUM_FEATS = len(FEATURE_KEYS)
+# V2 keys declared for documentation/export; the training loop doesn't need
+# them — it only needs the dim count.
+FEATURE_KEYS_V2 = (
+    FEATURE_KEYS_V1
+    + [f'f_hist{i}_act{j}' for i in (1, 2, 3) for j in (0, 1, 2, 3, 4)]
+    + ['f_succAP', 'f_phaseEarly', 'f_phaseMid', 'f_phaseEnd']
+)
 NUM_ACTIONS = 5  # N/S/E/W/Stop
 
 
@@ -70,7 +65,10 @@ def _run_one_game(log_path: Path, red: str, blue: str, layout: str, seed: int | 
                   timeout_s: float = 180.0) -> dict:
     """Invoke experiments/single_game.py with RC22_LOG_PATH set.
 
-    Returns parsed JSON from single_game (winner, score, ...).
+    Returns parsed JSON from single_game (winner, score, ...). The caller
+    selects which agent module is the teacher by passing its name through
+    `red` / `blue` (typically "zoo_distill_collector" for v1 or
+    "zoo_distill_collector_v2" for v2).
     """
     env = os.environ.copy()
     env["RC22_LOG_PATH"] = str(log_path)
@@ -115,13 +113,14 @@ def cmd_collect(args) -> int:
     wins = 0
     crashes = 0
 
+    collector = args.collector
     for i in range(total):
         # Alternate colors: even i → collector is Red, odd → collector is Blue.
         if i % 2 == 0:
-            red, blue = "zoo_distill_collector", "baseline"
+            red, blue = collector, "baseline"
             our_win_key = "red_win"
         else:
-            red, blue = "baseline", "zoo_distill_collector"
+            red, blue = "baseline", collector
             our_win_key = "blue_win"
 
         layout = args.layout
@@ -155,9 +154,15 @@ def cmd_collect(args) -> int:
 # TRAIN
 # ---------------------------------------------------------------------------
 
-def _load_jsonl(path: Path) -> list:
-    """Load all turn records. Returns list of (feats ndarray [L,20], chosen_local_idx, legal list)."""
+def _load_jsonl(path: Path) -> tuple[list, int]:
+    """Load all turn records. Returns (data, num_feats).
+
+    `data` is a list of (feats ndarray [L, D], chosen_local_idx) with `D`
+    = number of features inferred from the first valid record. Records
+    whose feature width doesn't match are silently dropped.
+    """
     data = []
+    num_feats = None
     for ln in open(path):
         ln = ln.strip()
         if not ln:
@@ -173,12 +178,16 @@ def _load_jsonl(path: Path) -> list:
             continue
         if len(feats) != len(legal):
             continue
-        x = np.asarray(feats, dtype=np.float64)  # [L, 20]
-        if x.ndim != 2 or x.shape[1] != NUM_FEATS:
+        x = np.asarray(feats, dtype=np.float64)
+        if x.ndim != 2 or x.shape[0] == 0:
             continue
-        local_idx = legal.index(chosen)  # position within legal list
+        if num_feats is None:
+            num_feats = int(x.shape[1])
+        if x.shape[1] != num_feats:
+            continue
+        local_idx = legal.index(chosen)
         data.append((x, local_idx))
-    return data
+    return data, int(num_feats or 0)
 
 
 def _softmax(z: np.ndarray) -> np.ndarray:
@@ -187,11 +196,13 @@ def _softmax(z: np.ndarray) -> np.ndarray:
     return e / (e.sum() + 1e-12)
 
 
-def _normalize_feats(data: list) -> tuple[np.ndarray, np.ndarray]:
+def _normalize_feats(data: list, num_feats: int) -> tuple[np.ndarray, np.ndarray]:
     """Compute per-feature mean+std over all (s,a) pairs for input normalization."""
-    stacked = np.concatenate([x for x, _ in data], axis=0) if data else np.zeros((0, NUM_FEATS))
-    mu = stacked.mean(axis=0) if len(stacked) else np.zeros(NUM_FEATS)
-    sd = stacked.std(axis=0)  if len(stacked) else np.ones(NUM_FEATS)
+    if not data:
+        return np.zeros(num_feats), np.ones(num_feats)
+    stacked = np.concatenate([x for x, _ in data], axis=0)
+    mu = stacked.mean(axis=0)
+    sd = stacked.std(axis=0)
     sd = np.where(sd < 1e-6, 1.0, sd)
     return mu, sd
 
@@ -201,24 +212,25 @@ def cmd_train(args) -> int:
     out_path = Path(args.out).resolve()
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    data = _load_jsonl(data_path)
+    data, NUM_FEATS = _load_jsonl(data_path)
     N = len(data)
-    if N == 0:
+    if N == 0 or NUM_FEATS == 0:
         print("[train] no data — abort", file=sys.stderr)
         return 1
 
-    mu, sd = _normalize_feats(data)
+    mu, sd = _normalize_feats(data, NUM_FEATS)
 
     # Normalize once (store normalized arrays back).
     data = [((x - mu) / sd, idx) for (x, idx) in data]
 
-    # MLP shape: 20 → H → 1 (per-action score). Softmax over legal actions.
+    # MLP shape: D → H → 1 (per-action score). Softmax over legal actions.
     H = args.hidden
     rng = np.random.RandomState(args.seed)
     W1 = rng.randn(NUM_FEATS, H).astype(np.float64) * np.sqrt(2.0 / NUM_FEATS)
     b1 = np.zeros(H, dtype=np.float64)
     W2 = rng.randn(H, 1).astype(np.float64) * np.sqrt(2.0 / H)
     b2 = np.zeros(1, dtype=np.float64)
+    print(f"[train] feat_dim={NUM_FEATS} hidden={H}", file=sys.stderr)
 
     lr = args.lr
     mom = 0.9
@@ -273,12 +285,20 @@ def cmd_train(args) -> int:
         print(f"[train] epoch={epoch+1} loss={tr_loss:.4f} acc={tr_acc:.3f} "
               f"val_loss={va_loss:.4f} val_acc={va_acc:.3f}", file=sys.stderr)
 
-    # Save
+    # Save — pick the right feature-key list by dim so downstream agents
+    # can reconstruct order if needed.
+    if NUM_FEATS == len(FEATURE_KEYS_V1):
+        feature_keys = FEATURE_KEYS_V1
+    elif NUM_FEATS == len(FEATURE_KEYS_V2):
+        feature_keys = FEATURE_KEYS_V2
+    else:
+        feature_keys = [f"f_{i}" for i in range(NUM_FEATS)]
+
     np.savez(
         out_path,
         W1=W1, b1=b1, W2=W2, b2=b2,
         feat_mu=mu, feat_sd=sd,
-        feature_keys=np.array(FEATURE_KEYS),
+        feature_keys=np.array(feature_keys),
         hidden=H,
     )
     print(f"[train] weights → {out_path}", file=sys.stderr)
@@ -323,6 +343,7 @@ def cmd_both(args) -> int:
     a.out = str(data_path)
     a.layout = args.layout
     a.seed_base = args.seed_base
+    a.collector = args.collector
     rc = cmd_collect(a)
     if rc != 0:
         return rc
@@ -350,6 +371,9 @@ def main(argv=None) -> int:
     c.add_argument("--out", type=str, required=True)
     c.add_argument("--layout", type=str, default="defaultCapture")
     c.add_argument("--seed-base", type=int, default=2226)
+    c.add_argument("--collector", type=str, default="zoo_distill_collector",
+                   help="Module name of the teacher+logger agent (e.g. "
+                        "zoo_distill_collector for v1, zoo_distill_collector_v2 for v2).")
     c.set_defaults(func=cmd_collect)
 
     t = sp.add_parser("train")
@@ -366,6 +390,7 @@ def main(argv=None) -> int:
     b.add_argument("--out-dir", type=str, required=True)
     b.add_argument("--layout", type=str, default="defaultCapture")
     b.add_argument("--seed-base", type=int, default=2226)
+    b.add_argument("--collector", type=str, default="zoo_distill_collector")
     b.add_argument("--hidden", type=int, default=32)
     b.add_argument("--lr", type=float, default=1e-3)
     b.add_argument("--epochs", type=int, default=30)
