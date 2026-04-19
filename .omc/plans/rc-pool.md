@@ -414,3 +414,26 @@
   - **Pipeline artifacts**: `experiments/distill_rc22.py` (orchestrator), `minicontest/zoo_distill_collector.py` (teacher + logger), `minicontest/zoo_distill_rc22.py` (student inference, 2K params numpy-only), `experiments/artifacts/rc22/weights.npz` (trained MLP), `experiments/artifacts/rc22/data.jsonl` (59,828 records).
   - **Insight**: Action-level accuracy ≠ game-level WR. 9% action-error compounds over 300-turn games → initial expectation was 55-65% WR, **observed 88%** because rc22 doesn't need to match teacher EVERY turn — just enough to execute the strategy. Lossy distillation still captures most of rc82's skill.
   - **Value for Phase 4**: First ARCHITECTURALLY DIFFERENT pool member (neural vs hand-rule). Adds diversity. Also demonstrates feasibility of Tier 3 → opens rc52/rc61 etc.
+
+- **2026-04-19 pm26 rc52b REINFORCE alt-run (NEW learning tier peak)**:
+  - Untracked `experiments/rc52b_final_weights.py` from prior training run (iter 30/300g, cum_wr 67.7% vs rc52's 57.3%). Same algorithm/spec as rc52 — different stochastic path.
+  - **rc52b 100-game HTH vs baseline** (Mac, defaultCapture, 8-worker): **92/100 = 92%** Wilson [0.850, 0.959], 0 crashes. **+2pp over rc52 (90%)**, +6pp over A1 solo (86%).
+  - Weights diverged visibly from rc52 (e.g. f_distToFood 34.14 → 34.14 similar, but f_scaredFlee 5.15 vs 14.32 in W_DEF). Training variance on the same REINFORCE spec yielded a better local optimum.
+  - **Files**: `minicontest/zoo_reflex_rc52b.py` (new agent wrapper), `experiments/rc52b_final_weights.py` (weights).
+  - **Strategic value**: confirms REINFORCE can reach ~92% on baseline; variance across training runs ≈ 2pp. Both rc52 and rc52b stay in Phase 4 pool for diversity.
+
+- **2026-04-19 pm26 rc46 K-centroid opponent classifier (Tier 2 adaptive)**:
+  - 4-archetype nearest-centroid classifier (RUSH/TURTLE/CHOKE/NEUTRAL) on a 4-D observation vector (pacman_ratio, invader_crossings, mean_depth, our_food_eaten_ratio).
+  - Classification fires once at our-turn tick 60 (~120 game ticks) and stays fixed. Per-archetype multipliers applied to A1's weights (boost defense for RUSH, boost offense for TURTLE/CHOKE, no-op for NEUTRAL).
+  - **rc46 100-game HTH vs baseline**: Red 48/50 + Blue 43/50 + 2 Ties + 5 Red/50 (from Blue-perspective loss) → **91/100 = 91%** Wilson [0.838, 0.952], 0 crashes. **+5pp over A1 solo (86%)**, ties rc52's 90% learning tier.
+  - **Strategic value**: first OPPONENT-ADAPTIVE rc. Different archetype from rc52/rc52b (reactive vs offline-learned). Valuable in tournament where opponent stats vary.
+
+- **2026-04-19 pm26 rc141 rc52b OFF + rc82 DEF asymmetric**:
+  - Same pattern as rc140 but using the better-trained REINFORCE variant (rc52b instead of rc52).
+  - **rc141 100-game HTH**: Red 47/50 + Blue 43/50 → **90/100 = 90%** Wilson [0.826, 0.945], 0 crashes. **Below rc52b solo 92%** (-2pp) — confirms rc140's lesson that linear-Q learned offense interacts weakly with rc82 DEF.
+  - Still a PASS. Archetype slot filled for Phase 4 diversity.
+
+- **2026-04-19 pm26 rc142 rc46 classifier OFF + rc82 DEF asymmetric**:
+  - First hybrid of opponent-classifier OFF with composite DEF. Classifier observes during both OFF/DEF turns; on OFF turn applies multipliers to A1 weights; on DEF turn uses rc82 full composite.
+  - **rc142 100-game HTH**: Red 48/50 + Blue 43/50 + 2 Ties → **91/100 = 91%** Wilson [0.838, 0.952], 0 crashes. **Same as rc46 solo** — composite DEF didn't lift it above the classifier's intrinsic 91%.
+  - **Pattern confirmed (pm26)**: "learning/classifier OFF + rc82 DEF" composition stays ≈ OFF-solo. Only COMPOSITE offenses (rc16/rc32) achieved the 100% peak with rc82 DEF. Sweet spot = "two composites" not "learning + composite".

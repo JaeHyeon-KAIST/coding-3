@@ -1,10 +1,13 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm25 — **Tier 3 sprint + honesty correction**:
-- rc22 distillation **88%**, rc22-v2 extended **85%**, rc52 REINFORCE **90%** (honest post-debug), rc140 asym **91%**.
-- **rc52 debug lesson**: first run's "95%" was A1 variance luck (weights didn't move due to per-step averaging bug + near-deterministic policy → zero gradient). After T=5 softmax + per-batch normalization fix, rc52 moved ~0.97 total weight delta → HTH 90/100 (+4pp vs A1's 86%, within CI). Real but modest lift. Documented as pedagogical.
-- A1 (Mac defaultCapture 100g) authoritative WR = **86%** [Wilson 77.9-91.5].
-- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h.
+**Last updated:** 2026-04-19 pm26 — **Tier 3 + adaptive rc sprint (+4 rc)**:
+- **rc52b** 92% Wilson [0.850, 0.959] 🥈 NEW LEARNING TIER PEAK — alt-run REINFORCE, +2pp over rc52
+- **rc46** 91% [0.838, 0.952] — K-centroid opponent classifier (4-archetype, adaptive multipliers)
+- **rc141** 90% [0.826, 0.945] — rc52b OFF + rc82 DEF asym (below rc52b solo)
+- **rc142** 91% [0.838, 0.952] — rc46 OFF + rc82 DEF asym (= rc46 solo)
+- **Pattern confirmed**: "learning/classifier OFF + rc82 DEF" ≈ OFF-solo (no boost). 100% peak requires COMPOSITE OFF (rc16/rc32).
+- Prior: A1 86%, rc22 distill 88%, rc22-v2 85%, rc52 90%, rc82 100% (champion tier 8 at 100%).
+- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h (unreachable to check — SSH timeout).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
