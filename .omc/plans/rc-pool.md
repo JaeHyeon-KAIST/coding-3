@@ -494,4 +494,12 @@
     4. **Extra slots rarely help**: rc152 4-way 98% vs rc160 2-way 99% — minimal improvement at best.
     5. **rc32/rc52b/rc22/A1 in chase/small-lead slots never exceed rc16 equivalent**.
   - **Files**: `minicontest/zoo_reflex_rc148.py` to `rc167.py` (20 new agents total).
-  - **Submission implication**: rc160 is the new BEST CANDIDATE for your_best.py. Simple 2-agent composition (rc82 + rc16 logic) makes AST-flattening feasible. 97.5% baseline WR is +5pp over any pm24 composite at the same sample size.
+  - **Submission implication**: rc160 is the best BASELINE WR candidate for your_best.py. Simple 2-agent composition (rc82 + rc16 logic) makes AST-flattening feasible. 97.5% baseline WR is +5pp over any pm24 composite at the same sample size.
+  - **CRITICAL CAVEAT — tournament head-to-head (pm26 END)**: rc160 vs rc82 head-to-head 60 games total (30 each side): **rc82 32W / rc160 11W / 17T**. rc82 DOMINATES rc160 2.9:1 — the switch behavior is exploitable by strong opponents. rc160's baseline advantage DOES NOT generalize to tournament play. Submission decision is between:
+    - **rc160 for baseline (code 40pt)**: 97.5% WR guarantees code score
+    - **rc82 for tournament (extra 30pt)**: better vs other champions
+  - Additional pm26 END agents (all below rc160):
+    - rc170 (consensus rc82 ∧ rc16, tie-break by score): 95%
+    - rc172 (rc160 + endgame-tied→rc82): 95%
+    - rc173/rc174 coded but not HTH-tested yet
+  - **Key lesson (pm26 END)**: baseline WR is NOT a reliable proxy for tournament strength. Switch-based agents exploit baseline-specific weaknesses that don't exist in strong opponents.

@@ -9,7 +9,10 @@
 - **REINFORCE regressed twice** (rc52c aggressive 86%, rc52d conservative 86%) — rc52b is lucky single-run sample.
 - **40g "100%" claims CORRECTED (100g authoritative)**: rc82 97%, rc16 92%, rc105 95% — all pm23/pm24 champions are 90-97%, not 100%.
 - **Pattern laws** (pm26 distilled): (1) asymmetric direction matters; (2) rc16 must handle tied; (3) threshold flat 1-3; (4) extra slots don't help; (5) chase-agent choice low-impact.
-- **Submission candidate** now rc160 (pending re-verify with Phase 4 round-robin): simplest/strongest, +5pp over pm24 composites at 100g scale.
+- **Submission candidate**: DUAL TRACK:
+  - **rc160** (baseline-optimal, 97.5% 200g) for code 40pt — simplest 2-way switch
+  - **rc82** (tournament-optimal, head-to-head 32-11-17 vs rc160) for extra 30pt — composite champion
+  - **Head-to-head critical finding (pm26 END)**: rc82 beats rc160 2.9:1. Switch-based rc160 exploits baseline-specific weaknesses; doesn't generalize. Phase 4 round-robin needs rc82.
 - Server Order 4 unreachable (SSH timeout).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
