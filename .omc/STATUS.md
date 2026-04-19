@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **44 new rc** (A-K batches, 11 batches). **42 pass** (31 strong, 11 weak), 2 drop. **5 champions at 100%** (rc02, rc16, rc82, rc105, rc109), 8 at 97.5%+, 14 at 95%+. rc109 is stable peak; more overlays regress to 97.5%. Server Order 4 Phase 2a still early.
+**Last updated:** 2026-04-19 pm24 end — **48 new rc** (A-L batches, 12 batches). **46 pass** (33 strong, 13 weak), 2 drop. **🎉 6 champions at 100%** (rc02, rc16, rc82, rc105, rc109, **rc116** NEW), 9 at 97.5%+, 16 at 95%+. rc50 opening book overlay on rc109 maintains 100% — rc116 new champion. Server Order 4 Phase 2a still early.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)

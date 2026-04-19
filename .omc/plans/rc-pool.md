@@ -326,3 +326,11 @@
   - **pm24 total (A-K, 11 batches)**: **44 new rc, 42 pass** (31 strong + 11 weak), **2 drop** (rc30/34).
   - **Final champion tier**: 5 at 100% (rc02, rc16, rc82, rc105, rc109), 8 at 97.5%+ (rc90, rc32, rc97, rc101, rc108, rc111, rc112, rc87-pre-drop-era).
   - **Insight (Batch K)**: rc109 is a stable peak. Adding overlays on top of it regresses to 97.5% slightly. rc29 offense disruption helps rc16 base (→ rc109 100%) more than rc02 base (rc113 92.5%+) — AP override already fires on rc02 when appropriate, rc29 may double-override.
+- **2026-04-19 pm24 Batch L 40-game HTH (composites + novel combinations)**:
+  - **rc115** (NEW) rc44 OFF + rc82 DEF: **39/40 = 97.5%** ✅ PASS. Plain rc44 stacking offense.
+  - **rc116** (NEW) rc109 + rc50 opening book on offense: **40/40 = 100%** 🥇 — **6TH PERFECT CHAMPION**!
+  - **rc117** (NEW) rc03 OFF + rc82 DEF: **36/40 = 90%** ✅ PASS. Dead-end trap as offense.
+  - **rc118** (NEW) rc109 + rc48 WHCA* on DEFENDER only: **37/40 + 2T = 92.5%+** ✅ PASS.
+  - **pm24 total (A-L, 12 batches)**: **48 new rc, 46 pass** (33 strong + 13 weak), **2 drop** (rc30/34).
+  - **Final champion tier**: **6 at 100%** (rc02, rc16, rc82, rc105, rc109, **rc116**).
+  - **Insight (Batch L)**: rc50 opening book overlay on rc109's offense maintains 100% — the 15-turn nudge toward uncontested food doesn't conflict with rc16's Voronoi weights. rc117 (rc03 OFF) shows dead-end logic on offense = pure A1 offense (90%), confirming rc03's AP-style trigger only fires on defender side.
