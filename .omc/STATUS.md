@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **52 new rc** (A-M batches, 13 batches). **50 pass** (34 strong, 16 weak), 2 drop. **6 champions at 100%**, 10 at 97.5%+, 17 at 95%+. rc116 confirmed as saturation point — more overlays regress. rc29 is necessary (ablation rc122 drops to 87.5%+). Server Order 4 Phase 2a gen 2/30.
+**Last updated:** 2026-04-19 pm24 end — **56 new rc** (A-N batches, 14 batches). **54 pass** (36 strong, 18 weak), 2 drop. **🎉 7 champions at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, **rc123** NEW), 10 at 97.5%+, 18 at 95%+. **Pattern discovered: rc82 DEFENDER is the critical ingredient** — strong offense + rc82 DEF → 100%. Server Order 4 Phase 2a gen 2/30.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)

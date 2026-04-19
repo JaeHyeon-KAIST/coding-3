@@ -341,3 +341,11 @@
   - **rc122** (NEW) rc16 + rc50 OFF (no rc29) + rc82 DEF: **35/40 + 2T = 87.5%+** ✅ PASS. **Ablation confirms rc29 contributes ~10pp to rc116's perfect score.**
   - **pm24 total (A-M, 13 batches)**: **52 new rc, 50 pass** (34 strong + 16 weak), **2 drop** (rc30/34).
   - **Insight (Batch M)**: rc116 is the saturation point for compound composition. Adding more overlays (rc119 +WHCA, rc120 +layout) regresses. Removing rc29 (rc122) drops to 87.5%+ — rc29 is a necessary component of rc109/rc116's perfect score.
+- **2026-04-19 pm24 Batch N 40-game HTH (defender-anchored pattern test)**:
+  - **rc123** (NEW) rc32 Pincer OFF + rc82 DEF: **40/40 = 100%** 🥇 — **7TH PERFECT CHAMPION**!
+  - **rc124** (NEW) rc82+rc50 opening book OFF + rc32 DEF: **37/40 + 3T = 92.5%+** ✅ PASS.
+  - **rc125** (NEW) rc16 OFF + rc32+rc29 DEF: **35/40 + 2T = 87.5%+** ✅ PASS. Adding rc29 to defender is useless (defender is rarely Pacman).
+  - **rc126** (NEW) rc109 + 2-ply lookahead veto: **37/40 + 1T = 92.5%+** ✅ PASS. Veto drops rc109 from 100%.
+  - **pm24 total (A-N, 14 batches)**: **56 new rc, 54 pass** (36 strong + 18 weak), **2 drop**.
+  - **Champion tier**: **7 at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, **rc123**).
+  - **Discovered pattern**: **rc82 as DEFENDER is the critical ingredient.** Pattern holds: rc16 OFF + rc82 DEF (rc105 100%), rc16+rc29 OFF + rc82 DEF (rc109 100%), rc32 OFF + rc82 DEF (rc123 100%). Outliers: rc02 OFF + rc82 DEF (rc100 95%), rc03 OFF + rc82 DEF (rc117 90%) — suggest rc02/rc03's narrow-fire overrides interact with A1 weights differently. rc82's rc44 stacking on DEFENSE role evaluates defense-role states with rc02+rc32 votes weighted heavily — a strong territorial defender by design.
