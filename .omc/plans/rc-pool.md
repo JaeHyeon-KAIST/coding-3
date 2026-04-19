@@ -278,3 +278,11 @@
   - **pm24 total (A + B + C + D + E)**: **20 new rc, 18 pass** (14 strong + 4 weak), **2 drop** (rc30/34).
   - **Top Phase 4 candidates**: rc02/rc16/rc82 = 100%, rc90 = 97.5%, rc32 = 97.5%, rc84/rc86/rc21/rc03/rc15 = 95%+, rc81/rc29/rc44/rc19/rc09/rc45/rc08 = 92.5%+.
   - **Insight**: Dragging overlay heuristics active "too often" (rc87 far-food always-on, rc89 dead-end 5-cell trigger) can destroy A1's tuned behavior. All our highest-rc successes had NARROW fire-conditions (rc02 invader visible, rc29 herded, rc48 teammate collision). Broad always-on overrides underperform even when the logic is individually sound.
+- **2026-04-19 pm24 Batch F 40-game HTH (third-asym + scared chase + dense vote + layout stack)**:
+  - **rc91** (NEW) Role-asym rc82 OFF + rc16 DEF: **37/40 = 92.5%** ✅ PASS (Red 20/20, Blue 17/20). Below rc90 (rc82+rc32) but still strong.
+  - **rc92** (NEW) Scared-ghost aggressive chase: **30/40 = 75%** ✅ PASS (Red 14/20, Blue 16/20). Rare trigger (scared windows short).
+  - **rc93** (NEW) rc90 + rc21 layout multiplier stack: **38/40 + 1T = 95%+** ✅ PASS (Red 18/20 + 1T, Blue 20/20). Layout mult doesn't improve rc90 — rc82 already has state-conditioning.
+  - **rc94** (NEW) 3-champion dense vote over rc02+rc16+rc82 (all 100% solo): **38/40 = 95%** ✅ PASS (Red 19/20, Blue 19/20). **Dense vote of perfect members (95%) > sparse vote with weak members (rc83 = 90%)** — dilution hypothesis confirmed.
+  - **pm24 total (A + B + C + D + E + F)**: **24 new rc, 22 pass** (18 strong + 4 weak), **2 drop** (rc30/34).
+  - **Final top pool**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32 = 97.5%, rc93/rc94/rc84/rc86/rc21 = 95%+, rc91/rc81/rc29/rc44/rc19/rc09/rc45/rc08 = 92.5%+, lower tiers 75-90%.
+  - **Insight (pm24 final)**: Dense voting preserves strength (rc94 vs rc83 = +5pp). Asymmetric composition with strongest offense + strong defense dominates (rc90 97.5% > rc84 95%+ > rc91 92.5% > rc81 92.5%+). Layout mult synergy is limited when base already state-conditioned (rc93 tracks rc90).
