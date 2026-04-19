@@ -1,14 +1,81 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-19 pm25 — **Tier 3 learning rc sprint (4 shipped)**:
-- rc22 distillation (numpy MLP, rc82 teacher) → **88%** vs baseline Wilson [0.80, 0.93]
-- rc22-v2 39-dim extended features → **85%** (val_acc 91→94% but game-WR plateau)
-- rc52 REINFORCE (linear Q gradient, A1 init, T=5) → **90%** [0.83, 0.95] (honest post-debug)
-- rc140 (rc52 OFF + rc82 DEF asym) → **91%**
-- A1 authoritative Mac 100g = **86%** [0.78, 0.92] (corrected from server 79%)
+**Last updated:** 2026-04-20 pm26 END — **SWITCH-BASED BREAKTHROUGH + Tournament H2H finding**:
+- 🏆 **rc160** (`if score >= 1: rc82 else rc16`) = **97.5%** vs baseline [0.944, 0.990] (200g).
+- **24 new rc** in pm26 session (rc141-rc174) — switch pattern exploration.
+- **Critical H2H**: rc82 beats rc160 **32-11-17** in 60-game direct battle. Switch advantage doesn't generalize.
+- **100g corrections**: rc82 97%, rc16 92%, rc105 95% (pm23/24 40g "100%" were variance-inflated).
+- REINFORCE variance confirmed: rc52b 92% was lucky outlier (rc52c/rc52d 86% regression).
+
+## pm27 TL;DR (NEXT SESSION — READ FIRST)
+
+### 🎯 pm27 immediate priorities
+
+1. **Phase 4 round-robin tournament** (server). Pool: rc160 + rc82 + rc105 + rc131 + rc16 + rc152 + A1 + top pm24 champions (~15-25 agents). 5 layouts × 3 seeds × 2 colors. Expected: rc82 > rc160 > rc16 > rc52b tier ordering based on pm26 H2H evidence. Dispatch: `ssh jdl_wsl` + `tmux work`.
+2. **Submission selection decision**:
+   - **rc160** if code 40pt (baseline) is priority — 97.5% is safest.
+   - **rc82** if extra 30pt (tournament) is priority — dominates in H2H.
+   - Recommend: run phase 4 first, then decide based on data.
+3. **M7 flatten_agent** (Mac coding, ~2h). `experiments/select_top4.py:140` has NotImplementedError stub. Must implement AST-based flattening to produce `20200492.py` from chosen rc (rc160 or rc82). Both are composition-based so flattening needs `zoo_reflex_rc82.py` + `zoo_reflex_rc16.py` + `zoo_core.py` + `zoo_features.py` inlined.
+4. **Server Order 4 check** (SSH was timing out pm26). Retry `ssh jdl_wsl "pgrep -af evolve.py | wc -l && ls experiments/artifacts/2?_gen*.json | tail -5"`. If finished, HTH battery vs baseline + add to Phase 4 pool.
+
+### 🧪 pm26 key findings (pattern laws)
+
+1. **Asymmetric direction matters**: "rc82-leading + rc16-else" (rc160) = 99%. Reverse (rc164) = 97%.
+2. **Tied score MUST use rc16**: rc163 (rc82 at 0) = 96%, rc162 (rc82 always ex tied) = 93%.
+3. **Threshold 1-3 is flat**: rc160 (≥1) = rc166 (≥3) = 99%.
+4. **More switch slots don't help**: 2-way rc160 = 99% > 4-way rc152 = 98% > 5-way rc154 = 92%.
+5. **Baseline WR is NOT tournament proxy** — rc160 beats baseline by switching but loses to rc82 H2H.
+
+### 📝 pm26 full rc catalog (24 agents committed)
+
+Switch variants (12):
+- rc148-152: score-conditioned (rc82/rc52b/A1/...)
+- rc153-156: variants with rc32 / hysteresis / finer bands
+- rc157-160: no-A1 / 2-way
+- rc161-167: champion-only combinations + threshold sweep
+- rc170-174: consensus / carry-count / endgame-guard
+
+Asymmetric (5): rc141/142/143/147 (learning OFF + composite DEF) — all 90-91%.
+
+REINFORCE (3): rc52b (92% lucky), rc52c (86% overshot), rc52d (86% conservative-regressed).
+
+Verification-only: rc82/rc16/rc105 100g re-tests.
+
+### 🔧 Files ready to use
+
+- `minicontest/zoo_reflex_rc160.py` ← **primary submission candidate** (2-way score switch)
+- `minicontest/zoo_reflex_rc82.py` ← **tournament submission candidate** (rc29+rc44 composite)
+- `experiments/hth_battery.py` ← for 100g authoritative HTH
+- `experiments/tournament.py` ← Phase 4 round-robin (dispatch to server)
+
+### 🚨 Known issues / TODOs
+
+- M7 flatten_agent raises `NotImplementedError` — must fix before M8/M10.
+- Server Order 4 status unknown (SSH timeout 2026-04-19 evening).
+- pm23/24 "100% champion" labels need global update — they're 90-97% at 100g, not 100%.
+
+### 📂 Reference docs
+
+- `.omc/wiki/2026-04-19-pm26-end-switch-based-rc160-breakthrough-97-5-200g.md` — full pm26 session log
+- `.omc/plans/rc-pool.md` — 160+ rc catalog with pm26 entries
+- `experiments/hth_battery.py --help` — HTH protocol
+- Recent commits: `git log --oneline -10` → 6 pm26 commits (rc sprint → rc152 → rc160 → final)
+
+---
+
+## pm25 TL;DR (historical — pm26 superseded this)
+
+### pm25 주요 성과
+
+- rc22 distillation (numpy MLP, rc82 teacher) → 88% vs baseline Wilson [0.80, 0.93]
+- rc22-v2 39-dim extended features → 85% (val_acc 91→94% but game-WR plateau)
+- rc52 REINFORCE (linear Q gradient, A1 init, T=5) → 90% [0.83, 0.95] (honest post-debug)
+- rc140 (rc52 OFF + rc82 DEF asym) → 91%
+- A1 authoritative Mac 100g = 86% [0.78, 0.92] (corrected from server 79%)
 - Server Order 4 Phase 2a gen 3/10 best=0.712 ETA ~20-24h.
 
-## pm26 TL;DR (NEXT SESSION)
+## pm26 TL;DR (historical — superseded by pm26 END section at top)
 
 ### pm25 주요 성과
 
@@ -50,7 +117,7 @@
 - `.omc/plans/rc-pool.md` 끝부분 — pm25 log + rc22 status row
 - `experiments/artifacts/rc22/` — weights + data + hth CSV
 
-## pm25 TL;DR (NEXT SESSION — 🚨 READ CAREFULLY)
+## pm25 TL;DR (historical — deeper pm25 context)
 
 ### ⚠️ pm24가 놓친 것 (IMPORTANT)
 
