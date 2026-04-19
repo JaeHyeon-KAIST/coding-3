@@ -356,3 +356,11 @@
   - **rc130** (NEW) rc08 dual-invader OFF + rc82 DEF: **37/40 + 2T = 92.5%+** ✅ PASS.
   - **pm24 total (A-O, 15 batches)**: **60 new rc, 58 pass** (36 strong + 22 weak), **2 drop**.
   - **Pattern refinement**: The "X OFF + rc82 DEF = 100%" pattern is NOT universal. It holds for rc16/rc32 offenses but NOT for A1/rc08/rc09/rc19. **rc16 OFF + rc82 DEF is uniquely special** — likely because Voronoi's territorial scoring complements rc82's internal stacking, whereas plain reflex offenses don't. The 100% ceiling requires specific OFF-DEF combinations, not just strong DEF.
+- **2026-04-19 pm24 Batch P 40-game HTH (rc29-overlay verification + ensemble offense)**:
+  - **rc131** (NEW) rc32+rc29 OFF + rc82 DEF: **40/40 = 100%** 🥇 — **8TH PERFECT CHAMPION**! rc29 disruption layered on rc32 offense matches rc109 (rc29 on rc16) at 100%.
+  - **rc132** (NEW) rc45 ensemble OFF + rc82 DEF: **39/40 + 1T = 97.5%+** ✅ PASS.
+  - **rc133** (NEW) rc15 ensemble OFF + rc82 DEF: **38/40 + 1T = 95%+** ✅ PASS.
+  - **rc134** (NEW) rc16 OFF + rc94 DEF: **37/40 + 3T = 92.5%+** ✅ PASS. rc94 (3-way vote) as DEF weaker than rc82 DEF.
+  - **pm24 total (A-P, 16 batches)**: **64 new rc, 62 pass** (38 strong + 24 weak), **2 drop**.
+  - **Champion tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
+  - **Insight (Batch P)**: rc29 REVERSE overlay lifts both rc16 offense (→ rc109 100%) AND rc32 offense (→ rc131 100%) to perfect scores when paired with rc82 DEF. The disruption pattern is universal across champion offense bases. rc94 as DEF is materially weaker than rc82 DEF (92.5%+ vs 100%).

@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **60 new rc** (A-O batches, 15 batches). **58 pass** (36 strong, 22 weak), 2 drop. **7 champions at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123), 10 at 97.5%+, 19 at 95%+. Pattern refined: rc82 DEF alone is NOT sufficient — requires rc16/rc32 as OFF (Voronoi/Pincer complementing rc82's internal votes). Server Order 4 Phase 2a gen 2/30.
+**Last updated:** 2026-04-19 pm24 end — **64 new rc** (A-P batches, 16 batches). **62 pass** (38 strong, 24 weak), 2 drop. **🎉 8 champions at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123, **rc131** NEW), 11 at 97.5%+, 20 at 95%+. rc29 REVERSE overlay lifts both rc16-offense (rc109) and rc32-offense (rc131) to 100% with rc82 DEF. Server Order 4 Phase 2a gen 2/30.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
