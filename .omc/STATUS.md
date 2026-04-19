@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **12 new rc** implemented + HTH 완료. **10 pass** (rc07/28/29/31/44/48/50 + rc21/81/82), 2 dropped (rc30/34). **rc82 (rc29+rc44 combo) joins rc02+rc16 at 100%**. Server Order 4 Phase 2a still early (ETA ~18h).
+**Last updated:** 2026-04-19 pm24 end — **16 new rc** (A+B+C+D batches). **14 pass**, 2 drop. **3 champions at 100%** (rc02/rc16/rc82). rc84/rc86/rc21/rc03/rc15 ≥95%. Server Order 4 Phase 2a still early (ETA ~18h).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
@@ -9,33 +9,39 @@
 → **pm24 session log** — `.omc/wiki/` 하위 `2026-04-19-pm24-*` page (when ingested).
 → **pm23 session log** — `.omc/wiki/2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md`.
 
-## pm24 headline (+12 rc, +10 pass; 3 new 100%-WR)
+## pm24 headline (+16 rc total, +14 pass; 3 new 100%-WR)
 
-pm24 Batch A+B+C 40-game HTH (20 Red + 20 Blue vs baseline):
+pm24 Batch A+B+C+D 40-game HTH (20 Red + 20 Blue vs baseline):
 | Agent | Red | Blue | Total | WR | Verdict |
 |---|---|---|---|---|---|
 | **rc82** rc29+rc44 combo | 20/20 | 20/20 | 40/40 | **100%** | 🥇 PASS |
+| **rc84** Role-asym rc82 OFF + rc02 DEF | 18/20+2T | 20/20 | 38/40+2T | **95%+** | ✅ PASS |
+| **rc86** rc82 + rc48 WHCA* stack | 18/20+1T | 20/20 | 38/40+1T | **95%+** | ✅ PASS |
 | **rc21** Layout clustering (weight mult) | 20/20 | 18/20 | 38/40 | **95%** | ✅ PASS |
 | **rc81** Role-asym rc16 OFF + rc02 DEF | 17/20+3T | 20/20 | 37/40+3T | **92.5%+** | ✅ PASS |
 | **rc29** Search-depth disruption | 20/20 | 17/20 | 37/40 | **92.5%** | ✅ PASS |
 | **rc44** State-conditioned stacking | 19/20 | 18/20 | 37/40 | **92.5%** | ✅ PASS |
+| **rc83** 5-way multi-champ ensemble | 17/20 | 19/20 | 36/40 | **90%** | ✅ PASS |
 | **rc48** WHCA* teammate deconflict | 19/20 | 17/20 | 36/40 | **90%** | ✅ PASS |
 | **rc50** Opening book (15-turn) | 18/20 | 18/20 | 36/40 | **90%** | ✅ PASS |
 | **rc07** Kamikaze decoy | 20/20 | 16/20 | 36/40 | **90%** | ✅ PASS |
+| **rc85** Capsule-timing gate | 17/20 | 18/20+1T | 35/40+1T | **87.5%+** | ✅ PASS |
 | **rc31** Kiting / aggro-juggling | 17/20 | 18/20 | 35/40 | **87.5%** | ✅ PASS |
 | **rc28** Boids anti-clump | 14/20 | 19/20 | 33/40 | **82.5%** | ✅ PASS (ties A1) |
 | **rc30** Particle-filter blinding | 8/20 | 2/20 | 10/40 | **25%** | ❌ DROP |
 | **rc34** Pavlovian feinting | 0/20 | 0/20 | 0/40 | **0%** | ❌ DROP |
 
-**pm24 cumulative rc count**: 27 new rc (pm23 = 16 pass + 1 drop rc18; pm24 = 10 pass + 2 drop rc30/34).
-**Pool size for Phase 4**: 27 rc + A1/O2/O3/(O4) + D1/D2/D3/D13/T4/T5 = ~34 candidates.
+**pm24 cumulative rc count**: 31 new rc (pm23 = 16 pass + 1 drop rc18; pm24 = 14 pass + 2 drop rc30/34).
+**Pool size for Phase 4**: 31 rc + A1/O2/O3/(O4) + D1/D2/D3/D13/T4/T5 = ~38 candidates.
 **3 champions at 100% WR**: rc02 (Tarjan AP), rc16 (Voronoi), rc82 (rc29+rc44 combo).
 
 **Insights (pm24)**:
 1. **Stochastic top-K injection catastrophic** — rc29 (threat-conditioned REVERSE) passes, rc34 (time-conditioned blind) fails.
-2. **Orthogonal overlays compose** — rc82 (rc29+rc44) ties the 100% ceiling. Tactical (rc29) + strategic (rc44) layers stack.
-3. **Role-asymmetric team viable** — rc81 (rc16+rc02) 92.5% shows different-class-per-role works; confirms Phase 4 can include asymmetric compositions.
-4. **Layout conditioning helps** — rc21 95% with only a ×1.10/×0.90 class multiplier. Simple metric → measurable gain.
+2. **Orthogonal overlays compose** — rc82 (rc29+rc44) ties the 100% ceiling. Tactical + strategic layers stack.
+3. **Role-asymmetric design viable** — rc84 (rc82 OFF + rc02 DEF) 95%+ beats rc81 (rc16 OFF + rc02 DEF) 92.5%+ because offense is stronger.
+4. **Layout conditioning helps** — rc21 95% with ×1.10/×0.90 class multiplier alone.
+5. **Ensemble dilution** — rc83 (5-way vote) only 90%, BELOW its strongest member rc82 (100%). Voting over weaker members pulls top signal down.
+6. **Stacked overlays preserve quality** — rc86 (rc82 + rc48) 95%+. Unlike voting, sequential override (apply strongest, then filter) doesn't dilute.
 
 ## pm23 headline (rc02-rc08 sprint)
 

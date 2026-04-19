@@ -262,3 +262,11 @@
   - **rc82** (NEW NUMBER) rc44 state-stacking + rc29 REVERSE disruption combo: **40/40 = 100%** 🥇✅ PASS (Red 20/20, Blue 20/20). Ties rc02/rc16 for top. Confirms orthogonal overlays compose.
   - **pm24 total (Batch A + B + C)**: 12 new rc implemented, **10 pass** (rc07/28/29/31/44/48/50 + rc21/81/82), 2 drop (rc30/34).
   - **Top pool at pm24 end**: rc02/rc16/rc82 = 100% (3 champions), rc32 = 97.5%, rc21/rc03/rc15 = 95%, rc81/rc09/rc19/rc45/rc08/rc29/rc44 = 92.5%+.
+- **2026-04-19 pm24 Batch D 40-game HTH (composite stacks + ensembles)**:
+  - **rc83** 5-way multi-champion weighted ensemble (A1 + rc02 + rc16 + rc82 + rc21): **36/40 = 90%** ✅ PASS (Red 17/20, Blue 19/20). Interesting: does NOT exceed single rc82's 100% — voting dilutes strong members.
+  - **rc84** Role-asymmetric rc82 on OFFENSE + rc02 on DEFENSE: **38/40 + 2T = 95%+** ✅ PASS (Red 18/20 + 2T, Blue 20/20). Beats rc81 (rc16+rc02 at 92.5%+) by using the stronger offense combo.
+  - **rc85** Dynamic capsule-timing gate (zero f_distToCapsule unless threat/carry trigger): **35/40 + 1T = 87.5%+** ✅ PASS (Red 17/20, Blue 18/20 + 1T).
+  - **rc86** rc82 + rc48 WHCA* triple stack (tactical + strategic + teammate deconflict): **38/40 + 1T = 95%+** ✅ PASS (Red 18/20 + 1T, Blue 20/20).
+  - **pm24 total (A + B + C + D)**: **16 new rc implemented, 14 pass** (rc07/21/28/29/31/44/48/50 + rc81/82/83/84/85/86), 2 drop (rc30/34).
+  - **Final top pool**: rc02/rc16/rc82 = 100%, rc32 = 97.5%, rc84/rc86/rc21/rc03/rc15 = 95%+, rc83/rc81/rc09/rc19/rc45/rc08/rc29/rc44/rc50/rc48/rc07 = 90-92.5%+.
+  - **Insight**: Ensemble dilution (rc83 < rc82) suggests adding more weaker members can degrade the top performer's signal. Role-asymmetric with stronger offense (rc84 > rc81) shows specialization helps. Orthogonal stacks (rc86 = rc82 + rc48) preserve component quality.
