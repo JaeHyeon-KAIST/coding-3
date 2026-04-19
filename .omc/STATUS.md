@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **16 new rc** (A+B+C+D batches). **14 pass**, 2 drop. **3 champions at 100%** (rc02/rc16/rc82). rc84/rc86/rc21/rc03/rc15 ≥95%. Server Order 4 Phase 2a still early (ETA ~18h).
+**Last updated:** 2026-04-19 pm24 end — **20 new rc** (A+B+C+D+E batches). **18 pass** (14 strong, 4 weak), 2 drop. **3 champions at 100%** (rc02/rc16/rc82), **rc90 97.5%** (rc82 OFF + rc32 DEF beats all other asym combos). Server Order 4 Phase 2a still early (ETA ~18h).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
@@ -38,10 +38,12 @@ pm24 Batch A+B+C+D 40-game HTH (20 Red + 20 Blue vs baseline):
 **Insights (pm24)**:
 1. **Stochastic top-K injection catastrophic** — rc29 (threat-conditioned REVERSE) passes, rc34 (time-conditioned blind) fails.
 2. **Orthogonal overlays compose** — rc82 (rc29+rc44) ties the 100% ceiling. Tactical + strategic layers stack.
-3. **Role-asymmetric design viable** — rc84 (rc82 OFF + rc02 DEF) 95%+ beats rc81 (rc16 OFF + rc02 DEF) 92.5%+ because offense is stronger.
+3. **Role-asymmetric design viable** — rc84 (rc82+rc02) 95%+, rc90 (rc82+rc32) **97.5%** best asym so far. Pincer defender > AP defender for this composition.
 4. **Layout conditioning helps** — rc21 95% with ×1.10/×0.90 class multiplier alone.
-5. **Ensemble dilution** — rc83 (5-way vote) only 90%, BELOW its strongest member rc82 (100%). Voting over weaker members pulls top signal down.
-6. **Stacked overlays preserve quality** — rc86 (rc82 + rc48) 95%+. Unlike voting, sequential override (apply strongest, then filter) doesn't dilute.
+5. **Ensemble dilution** — rc83 (5-way vote) 90% < rc82 solo 100%. Voting over weaker members pulls top signal down.
+6. **Stacked overlays preserve quality** — rc86 (rc82+rc48) 95%+. Sequential override (apply strongest, then filter) doesn't dilute.
+7. **Narrow fire-conditions essential** — rc87 (far-food always-on when safe) 55% and rc89 (dead-end avoid 5-cell) 55%. Overlays that fire too often destroy A1's tuned behavior. Successful overlays (rc02 invader-visible, rc29 herded, rc48 collision) all have tight triggers.
+8. **2-ply lookahead modest gain** — rc88 80%, better than A1 82.5%? Actually below. Self-play lookahead without opponent model doesn't always help reflex policies.
 
 ## pm23 headline (rc02-rc08 sprint)
 

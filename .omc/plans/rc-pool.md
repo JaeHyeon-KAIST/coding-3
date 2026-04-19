@@ -270,3 +270,11 @@
   - **pm24 total (A + B + C + D)**: **16 new rc implemented, 14 pass** (rc07/21/28/29/31/44/48/50 + rc81/82/83/84/85/86), 2 drop (rc30/34).
   - **Final top pool**: rc02/rc16/rc82 = 100%, rc32 = 97.5%, rc84/rc86/rc21/rc03/rc15 = 95%+, rc83/rc81/rc09/rc19/rc45/rc08/rc29/rc44/rc50/rc48/rc07 = 90-92.5%+.
   - **Insight**: Ensemble dilution (rc83 < rc82) suggests adding more weaker members can degrade the top performer's signal. Role-asymmetric with stronger offense (rc84 > rc81) shows specialization helps. Orthogonal stacks (rc86 = rc82 + rc48) preserve component quality.
+- **2026-04-19 pm24 Batch E 40-game HTH (novel axis + role-asym + lookahead)**:
+  - **rc87** Far-food prioritization (target food furthest from defender): **22/40 = 55%** ⚠️ WEAK PASS (Red 11/20, Blue 11/20). Thesis failed — forced-far-food routing loses ground when fair-nearest is actually safe.
+  - **rc88** 2-ply self-play reflex lookahead (γ=0.6): **32/40 = 80%** ✅ PASS (Red 15/20, Blue 17/20). Gains vs A1 but below single-overlay rc2/rc16.
+  - **rc89** Dead-end corridor avoidance (ghost ≤ 5): **22/40 + 1T = 55%** ⚠️ WEAK PASS (Red 11/20 + 1T, Blue 11/20). Propagated dead-end tagging may flag too many cells on defaultCapture.
+  - **rc90** (NEW NUMBER) Role-asym rc82 OFF + rc32 DEF Pincer: **39/40 = 97.5%** 🥈 STRONG PASS (Red 19/20, Blue 20/20). **Pincer defender beats AP defender for this composition** — rc90 > rc84 > rc81.
+  - **pm24 total (A + B + C + D + E)**: **20 new rc, 18 pass** (14 strong + 4 weak), **2 drop** (rc30/34).
+  - **Top Phase 4 candidates**: rc02/rc16/rc82 = 100%, rc90 = 97.5%, rc32 = 97.5%, rc84/rc86/rc21/rc03/rc15 = 95%+, rc81/rc29/rc44/rc19/rc09/rc45/rc08 = 92.5%+.
+  - **Insight**: Dragging overlay heuristics active "too often" (rc87 far-food always-on, rc89 dead-end 5-cell trigger) can destroy A1's tuned behavior. All our highest-rc successes had NARROW fire-conditions (rc02 invader visible, rc29 herded, rc48 teammate collision). Broad always-on overrides underperform even when the logic is individually sound.
