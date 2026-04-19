@@ -240,3 +240,17 @@
   - **Top candidates pm23 (WR > 90%)**: rc02 (100%), rc16 (100%), rc32 (97.5%), rc03 (95%), rc15 (95%), rc45 (92.5%+), rc19 (92.5%), rc09 (92.5%), rc08 (92.5%+).
   - **pm23 총 신규 rc: 17개** (12 Day 1-2 + 5 batch3). Phase 4 pool 크게 확장.
 - **2026-04-19 pm23 autopilot S1 (서버)**: Order 3 완료 (30 gens, 최종 fitness 0.855). HTH baseline 78% < A1 79%; monster_rule_expert 56.7% << A1 76.7%. **A1 챔피언 유지.** zoo_reflex_O3 HOF wrapper 생성·커밋·서버 pull. Order 4 (master-seed 2026, init a1, HOF pool=A1+O2+O3) 서버에서 자동 런치 — ETA ~18h.
+- **2026-04-19 pm24 Batch A 40-game HTH (Mac, 서버 Order 4 waiting)**:
+  - **rc28** Boids swarm cohesion: 33/40 = 82.5% (Red 14/20, Blue 19/20). Ties A1.
+  - **rc29** Search-depth disruption (REVERSE when herded): **37/40 = 92.5%** (Red 20/20, Blue 17/20). +10pp vs A1.
+  - **rc31** Kiting / aggro-juggling (distance-2 hold): 35/40 = 87.5% (Red 17/20, Blue 18/20).
+  - **rc44** Stacking meta-policy (state-conditioned weights over A1+rc02+rc16+rc32): **37/40 = 92.5%** (Red 19/20, Blue 18/20).
+  - **rc50** Opening book (15-turn role-conditioned target): **36/40 = 90%** (Red 18/20, Blue 18/20).
+  - All 5 ≥ 30% threshold → Phase 4 round-robin pool 포함.
+  - Top pm24 Batch A: rc29/rc44 (92.5%) and rc50 (90%) above A1 baseline 82.5%.
+- **2026-04-19 pm24 Batch B 40-game HTH (Mac, stochastic overlays)**:
+  - **rc30** Particle-filter blinding (random top-K when out of sight): **10/40 = 25%** ❌ FAIL — random choices wreck coordinated offense (Red 8/20, Blue 2/20). **DROPPED.**
+  - **rc34** Pavlovian feinting (every-7-turn 2nd-best injection): **0/40 = 0%** ❌ COMPLETE FAIL — periodic stochastic drops are catastrophic at critical moments (Red 0/20, Blue 0/20). **DROPPED.**
+  - **rc48** WHCA* / reservation-table teammate deconfliction: **36/40 = 90%** ✅ PASS (Red 19/20, Blue 17/20). Phase 4 pool 포함.
+  - **Insight**: Periodic/random top-K injection ≠ free lunch. Deterministic top-K like A1 argmax is information-preserving; stochastic wrecks at critical food-return or ghost-kill moments. Confirms rc29 (REVERSE only under ghost threat) and rc34 (every 7 turns blindly) are qualitatively different — targeted disruption ≠ untargeted noise.
+  - **pm24 total (Batch A + B)**: 8 new rc implemented, 6 pass (rc28/29/31/44/48/50), 2 drop (rc30/34).

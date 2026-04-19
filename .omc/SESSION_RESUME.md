@@ -1,13 +1,23 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-19 pm22 end — Order 3 Phase 2b gen 6 (best_ever=0.796). Phase 2a completed with best_ever 0.716 > A1. 80 rc candidates pool 수집 완료. pm23 실제 구현 시작 예정.
+**Last updated:** 2026-04-19 pm24 end — Order 4 Phase 2a gen 0 launched (ETA ~18h, master-seed=2026, init=a1, HOF pool=A1+O2+O3). pm24 implemented 8 new rc (6 pass, 2 drop).
 
-## pm23 TL;DR (CANDIDATE IMPLEMENTATION START)
+## pm25 TL;DR (NEXT SESSION)
 
-- **pm22 주요 성과**: Round-robin 후보 80개 수집 (Codex 18 + Gemini 17 + 기존 50 + user 아이디어). `rc-pool.md`에 마스터 목록.
-- **pm23 할 일**: Tier 1 rc01 (D-series) 부터 Mac에서 실제 구현.
-- **서버 상태**: Order 3 진행 중, autopilot cron 재생성 필요.
-- **First actions**: `.omc/plans/pm23-handoff.md` 읽기 → `.omc/plans/rc-pool.md` 훑기 → 서버 상태 체크 → cron 재생성 → rc01 시작.
+- **pm24 주요 성과**: 8 new rc implemented + full 40g HTH. 6 pass: rc29/rc44 (92.5%), rc48/rc50 (90%), rc31 (87.5%), rc28 (82.5%). 2 drop: rc30/rc34 (random top-K catastrophic).
+- **pm25 할 일**:
+  1. `ssh jdl_wsl "tmux capture-pane -t work -p -S -30 | tail -20"` — Order 4 상태 확인.
+  2. Order 4 완료 (ETA 2026-04-20 ~06:00 KST) → HTH battery → O4 HOF wrapper 생성 또는 A1 유지.
+  3. Phase 4 round-robin tournament 준비 (23 rc + A1/O2/O3/O4 + D-series = ~30 candidates).
+  4. M7 flatten 계획 수립 (champion = A1 or best rc46/rc02/rc16/rc29/rc44).
+- **서버 상태**: Order 4 running, 18 evolve processes, ETA ~18h.
+- **First actions**: `.omc/STATUS.md` pm24 headline → Order 4 server check → Phase 4 plan.
+
+## pm23-24 TL;DR (historical)
+
+- **pm22**: Round-robin 후보 80개 수집 (Codex 18 + Gemini 17 + 기존 50 + user 아이디어). `rc-pool.md` 생성.
+- **pm23**: 17 rc implemented in one session (rc02-rc08, rc09/11/15/16/17/19, rc27/32/33/45/46). rc02 + rc16 공동 1위 (100%), rc32 97.5%. rc18 dropped (FAIL).
+- **pm24**: 8 more rc (rc28/29/30/31/34/44/48/50). 6 pass, 2 drop. Batch B learned: random top-K injection catastrophic; deterministic top-K safe.
 
 ## pm22 TL;DR (historical)
 

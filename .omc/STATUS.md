@@ -1,12 +1,34 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm23 mid — rc02-rc08 Tier 1 구현·smoke 완료. **rc02 Tarjan AP 40/40 (100%) vs baseline — A1 대비 +17.5pp**. Order 3 Phase 2b gen 7 (best=0.788) 서버 자동 진행 중.
+**Last updated:** 2026-04-19 pm24 — 8 new rc implemented + HTH 완료. **6 pass** (rc28/29/31/44/48/50), 2 dropped (rc30/34). Top pm24: rc29/rc44 (92.5%), rc50/rc48 (90%). Server Order 4 Phase 2a gen 0 (ETA ~18h, master-seed=2026 init=a1 HOF pool=A1+O2+O3).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
-## 🚨 pm24 entry point (authoritative)
+## 🚨 pm25 entry point (authoritative)
 
-→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** + pm23 변경 로그 (rc02-rc08 status).
-→ **`.omc/wiki/2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md`** — pm23 session log with full HTH table.
+→ **`.omc/plans/rc-pool.md`** — **80 round-robin candidates 마스터 문서** + pm23/pm24 변경 로그.
+→ **pm24 session log** — `.omc/wiki/` 하위 `2026-04-19-pm24-*` page (when ingested).
+→ **pm23 session log** — `.omc/wiki/2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md`.
+
+## pm24 headline (+8 rc, +6 pass)
+
+pm24 Batch A+B 40-game HTH (20 Red + 20 Blue vs baseline):
+| Agent | Red | Blue | Total | WR | Verdict |
+|---|---|---|---|---|---|
+| **rc29** Search-depth disruption | 20/20 | 17/20 | 37/40 | **92.5%** | ✅ PASS |
+| **rc44** State-conditioned stacking | 19/20 | 18/20 | 37/40 | **92.5%** | ✅ PASS |
+| **rc48** WHCA* teammate deconflict | 19/20 | 17/20 | 36/40 | **90%** | ✅ PASS |
+| **rc50** Opening book (15-turn) | 18/20 | 18/20 | 36/40 | **90%** | ✅ PASS |
+| **rc31** Kiting / aggro-juggling | 17/20 | 18/20 | 35/40 | **87.5%** | ✅ PASS |
+| **rc28** Boids anti-clump | 14/20 | 19/20 | 33/40 | **82.5%** | ✅ PASS (ties A1) |
+| **rc30** Particle-filter blinding | 8/20 | 2/20 | 10/40 | **25%** | ❌ DROP |
+| **rc34** Pavlovian feinting | 0/20 | 0/20 | 0/40 | **0%** | ❌ DROP |
+
+**pm24 cumulative rc count**: 23 new rc (pm23 = 17 pass + 1 drop rc18; pm24 = 6 pass + 2 drop rc30/34).
+**Pool size for Phase 4**: 23 rc + A1 + O2 + O3 (when Order 4 lands → O4) + D1/D2/D3/D13/T4/T5 = ~30 candidates. Rich diversity.
+
+**Insight (pm24)**: Periodic/random top-K injection catastrophic. Deterministic top-K with narrow A1 tolerance = safe; blind stochasticity = surrender kill/return opportunities. rc29 (REVERSE under threat only) passes; rc34 (every-7-turn) fails. Targeting > untargeted noise.
+
+## pm23 headline (rc02-rc08 sprint)
 
 ## pm23 headline (rc02-rc08 sprint)
 
