@@ -1,0 +1,27 @@
+# Phase 4 round-robin tournament agent list.
+# Selected by pm24 HTH-vs-baseline ranking (17-batch MEGA sprint).
+# Format: one agent module per line (without .py).
+#
+# Tier 1 (100% HTH) — 8 agents
+zoo_reflex_rc02
+zoo_reflex_rc16
+zoo_reflex_rc82
+zoo_reflex_rc105
+zoo_reflex_rc109
+zoo_reflex_rc116
+zoo_reflex_rc123
+zoo_reflex_rc131
+#
+# Tier 2 (97.5%+ HTH) — 4 top picks
+zoo_reflex_rc32
+zoo_reflex_rc90
+zoo_reflex_rc97
+zoo_reflex_rc101
+#
+# References
+zoo_reflex_A1
+baseline
+#
+# Target: 14 agents × 13 = 182 pair orderings × 1 layout × 1 seed × 2 colors = 364 games.
+# Estimated wall on server (16 workers, ~7.7s/match parallel = ~1s/match effective): ~6 min.
+# Actual wall on Mac (~1-2 min/match, single-threaded): ~6-12h. Server preferred.

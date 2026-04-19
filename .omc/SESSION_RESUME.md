@@ -2,18 +2,65 @@
 
 **Last updated:** 2026-04-19 pm24 FINAL — **68 new rc** in one autopilot session (17 batches A-Q). **8 at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131). Order 4 Phase 2a gen 2/30 still cooking (~30h total ETA).
 
-## pm25 TL;DR (NEXT SESSION)
+## pm25 TL;DR (NEXT SESSION — 🚨 READ CAREFULLY)
 
-- **pm24 주요 성과**: 68 new rc + HTH 배터리 전체 완료. 8 champions at 100%. Phase 4 pool ~75 candidates.
-- **Key insight**: rc16/rc32 OFFENSE + rc82 DEFENSE is the 100% sweet spot. rc29 REVERSE overlay is universal lift. Narrow fire-conditions essential.
-- **pm25 할 일**:
-  1. Server poll — Order 4 상태 (ETA 2026-04-20 ~17:00 KST if gen 2/30 wall ~60min)
-  2. Order 4 완료 → HTH battery → A1 대비 비교 → O4 HOF or A1 keep
-  3. **Phase 4 round-robin tournament** — `experiments/tournament.py` on ~75 agents × 2 seeds × defaultCapture+RANDOM
-  4. **M7 flatten** — pick Phase 4 ELO winner for submission (best candidates: rc82, rc105, rc109, rc116, rc123, rc131)
-  5. **M8-M10** — output.csv + ICML report + zip packaging
-- **서버 상태**: Order 4 running, 18 evolve processes, gen 2/30, wall ~60 min/gen, ETA ~30h total
-- **First actions**: `.omc/STATUS.md` pm24 FINAL headline → wiki `2026-04-19-pm24-mega-sprint-68-rc-8-champions` → server poll
+### ⚠️ pm24가 놓친 것 (IMPORTANT)
+
+**pm24는 Tier 1-2 hand-rule/composite만 68개 구현했고, Tier 3 학습 기반 rc는 전혀 안 함.**
+
+안 한 큰 항목 (각 1~5일 소요):
+- **rc22** Policy Distillation (teacher → student MLP, numpy inference)
+- **rc23** Coevolutionary CEM
+- **rc51** C4 ExIt (MCTS+NN)
+- **rc52** Q-learning v3 real training (replay buffer + SGD)
+- **rc53** CMA-ES with restarts
+- **rc54** NEAT
+- **rc55-60** IS-MCTS / POMCP / Factored MCTS 등
+- **rc61** **AlphaZero-lite (5일, 가장 복잡)**
+- **rc62-64** Distributional RL / SAC / MAPPO
+- **rc70** MuZero-lite (5일, 연구급)
+- **rc71-75** 최신 논문 (TAR², DrS, ARES, DIRECT, MAML)
+- **rc76-80** Pruning / Ensemble Distillation / Gating
+
+제출은 numpy+pandas only이므로 학습은 server GPU (RTX 4090)에서, 추론 weights는 numpy로 export 필요.
+
+### pm24 주요 성과 (사실)
+
+- **68 new rc** (17 batches A-Q), **66 pass**, 2 drop
+- **8 champions at 100%**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131
+- Pattern 발견: rc16/rc32 OFF + rc82 DEF = sweet spot
+- 모두 **hand-rule + composite/overlay** — 학습 없음
+
+### pm25 우선순위
+
+**병렬 전략 (추천)**:
+1. **서버 Order 4 완료 대기** (ETA 2026-04-20 ~17:00 KST if gen 2/30 wall ~60min/gen)
+2. **Mac: Tier 3 rc 시작** — 아래 순서
+   a. **rc22 Policy Distillation** (제일 쉬운 진입): rc82 data collection → numpy MLP 학습 → rc22 inference agent
+   b. **rc52 Q-learning v3** (1~2일): replay buffer + SGD, zoo_approxq 살리기
+   c. **rc61 AlphaZero-lite** (5일, stretch): MCTS + policy/value net + self-play
+3. **서버 Order 4 끝나면**: HTH battery → O4 champion 결정 → Phase 4 tournament 런칭 (~75 agents, 서버 6분)
+4. **Phase 4 결과로 M7 flatten** 챔피언 확정 (후보: rc82/105/109/116/123/131 + Tier 3 결과)
+5. **M8-M10** output.csv + ICML report + zip
+
+**서버 상태 (pm24 종료 시점)**: Order 4 running, 18 evolve processes, gen 2/30 wall ~60min, ETA ~30h
+
+**pm25 첫 액션**:
+```bash
+# Step 1: Server Order 4 상태
+ssh -o ConnectTimeout=10 jdl_wsl "cd ~/projects/coding-3 && pgrep -af evolve.py | wc -l && tail -15 logs/phase2_A4*.log"
+# Step 2: pm24 모든 rc 학습 요약 확인
+cat .omc/STATUS.md | head -60
+# Step 3: rc-pool.md 변경 로그에서 pm24 section
+# Step 4: Tier 3 중 rc22부터 시작 (data collection 단계)
+```
+
+**참고 문서**:
+- `.omc/wiki/2026-04-19-pm24-mega-sprint-68-rc-8-champions.md` — 68 rc 상세 기록
+- `.omc/plans/rc-pool.md` — 전체 80 rc 카탈로그 + 17 batch 변경 로그
+- `.omc/STATUS.md` — pm24 FINAL headline + champion tier
+- `experiments/phase4_agents.txt` (미커밋) — top-14 agent list
+- `experiments/phase4_launch.sh` (미커밋) — tournament 런칭 스크립트
 
 ## pm23-24 TL;DR (historical)
 
