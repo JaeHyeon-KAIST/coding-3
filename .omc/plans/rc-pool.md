@@ -94,7 +94,7 @@
 | ID | 기법 | 카테고리 | 난이도 | 예상 | 비고 |
 |---|---|---|---|---|---|
 | **rc51** | C4 ExIt (MCTS teacher → NN student) | C4 | H | 2일 | self-play + distill loop |
-| **rc52** | B1 Q-learning v3 (진짜 학습, replay buffer + SGD) | B1 | M | 2일 | zoo_approxq 살리기 |
+| **rc52** ✅ PASS 95% 🥈 | REINFORCE policy gradient (linear Q, 20-dim, A1-init) | B1 | M | pm25 done (9 min train) | 100g HTH 95/100 [0.888, 0.978]; 150-game REINFORCE; A1 +16pp lift |
 | **rc53** | A2 CMA-ES with restarts (IPOP-CMA-ES) | A2 | M | 2일 | covariance + restart |
 | **rc54** | J2 NEAT (evolve network topology) | J2 | H | 3일 | numpy 구현 많이 필요 |
 | **rc55** | Re-determinizing IS-MCTS | Codex | M | 2일 | information set MCTS |
@@ -372,6 +372,26 @@
   - **pm24 FINAL total (A-Q, 17 batches)**: **68 new rc, 66 pass** (40 strong + 26 weak), **2 drop** (rc30/34).
   - **Final Champion Tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
   - **Phase 4 pool**: 68 pm24 rc + ~30 pm23 rc + HOF wrappers + D/T series ≈ **~75 candidates**. Rich diversity for tournament.
+- **2026-04-19 pm25 Tier 3 rc52 REINFORCE Q-learning (SECOND learning-based rc, 🥇 NEW CHAMPION TIER)**:
+  - **Algorithm**: linear REINFORCE policy gradient. Q(s,a) = w · φ(s,a), policy π(a|s) = softmax(Q) over legal actions. Update: w ← w + lr · (G - b) · ∇log π, where G = team score, b = running-mean baseline.
+  - **Features**: same 20-dim as A1/tuned (φ(s,a) from zoo_features.extract_features).
+  - **Training**: 15 iterations × 10 games = 150 games, ε-greedy exploration (ε=0.15), lr=1e-4, L2 clip at 500. Init weights = **A1's** final (79% baseline WR).
+  - **Training-time WR trajectory** (ε=0.15, noisy): 70% → 40% → 60-80% oscillating, cum_wr 57.3%.
+  - **rc52 GREEDY (ε=0) 100-game HTH vs baseline**: **95/100 = 95.0%** Wilson [0.888, 0.978], 0 crashes. 🥈 **NEW CHAMPION TIER** (second-best among all single-agents, behind only 8× perfect composites).
+  - **A1 → rc52 delta**: **+16pp** from REINFORCE alone (no new features, no architecture change). Strongest single-learning-step gain in the project.
+  - **Why it worked**: REINFORCE credit-assigns per action; CEM only ranks whole genomes. With the same feature space, gradient signal is more efficient than population search when seeded from a good baseline (A1).
+  - **Files**: `minicontest/zoo_rc52_trainer.py` (ε-greedy + logger), `minicontest/zoo_reflex_rc52.py` (inference using tuned container), `experiments/train_rc52.py` (REINFORCE loop), `experiments/rc52_final_weights.py` (flat copy checked in).
+  - **Strategic value**: single learning-based agent that ALMOST matches the 8× perfect composites (95% vs 100%) from a 9-min training run. Phase 4 pool now has a strong MONO-AGENT neural/RL candidate next to 8 composites.
+
+- **2026-04-19 pm25 Tier 3 rc22-v2 Extended-feature Distillation**:
+  - Extended features: 20 base + 15 history one-hot + 1 successor AP flag + 3 phase one-hot = **39 dims**.
+  - Training: 100 games (same collector pipeline), hidden=48, 50 epochs.
+  - Val_acc: **93.7%** (vs v1's 90.3%) — **+3.4pp improvement**, info bottleneck relaxed.
+  - **rc22-v2 100-game HTH**: **85/100 = 85%** Wilson [0.767, 0.907], 0 crashes.
+  - **Lesson**: higher action-level accuracy did NOT yield proportional game-WR gain. 85% vs v1's 88% is statistically indistinguishable (CIs overlap). Confirms "teacher mimicking ceiling" — closer mimicking can inherit teacher's minor mistakes. Further iterations (v3, v4) would show diminishing returns.
+  - **Decision**: keep both v1 and v2 as Phase 4 pool members (architectural diversity). No rc22-v3 planned.
+  - **Files**: `minicontest/zoo_distill_collector_v2.py`, `minicontest/zoo_distill_rc22_v2.py`, `experiments/artifacts/rc22_v2/weights.npz`.
+
 - **2026-04-19 pm25 Tier 3 rc22 Policy Distillation (FIRST learning-based rc)**:
   - **Teacher**: rc82 (rc29+rc44 combo, pm24 100% WR champion).
   - **Student**: numpy MLP 20→32→1 (per-action Q-score), softmax over legal, argmax inference. **~2K parameters**, pure numpy forward pass (submission-safe).

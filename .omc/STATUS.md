@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm25 — **FIRST Tier 3 learning-based rc**: rc22 Policy Distillation PASS at **88/100 = 88.0%** (Wilson [0.80, 0.93]) vs baseline. Teacher rc82 (100%) → numpy MLP student (20→32→1, 2K params, submission-safe). pm24 headline: 68 rc, 8 @100%. Server Order 4 Phase 2a gen 3/10 running (best=0.712, ETA ~24h).
+**Last updated:** 2026-04-19 pm25 — **THREE Tier 3 rc's shipped**: (1) rc22 distillation **88%**, (2) rc22-v2 39-dim extended **85%**, (3) **rc52 REINFORCE Q-learning 95% 🥈** (NEW champion tier — A1 +16pp lift from 150-game policy gradient). Phase 4 pool now has single-agent neural/RL candidate next to 8 composite 100%-champions. Server Order 4 Phase 2a gen 3/10 running (best=0.712, ETA ~24h).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
