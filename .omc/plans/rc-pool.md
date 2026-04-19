@@ -372,6 +372,11 @@
   - **pm24 FINAL total (A-Q, 17 batches)**: **68 new rc, 66 pass** (40 strong + 26 weak), **2 drop** (rc30/34).
   - **Final Champion Tier (8 at 100%)**: rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131.
   - **Phase 4 pool**: 68 pm24 rc + ~30 pm23 rc + HOF wrappers + D/T series ≈ **~75 candidates**. Rich diversity for tournament.
+- **2026-04-19 pm25 rc140 rc52 OFF + rc82 DEF asymmetric (pm24-pattern extension)**:
+  - Applies pm24's "X OFF + rc82 DEF = 100%" pattern with learned X = rc52.
+  - **rc140 100-game HTH**: 91/100 = **91%** Wilson [0.838, 0.952], 0 crashes. BELOW rc52 solo (95%) — learned offense interacts weaker with rc82 DEF than hand-rule offenses (rc16/rc32) did.
+  - Still a PASS, adds diversity as "learning-based-offense + composite-defense" archetype.
+
 - **2026-04-19 pm25 Tier 3 rc52 REINFORCE Q-learning (SECOND learning-based rc, 🥇 NEW CHAMPION TIER)**:
   - **Algorithm**: linear REINFORCE policy gradient. Q(s,a) = w · φ(s,a), policy π(a|s) = softmax(Q) over legal actions. Update: w ← w + lr · (G - b) · ∇log π, where G = team score, b = running-mean baseline.
   - **Features**: same 20-dim as A1/tuned (φ(s,a) from zoo_features.extract_features).
