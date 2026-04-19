@@ -1,14 +1,17 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm26 — **Tier 3 + adaptive rc sprint (+5 rc, +2 lessons)**:
-- **rc52b** 92% Wilson [0.850, 0.959] 🥈 NEW LEARNING TIER PEAK — alt-run REINFORCE, +2pp over rc52
+**Last updated:** 2026-04-19 pm26 — **Tier 3 + adaptive sprint (+8 rc, 3 lessons, 1 ceiling)**:
+- **rc52b** 92% [0.850, 0.959] 🥈 LEARNING PEAK — alt-run REINFORCE, +2pp over rc52 (but ≈ **lucky sample**, see below)
 - **rc46** 91% [0.838, 0.952] — K-centroid opponent classifier (4-archetype, adaptive multipliers)
-- **rc141** 90% [0.826, 0.945] — rc52b OFF + rc82 DEF asym (below rc52b solo)
-- **rc142** 91% [0.838, 0.952] — rc46 OFF + rc82 DEF asym (= rc46 solo)
-- **rc52c** 86% [0.779, 0.915] — REINFORCE +30 iters from rc52b ckpt with higher lr + lower T → OVERSHOT (train WR ↑, HTH ↓). Lesson: aggressive hypparams don't scale training-WR into HTH-WR.
-- **Pattern confirmed**: "learning/classifier OFF + rc82 DEF" ≈ OFF-solo (no boost). 100% peak requires COMPOSITE OFF (rc16/rc32). Sweet-spot hyparams for REINFORCE = low lr + high T.
-- Prior: A1 86%, rc22 distill 88%, rc22-v2 85%, rc52 90%, rc82 100% (champion tier 8 at 100%).
-- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h (unreachable to check — SSH timeout).
+- **rc141** 90% — rc52b OFF + rc82 DEF asym (below rc52b solo)
+- **rc142** 91% — rc46 OFF + rc82 DEF asym (= rc46 solo)
+- **rc143** 91% — rc52b OFF + rc16 Voronoi DEF asym (Red 98% but Blue 84% — color asymmetry)
+- **rc147** 91% — rc46 + NEUTRAL→rc52b override (baseline not classified NEUTRAL enough)
+- **rc52c** 86% — REINFORCE aggressive lr 5e-4 + T=3 → OVERSHOT
+- **rc52d** 86% — REINFORCE conservative lr 1e-5 + T=8 → ALSO regressed, confirms rc52b was lucky
+- **Ceiling discovered**: simple weight-mix + classifier rc converge at **~91%**. 100% peak requires rc82's composite offense (rc16/rc32 OFF + rc82 DEF pattern).
+- **REINFORCE variance**: 3 runs gave HTH (92%, 86%, 86%) from training cum_wr (68%, 73%, 74%). rc52b is a single-run outlier; expect it to report with wide variance band.
+- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h (unreachable — SSH timeout).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)

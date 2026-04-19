@@ -445,3 +445,20 @@
   - **Recommendation for future REINFORCE**: prefer low lr + higher T + longer training for fine-grained improvement. rc52b's 67.7% cum_wr / 92% HTH was the sweet spot.
   - **Files**: `minicontest/zoo_reflex_rc52c.py` (wrapper kept for Phase 4 diversity; weights at `experiments/artifacts/rc52c/final_weights.py`).
   - **Phase 4 value**: rc52c joins pool as "over-trained REINFORCE" data point. Its HTH-86% matches A1, so it may serve as a controlled-regression member in tournament analysis.
+
+- **2026-04-19 pm26 rc143 rc52b OFF + rc16 Voronoi DEF asymmetric**:
+  - Alternative to rc141: use rc16 (A1 + Voronoi overlay, 100% solo) as DEF base instead of rc82 composite.
+  - **rc143 100-game HTH**: Red 49/50 + Blue 42/50 + 1 Tie → **91/100 = 91%** Wilson [0.838, 0.952]. Same ~91% tier as rc141/rc142. **Red side extraordinary (98%)** but Blue 84% — color asymmetry pulled down total. rc16 DEF doesn't stack additively with rc52b OFF either.
+
+- **2026-04-19 pm26 rc147 rc46 + NEUTRAL→rc52b override**:
+  - Attempted to exploit "baseline classifies as NEUTRAL" by swapping NEUTRAL archetype handler from A1-no-op to rc52b weights.
+  - **rc147 100-game HTH**: Red 46/50 + Blue 45/50 → **91/100 = 91%** Wilson [0.838, 0.952]. Same tier — NEUTRAL swap didn't lift above rc46 solo.
+  - **Interpretation**: either baseline doesn't classify as NEUTRAL often (despite matching centroid), or A1 base with rc52b-like subset of improvements already captures the gain, so swapping to full rc52b adds nothing.
+
+- **2026-04-19 pm26 rc52d CONSERVATIVE REINFORCE (peak confirmed as lucky draw)**:
+  - Applied pm26 overshoot-lesson: lr=1e-5 (50× lower than rc52c's 5e-4), T=8.0 (higher temperature), 60 iter from rc52b ckpt. Training cum_wr 67.7% → **74.3%** (steady linear improvement, |w_off| stable 312.36).
+  - **rc52d 100-game HTH**: **86/100 = 86%** Wilson [0.779, 0.915]. **SAME as rc52c's 86%** — regression equal magnitude despite very different hypparams.
+  - **Cross-run lesson**: 3 REINFORCE attempts have produced HTH of (92%, 86%, 86%) from nearly identical training cum_wr (68%, 73%, 74%). rc52b is a **lucky training sample**; repeated runs converge toward ~86% (= A1 baseline). Hypothesis: the REINFORCE signal is too weak to escape A1's basin of attraction; HTH variance dominates.
+  - **Implication for submission**: rc52b (92%) should be considered an **unrepeatable single-run success** — when reporting results we should note the variance band is wide.
+  - **Files**: `minicontest/zoo_reflex_rc52d.py`, `experiments/rc52d_final_weights.py`.
+  - **Phase 4 value**: rc52d + rc52c = two "regressed REINFORCE" members. Useful as intra-REINFORCE ablation controls.
