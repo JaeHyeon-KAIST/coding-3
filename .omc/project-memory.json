@@ -158,6 +158,12 @@
       "type": "file"
     },
     {
+      "path": "minicontest/zoo_reflex_rc16.py",
+      "accessCount": 3,
+      "lastAccessed": 1776595960523,
+      "type": "file"
+    },
+    {
       "path": "experiments/artifacts/phase2_A1_17dim_final_weights.py",
       "accessCount": 2,
       "lastAccessed": 1776538970137,
@@ -227,12 +233,6 @@
       "path": "minicontest/zoo_reflex_rc08.py",
       "accessCount": 2,
       "lastAccessed": 1776567864611,
-      "type": "file"
-    },
-    {
-      "path": "minicontest/zoo_reflex_rc16.py",
-      "accessCount": 2,
-      "lastAccessed": 1776567865685,
       "type": "file"
     },
     {

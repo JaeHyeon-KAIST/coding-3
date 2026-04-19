@@ -1,17 +1,16 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm26 — **Tier 3 + adaptive sprint (+8 rc, 3 lessons, 1 ceiling)**:
-- **rc52b** 92% [0.850, 0.959] 🥈 LEARNING PEAK — alt-run REINFORCE, +2pp over rc52 (but ≈ **lucky sample**, see below)
-- **rc46** 91% [0.838, 0.952] — K-centroid opponent classifier (4-archetype, adaptive multipliers)
-- **rc141** 90% — rc52b OFF + rc82 DEF asym (below rc52b solo)
-- **rc142** 91% — rc46 OFF + rc82 DEF asym (= rc46 solo)
-- **rc143** 91% — rc52b OFF + rc16 Voronoi DEF asym (Red 98% but Blue 84% — color asymmetry)
-- **rc147** 91% — rc46 + NEUTRAL→rc52b override (baseline not classified NEUTRAL enough)
-- **rc52c** 86% — REINFORCE aggressive lr 5e-4 + T=3 → OVERSHOT
-- **rc52d** 86% — REINFORCE conservative lr 1e-5 + T=8 → ALSO regressed, confirms rc52b was lucky
-- **Ceiling discovered**: simple weight-mix + classifier rc converge at **~91%**. 100% peak requires rc82's composite offense (rc16/rc32 OFF + rc82 DEF pattern).
-- **REINFORCE variance**: 3 runs gave HTH (92%, 86%, 86%) from training cum_wr (68%, 73%, 74%). rc52b is a single-run outlier; expect it to report with wide variance band.
-- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h (unreachable — SSH timeout).
+**Last updated:** 2026-04-20 pm26 END — **SWITCH BREAKTHROUGH: rc160 = 97.5% [0.944, 0.990] NEW PEAK**:
+- **🏆 rc160 (`if score >= 1: rc82 else rc16`)** 200g = 195/200 = **97.5%** Wilson [0.944, 0.990]. +0.5pp over rc82 solo (97%).
+- **rc159/rc166/rc167** = 99% at 100g (CI overlaps rc160). Simplest 2-way wins.
+- **rc152** 4-way (rc82 / rc16 small-lead / A1 / rc52b): 98%.
+- **rc148/rc149/rc151/rc156** score/phase variants: 96-97%.
+- **Learning-tier** (rc52b 92%, rc46 91%, rc22 88%, rc52 90%) — below switch family.
+- **REINFORCE regressed twice** (rc52c aggressive 86%, rc52d conservative 86%) — rc52b is lucky single-run sample.
+- **40g "100%" claims CORRECTED (100g authoritative)**: rc82 97%, rc16 92%, rc105 95% — all pm23/pm24 champions are 90-97%, not 100%.
+- **Pattern laws** (pm26 distilled): (1) asymmetric direction matters; (2) rc16 must handle tied; (3) threshold flat 1-3; (4) extra slots don't help; (5) chase-agent choice low-impact.
+- **Submission candidate** now rc160 (pending re-verify with Phase 4 round-robin): simplest/strongest, +5pp over pm24 composites at 100g scale.
+- Server Order 4 unreachable (SSH timeout).
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
