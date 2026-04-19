@@ -25,6 +25,12 @@
 | **rc16** Voronoi territory | 20/20 | 20/20 | **40/40** | **100%** 🥇 | Tied with rc02 |
 | **rc17** Influence map | 16/20 | 18/20 | 34/40 | 85% | — |
 | **rc19** Phase-conditional | 19/20 | 18/20 | 37/40 | 92.5% | — |
+| **rc27** Stigmergy | 16/20 | 19/20+1T | 35/40+T | 87.5%+ | — |
+| **rc32** Pincer | 19/20 | 20/20 | 39/40 | **97.5%** 🥇 | 3rd highest |
+| **rc33** Persona-shift | 18/20 | 17/20 | 35/40 | 87.5% | — |
+| **rc45** Weighted ensemble | 20/20 | 17/20+1T | 37/40+T | 92.5%+ | — |
+| **rc46** K-centroid classifier | 17/20 | 16/20 | 33/40 | 82.5% | — |
+| **O3** (Order 3 HOF) | — | — | — | 78% (HTH) | New HOF wrapper |
 | A1 reference (pm20) | | | — | **82.5%** | — |
 
 **Autopilot** cron `fc249310` re-armed for this session. Server Order 3 Phase 2b gen 7 observed (best=0.788), ~13 gens to Order 3 complete, ETA ~12:30 KST 2026-04-19.

@@ -231,3 +231,12 @@
   - **rc19** Phase-conditional weights (opening/mid/endgame): **37/40 = 92.5%**.
   - **rc18** History features — **FAILED 1/4, dropped**. Anti-pattern penalties too aggressive; revisit with softer coefficients.
   - **pm23 총합 (12 rc new in one session, 2 committed at 100%)**: rc02, rc16 공동 1위; rc15, rc03 95%; rc19, rc09, rc08 92.5%; rc04, rc11 87.5%; rc17 85%; rc05 82.5%; rc06 75%.
+- **2026-04-19 pm23 Day 2 batch3 (rc27/rc32/rc33/rc45/rc46) 40-game HTH**:
+  - **rc27** Stigmergy (pheromone): **35/40 + 1T = 87.5%+** (Red 16/20, Blue 19/20 + 1T).
+  - **rc32** Pincer maneuver: **39/40 = 97.5%** 🥇 (Red 19/20, Blue 20/20).
+  - **rc33** Persona-shifting: 35/40 = 87.5% (Red 18/20, Blue 17/20).
+  - **rc45** N3 weighted ensemble (A1+rc02+rc16+D13): **37/40 + 1T = 92.5%+** (Red 20/20, Blue 17/20 + 1T).
+  - **rc46** K-centroid opponent classifier: 33/40 = 82.5% (Red 17/20, Blue 16/20).
+  - **Top candidates pm23 (WR > 90%)**: rc02 (100%), rc16 (100%), rc32 (97.5%), rc03 (95%), rc15 (95%), rc45 (92.5%+), rc19 (92.5%), rc09 (92.5%), rc08 (92.5%+).
+  - **pm23 총 신규 rc: 17개** (12 Day 1-2 + 5 batch3). Phase 4 pool 크게 확장.
+- **2026-04-19 pm23 autopilot S1 (서버)**: Order 3 완료 (30 gens, 최종 fitness 0.855). HTH baseline 78% < A1 79%; monster_rule_expert 56.7% << A1 76.7%. **A1 챔피언 유지.** zoo_reflex_O3 HOF wrapper 생성·커밋·서버 pull. Order 4 (master-seed 2026, init a1, HOF pool=A1+O2+O3) 서버에서 자동 런치 — ETA ~18h.
