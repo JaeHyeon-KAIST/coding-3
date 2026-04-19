@@ -286,3 +286,11 @@
   - **pm24 total (A + B + C + D + E + F)**: **24 new rc, 22 pass** (18 strong + 4 weak), **2 drop** (rc30/34).
   - **Final top pool**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32 = 97.5%, rc93/rc94/rc84/rc86/rc21 = 95%+, rc91/rc81/rc29/rc44/rc19/rc09/rc45/rc08 = 92.5%+, lower tiers 75-90%.
   - **Insight (pm24 final)**: Dense voting preserves strength (rc94 vs rc83 = +5pp). Asymmetric composition with strongest offense + strong defense dominates (rc90 97.5% > rc84 95%+ > rc91 92.5% > rc81 92.5%+). Layout mult synergy is limited when base already state-conditioned (rc93 tracks rc90).
+- **2026-04-19 pm24 Batch G 40-game HTH (deeper composites)**:
+  - **rc95** (NEW) rc82 + 2-ply lookahead veto of overrides: **35/40 = 87.5%** ✅ PASS (Red 18/20, Blue 17/20). Down from rc82 solo 100% — veto blocks good overrides that win in 3+ ply.
+  - **rc96** (NEW) rc94 3-champion vote + rc21 layout mult: **38/40 = 95%** ✅ PASS (Red 19/20, Blue 19/20). Matches rc94 — layout mult adds nothing to dense vote of strong members.
+  - **rc97** (NEW) rc90 (rc82+rc32) + rc48 WHCA* deconflict: **39/40 = 97.5%** 🥈 PASS (Red 20/20, Blue 19/20). Ties rc90 — deconflict useful on edge cases but not new peaks.
+  - **rc98** (NEW) Time-adaptive rc02 first 200 turns → rc82: **34/40 = 85%** ✅ PASS (Red 17/20, Blue 17/20). Worse than pure rc82 (100%) — early-game rc02 strategy doesn't adapt cleanly to late-game rc82.
+  - **pm24 total (A-G, 7 batches)**: **28 new rc, 26 pass** (20 strong + 6 weak), **2 drop** (rc30/34).
+  - **Final top pool (≥95%)**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32/rc97 = 97.5%, rc93/rc94/rc96/rc84/rc86/rc21 = 95%+.
+  - **Insights (Batch G)**: Veto of rc82's overrides hurts because rc82's rc29/rc44 layers exploit subtle state info that 2-ply A1 evaluation misses. Time-based strategy switching without smooth blending is brittle. Rc97 ≈ rc90 shows WHCA* is useful but limited on top of already-strong asym.

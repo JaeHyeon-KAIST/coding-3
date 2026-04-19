@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **24 new rc** (A-F batches). **22 pass** (18 strong, 4 weak), 2 drop. **3 champions at 100%** (rc02/rc16/rc82), **rc90 97.5%**, 5 at 95%+. Dense-vote 3-champs (rc94) confirmed stronger than 5-way sparse (rc83). Server Order 4 Phase 2a still early.
+**Last updated:** 2026-04-19 pm24 end — **28 new rc** (A-G batches). **26 pass** (20 strong, 6 weak), 2 drop. **3 champions at 100%** (rc02/rc16/rc82), **3 at 97.5%** (rc90, rc32, rc97), **6 at 95%+**. Server Order 4 Phase 2a still early.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
