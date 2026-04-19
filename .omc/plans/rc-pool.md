@@ -8,7 +8,8 @@
 
 ## 🎯 명명 규칙
 
-- `rc01` ~ `rc##`: round-robin candidate (이 문서 항목)
+- `rc01` ~ `rc80`: round-robin candidate (이 문서 오리지널 항목)
+- `rc81+`: 세션 중 발견된 composite/asymmetric rc (rc81 role-asym, rc82 rc29+rc44 combo 등)
 - pm은 "session timeline" prefix (pm22 = 22번째 세션). rc는 **작업 항목** prefix.
 - 한 rc가 여러 세션에 걸칠 수 있음.
 
@@ -254,3 +255,10 @@
   - **rc48** WHCA* / reservation-table teammate deconfliction: **36/40 = 90%** ✅ PASS (Red 19/20, Blue 17/20). Phase 4 pool 포함.
   - **Insight**: Periodic/random top-K injection ≠ free lunch. Deterministic top-K like A1 argmax is information-preserving; stochastic wrecks at critical food-return or ghost-kill moments. Confirms rc29 (REVERSE only under ghost threat) and rc34 (every 7 turns blindly) are qualitatively different — targeted disruption ≠ untargeted noise.
   - **pm24 total (Batch A + B)**: 8 new rc implemented, 6 pass (rc28/29/31/44/48/50), 2 drop (rc30/34).
+- **2026-04-19 pm24 Batch C 40-game HTH (role-asym + composite)**:
+  - **rc07** Kamikaze decoy (sacrificial bait when teammate carrying ≥5): **36/40 = 90%** ✅ PASS (Red 20/20, Blue 16/20).
+  - **rc21** Layout clustering (TIGHT/OPEN/MEDIUM weight multiplier): **38/40 = 95%** ✅ PASS (Red 20/20, Blue 18/20).
+  - **rc81** (NEW NUMBER) Role-asymmetric team — rc16 Voronoi on OFFENSE, rc02 Tarjan AP on DEFENSE: **37/40 + 3T = 92.5%+** ✅ PASS (Red 17/20 + 3T, Blue 20/20). First role-asymmetric rc — asymmetric design is viable.
+  - **rc82** (NEW NUMBER) rc44 state-stacking + rc29 REVERSE disruption combo: **40/40 = 100%** 🥇✅ PASS (Red 20/20, Blue 20/20). Ties rc02/rc16 for top. Confirms orthogonal overlays compose.
+  - **pm24 total (Batch A + B + C)**: 12 new rc implemented, **10 pass** (rc07/28/29/31/44/48/50 + rc21/81/82), 2 drop (rc30/34).
+  - **Top pool at pm24 end**: rc02/rc16/rc82 = 100% (3 champions), rc32 = 97.5%, rc21/rc03/rc15 = 95%, rc81/rc09/rc19/rc45/rc08/rc29/rc44 = 92.5%+.
