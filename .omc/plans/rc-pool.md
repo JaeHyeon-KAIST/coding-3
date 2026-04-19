@@ -94,7 +94,7 @@
 | ID | 기법 | 카테고리 | 난이도 | 예상 | 비고 |
 |---|---|---|---|---|---|
 | **rc51** | C4 ExIt (MCTS teacher → NN student) | C4 | H | 2일 | self-play + distill loop |
-| **rc52** ✅ PASS 95% 🥈 | REINFORCE policy gradient (linear Q, 20-dim, A1-init) | B1 | M | pm25 done (9 min train) | 100g HTH 95/100 [0.888, 0.978]; 150-game REINFORCE; A1 +16pp lift |
+| **rc52** ✅ PASS 90% | REINFORCE policy gradient with T=5 softmax (linear Q, 20-dim, A1-init) | B1 | M | pm25 done | 100g HTH 90/100 [0.826, 0.945]; +4pp over A1's 86% (within CI); see pm25 debug note |
 | **rc53** | A2 CMA-ES with restarts (IPOP-CMA-ES) | A2 | M | 2일 | covariance + restart |
 | **rc54** | J2 NEAT (evolve network topology) | J2 | H | 3일 | numpy 구현 많이 필요 |
 | **rc55** | Re-determinizing IS-MCTS | Codex | M | 2일 | information set MCTS |
@@ -377,16 +377,24 @@
   - **rc140 100-game HTH**: 91/100 = **91%** Wilson [0.838, 0.952], 0 crashes. BELOW rc52 solo (95%) — learned offense interacts weaker with rc82 DEF than hand-rule offenses (rc16/rc32) did.
   - Still a PASS, adds diversity as "learning-based-offense + composite-defense" archetype.
 
-- **2026-04-19 pm25 Tier 3 rc52 REINFORCE Q-learning (SECOND learning-based rc, 🥇 NEW CHAMPION TIER)**:
-  - **Algorithm**: linear REINFORCE policy gradient. Q(s,a) = w · φ(s,a), policy π(a|s) = softmax(Q) over legal actions. Update: w ← w + lr · (G - b) · ∇log π, where G = team score, b = running-mean baseline.
-  - **Features**: same 20-dim as A1/tuned (φ(s,a) from zoo_features.extract_features).
-  - **Training**: 15 iterations × 10 games = 150 games, ε-greedy exploration (ε=0.15), lr=1e-4, L2 clip at 500. Init weights = **A1's** final (79% baseline WR).
-  - **Training-time WR trajectory** (ε=0.15, noisy): 70% → 40% → 60-80% oscillating, cum_wr 57.3%.
-  - **rc52 GREEDY (ε=0) 100-game HTH vs baseline**: **95/100 = 95.0%** Wilson [0.888, 0.978], 0 crashes. 🥈 **NEW CHAMPION TIER** (second-best among all single-agents, behind only 8× perfect composites).
-  - **A1 → rc52 delta**: **+16pp** from REINFORCE alone (no new features, no architecture change). Strongest single-learning-step gain in the project.
-  - **Why it worked**: REINFORCE credit-assigns per action; CEM only ranks whole genomes. With the same feature space, gradient signal is more efficient than population search when seeded from a good baseline (A1).
-  - **Files**: `minicontest/zoo_rc52_trainer.py` (ε-greedy + logger), `minicontest/zoo_reflex_rc52.py` (inference using tuned container), `experiments/train_rc52.py` (REINFORCE loop), `experiments/rc52_final_weights.py` (flat copy checked in).
-  - **Strategic value**: single learning-based agent that ALMOST matches the 8× perfect composites (95% vs 100%) from a 9-min training run. Phase 4 pool now has a strong MONO-AGENT neural/RL candidate next to 8 composites.
+- **2026-04-19 pm25 Tier 3 rc52 REINFORCE Q-learning (SECOND learning-based rc — HONEST POST-DEBUG RESULTS)**:
+  - **Algorithm**: linear REINFORCE policy gradient with temperature-T softmax.
+    Q(s,a) = w · φ(s,a), π(a|s) = softmax(Q / T) for gradient, greedy at inference.
+    Update: w ← w + (lr / batch_size) · Σ_steps (G - b) · ∇log π(a|s)
+    where ∇log π = φ(s,a) - Σ_a' π(a'|s) φ(s,a').
+  - **Features**: same 20-dim as A1/tuned.
+  - **Training**: 30 iters × 10 games = 300 games, ε=0.15, lr=1e-3, T=5.0, init = A1 weights.
+  - **IMPORTANT DEBUGGING NOTE** (documented for future learners):
+    - FIRST training attempt (150g, lr=1e-4, T=1, per-step averaging): weights essentially did NOT move (total delta 0.0003 from A1). HTH gave 95/100, but this was A1's variance luck — identical weights. `zoo_reflex_rc52` was effectively `zoo_reflex_A1` rebranded.
+    - Root cause: (a) A1's confident policy makes gradient ≈ 0 (softmax near deterministic); (b) averaging update by step count (~2800) made effective lr = 3.6e-8.
+    - Fix: temperature T=5 softens the training policy + batch-size normalization.
+  - **rc52 honest HTH** (greedy, properly trained weights):
+    - **A1 solo baseline** (Mac, defaultCapture, 100g): 86/100 = **86%** Wilson [0.779, 0.915].
+    - **rc52 REINFORCE-trained** (same conditions): 90/100 = **90%** Wilson [0.826, 0.945].
+    - **Delta**: +4pp (within CI overlap — not statistically decisive from 100g each).
+  - **Takeaway**: REINFORCE did move weights (total delta 0.97, max f_stop -0.47) and gave a measurable ~4pp lift over A1 init. Modest but real. NOT a new champion tier — closer to A1's performance band.
+  - **Files**: `minicontest/zoo_rc52_trainer.py`, `minicontest/zoo_reflex_rc52.py`, `experiments/train_rc52.py` (with T + per-batch norm fixes), `experiments/rc52_final_weights.py`.
+  - **Strategic value**: first true learning-based single-agent (vs rc22 distillation). Adds architectural diversity to Phase 4 pool. Not a submission candidate (8 pm24 composites at 100% are stronger).
 
 - **2026-04-19 pm25 Tier 3 rc22-v2 Extended-feature Distillation**:
   - Extended features: 20 base + 15 history one-hot + 1 successor AP flag + 3 phase one-hot = **39 dims**.

@@ -1,6 +1,10 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm25 — **THREE Tier 3 rc's shipped**: (1) rc22 distillation **88%**, (2) rc22-v2 39-dim extended **85%**, (3) **rc52 REINFORCE Q-learning 95% 🥈** (NEW champion tier — A1 +16pp lift from 150-game policy gradient). Phase 4 pool now has single-agent neural/RL candidate next to 8 composite 100%-champions. Server Order 4 Phase 2a gen 3/10 running (best=0.712, ETA ~24h).
+**Last updated:** 2026-04-19 pm25 — **Tier 3 sprint + honesty correction**:
+- rc22 distillation **88%**, rc22-v2 extended **85%**, rc52 REINFORCE **90%** (honest post-debug), rc140 asym **91%**.
+- **rc52 debug lesson**: first run's "95%" was A1 variance luck (weights didn't move due to per-step averaging bug + near-deterministic policy → zero gradient). After T=5 softmax + per-batch normalization fix, rc52 moved ~0.97 total weight delta → HTH 90/100 (+4pp vs A1's 86%, within CI). Real but modest lift. Documented as pedagogical.
+- A1 (Mac defaultCapture 100g) authoritative WR = **86%** [Wilson 77.9-91.5].
+- Server Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~24h.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)

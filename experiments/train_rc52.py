@@ -157,7 +157,8 @@ def _run_one_game(weights_path: Path, log_path: Path, epsilon: float,
     return {"crashed": True, "score": 0}
 
 
-def _softmax(z: np.ndarray) -> np.ndarray:
+def _softmax(z: np.ndarray, T: float = 1.0) -> np.ndarray:
+    z = z / max(T, 1e-6)
     z = z - z.max()
     e = np.exp(z)
     return e / (e.sum() + 1e-12)
@@ -255,8 +256,8 @@ def train(args):
                         continue
                     w = w_off if role == "OFFENSE" else w_def
                     Q = feats @ w                        # [L]
-                    pi = _softmax(Q)                     # [L]
-                    grad = feats[chosen] - (pi[:, None] * feats).sum(axis=0)  # [17]
+                    pi = _softmax(Q, T=args.temperature)  # [L] — soft policy for gradient
+                    grad = feats[chosen] - (pi[:, None] * feats).sum(axis=0)  # [D]
                     step = args.lr * advantage * grad
                     if role == "OFFENSE":
                         updates_off += step
@@ -267,11 +268,11 @@ def train(args):
                 except Exception:
                     continue
 
-        # Apply average update (instead of summed — keeps scale stable).
-        if n_off_updates > 0:
-            w_off += updates_off / n_off_updates
-        if n_def_updates > 0:
-            w_def += updates_def / n_def_updates
+        # Apply sum / batch_size — one Monte Carlo REINFORCE step per batch.
+        # (Previous version divided by step count, making effective lr ~lr/2800.)
+        batch_size = max(1, len(game_returns))
+        w_off += updates_off / batch_size
+        w_def += updates_def / batch_size
 
         # Optional L2 clip.
         max_norm = args.w_clip
@@ -314,6 +315,10 @@ def main(argv=None) -> int:
     p.add_argument("--epsilon", type=float, default=0.15)
     p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--w-clip", type=float, default=500.0)
+    p.add_argument("--temperature", type=float, default=5.0,
+                   help="Softmax temperature for training-policy gradient. "
+                        "Higher = softer policy = larger gradient. Greedy "
+                        "inference (at HTH time) is temperature-agnostic.")
     p.add_argument("--init-weights", type=str, default="")
     p.add_argument("--out", type=str, required=True)
     args = p.parse_args(argv)

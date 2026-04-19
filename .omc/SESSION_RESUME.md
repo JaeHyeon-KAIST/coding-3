@@ -1,6 +1,12 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-19 pm25 — **rc22 Policy Distillation SHIPPED** (FIRST Tier 3 learning-based rc). Student = numpy MLP 20→32→1, distilled from rc82 teacher, **88/100 = 88%** vs baseline Wilson [0.80, 0.93]. Order 4 Phase 2a gen 3/10 running best=0.712, ETA ~20-24h.
+**Last updated:** 2026-04-19 pm25 — **Tier 3 learning rc sprint (4 shipped)**:
+- rc22 distillation (numpy MLP, rc82 teacher) → **88%** vs baseline Wilson [0.80, 0.93]
+- rc22-v2 39-dim extended features → **85%** (val_acc 91→94% but game-WR plateau)
+- rc52 REINFORCE (linear Q gradient, A1 init, T=5) → **90%** [0.83, 0.95] (honest post-debug)
+- rc140 (rc52 OFF + rc82 DEF asym) → **91%**
+- A1 authoritative Mac 100g = **86%** [0.78, 0.92] (corrected from server 79%)
+- Server Order 4 Phase 2a gen 3/10 best=0.712 ETA ~20-24h.
 
 ## pm26 TL;DR (NEXT SESSION)
 
