@@ -334,3 +334,10 @@
   - **pm24 total (A-L, 12 batches)**: **48 new rc, 46 pass** (33 strong + 13 weak), **2 drop** (rc30/34).
   - **Final champion tier**: **6 at 100%** (rc02, rc16, rc82, rc105, rc109, **rc116**).
   - **Insight (Batch L)**: rc50 opening book overlay on rc109's offense maintains 100% — the 15-turn nudge toward uncontested food doesn't conflict with rc16's Voronoi weights. rc117 (rc03 OFF) shows dead-end logic on offense = pure A1 offense (90%), confirming rc03's AP-style trigger only fires on defender side.
+- **2026-04-19 pm24 Batch M 40-game HTH (rc116 extensions + ablation)**:
+  - **rc119** (NEW) rc116 + rc48 WHCA*: **35/40 + 3T = 87.5%+** ✅ PASS. Adding WHCA* to rc116 drops below rc116 (100%).
+  - **rc120** (NEW) rc116 + rc21 layout mult: **39/40 = 97.5%** ✅ PASS. Slight regression from rc116.
+  - **rc121** (NEW) rc116's OFF + rc32 DEF (instead of rc82): **38/40 + 1T = 95%+** ✅ PASS. Pincer defender slightly worse than rc82 defender for this offense combo.
+  - **rc122** (NEW) rc16 + rc50 OFF (no rc29) + rc82 DEF: **35/40 + 2T = 87.5%+** ✅ PASS. **Ablation confirms rc29 contributes ~10pp to rc116's perfect score.**
+  - **pm24 total (A-M, 13 batches)**: **52 new rc, 50 pass** (34 strong + 16 weak), **2 drop** (rc30/34).
+  - **Insight (Batch M)**: rc116 is the saturation point for compound composition. Adding more overlays (rc119 +WHCA, rc120 +layout) regresses. Removing rc29 (rc122) drops to 87.5%+ — rc29 is a necessary component of rc109/rc116's perfect score.
