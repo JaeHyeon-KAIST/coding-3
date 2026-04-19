@@ -437,3 +437,11 @@
   - First hybrid of opponent-classifier OFF with composite DEF. Classifier observes during both OFF/DEF turns; on OFF turn applies multipliers to A1 weights; on DEF turn uses rc82 full composite.
   - **rc142 100-game HTH**: Red 48/50 + Blue 43/50 + 2 Ties → **91/100 = 91%** Wilson [0.838, 0.952], 0 crashes. **Same as rc46 solo** — composite DEF didn't lift it above the classifier's intrinsic 91%.
   - **Pattern confirmed (pm26)**: "learning/classifier OFF + rc82 DEF" composition stays ≈ OFF-solo. Only COMPOSITE offenses (rc16/rc32) achieved the 100% peak with rc82 DEF. Sweet spot = "two composites" not "learning + composite".
+
+- **2026-04-19 pm26 rc52c REINFORCE continued from rc52b ckpt (OVERSHOOT lesson)**:
+  - Continued rc52b weights for 30 more iters (effective 60 total), ε=0.10, lr=5e-4 (5× rc52b's 1e-4), T=3.0 (lower than rc52b's 5.0). Training cum_wr rose 67.7% → **73.3%**.
+  - **rc52c 100-game HTH**: **86/100 = 86%** Wilson [0.779, 0.915]. **-6pp regression from rc52b's 92%** — back to A1 solo baseline.
+  - **Lesson (learning rate / temperature overshoot)**: more training is NOT more skill when hyperparameters are aggressive. Higher lr (5× stronger gradient step) and lower T (sharper policy → larger ∇log π magnitude) both push weights harder per batch. Combined, 30 more iters overshot the rc52b local optimum. Training-set WR (ε-greedy vs baseline) does NOT predict held-out WR (greedy HTH).
+  - **Recommendation for future REINFORCE**: prefer low lr + higher T + longer training for fine-grained improvement. rc52b's 67.7% cum_wr / 92% HTH was the sweet spot.
+  - **Files**: `minicontest/zoo_reflex_rc52c.py` (wrapper kept for Phase 4 diversity; weights at `experiments/artifacts/rc52c/final_weights.py`).
+  - **Phase 4 value**: rc52c joins pool as "over-trained REINFORCE" data point. Its HTH-86% matches A1, so it may serve as a controlled-regression member in tournament analysis.
