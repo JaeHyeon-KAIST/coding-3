@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 50 pages | Last updated: 2026-04-19T03:19:28.629Z
+> 51 pages | Last updated: 2026-04-19T06:39:06.230Z
 
 ## convention
 
@@ -51,6 +51,7 @@
 - [2026-04-19 - pm22 rc-pool 80 candidates 수집 + autopilot Phase 2b 진행](2026-04-19-pm22-rc-pool-80-candidates-autopilot-phase-2b.md) — # 2026-04-19 - pm22 rc-pool 80 candidates 수집 + autopilot Phase 2b 진행
 - [2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint](2026-04-19-pm23-rc02-rc08-tier-1-candidate-sprint.md) — # 2026-04-19 - pm23 rc02-rc08 Tier 1 candidate sprint
 - [2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop](2026-04-19-pm24-8-new-rc-implemented-6-pass-2-drop.md) — # 2026-04-19 - pm24 8 new rc implemented: 6 pass 2 drop
+- [2026-04-19 - pm24 MEGA sprint 68 rc 8 champions](2026-04-19-pm24-mega-sprint-68-rc-8-champions.md) — # 2026-04-19 - pm24 MEGA sprint 68 rc 8 champions
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15

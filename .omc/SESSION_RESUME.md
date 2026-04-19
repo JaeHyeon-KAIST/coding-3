@@ -1,17 +1,19 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-19 pm24 end — Order 4 Phase 2a gen 0 launched (ETA ~18h, master-seed=2026, init=a1, HOF pool=A1+O2+O3). pm24 implemented 8 new rc (6 pass, 2 drop).
+**Last updated:** 2026-04-19 pm24 FINAL — **68 new rc** in one autopilot session (17 batches A-Q). **8 at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, rc123, rc131). Order 4 Phase 2a gen 2/30 still cooking (~30h total ETA).
 
 ## pm25 TL;DR (NEXT SESSION)
 
-- **pm24 주요 성과**: 8 new rc implemented + full 40g HTH. 6 pass: rc29/rc44 (92.5%), rc48/rc50 (90%), rc31 (87.5%), rc28 (82.5%). 2 drop: rc30/rc34 (random top-K catastrophic).
+- **pm24 주요 성과**: 68 new rc + HTH 배터리 전체 완료. 8 champions at 100%. Phase 4 pool ~75 candidates.
+- **Key insight**: rc16/rc32 OFFENSE + rc82 DEFENSE is the 100% sweet spot. rc29 REVERSE overlay is universal lift. Narrow fire-conditions essential.
 - **pm25 할 일**:
-  1. `ssh jdl_wsl "tmux capture-pane -t work -p -S -30 | tail -20"` — Order 4 상태 확인.
-  2. Order 4 완료 (ETA 2026-04-20 ~06:00 KST) → HTH battery → O4 HOF wrapper 생성 또는 A1 유지.
-  3. Phase 4 round-robin tournament 준비 (23 rc + A1/O2/O3/O4 + D-series = ~30 candidates).
-  4. M7 flatten 계획 수립 (champion = A1 or best rc46/rc02/rc16/rc29/rc44).
-- **서버 상태**: Order 4 running, 18 evolve processes, ETA ~18h.
-- **First actions**: `.omc/STATUS.md` pm24 headline → Order 4 server check → Phase 4 plan.
+  1. Server poll — Order 4 상태 (ETA 2026-04-20 ~17:00 KST if gen 2/30 wall ~60min)
+  2. Order 4 완료 → HTH battery → A1 대비 비교 → O4 HOF or A1 keep
+  3. **Phase 4 round-robin tournament** — `experiments/tournament.py` on ~75 agents × 2 seeds × defaultCapture+RANDOM
+  4. **M7 flatten** — pick Phase 4 ELO winner for submission (best candidates: rc82, rc105, rc109, rc116, rc123, rc131)
+  5. **M8-M10** — output.csv + ICML report + zip packaging
+- **서버 상태**: Order 4 running, 18 evolve processes, gen 2/30, wall ~60 min/gen, ETA ~30h total
+- **First actions**: `.omc/STATUS.md` pm24 FINAL headline → wiki `2026-04-19-pm24-mega-sprint-68-rc-8-champions` → server poll
 
 ## pm23-24 TL;DR (historical)
 
