@@ -349,3 +349,10 @@
   - **pm24 total (A-N, 14 batches)**: **56 new rc, 54 pass** (36 strong + 18 weak), **2 drop**.
   - **Champion tier**: **7 at 100%** (rc02, rc16, rc82, rc105, rc109, rc116, **rc123**).
   - **Discovered pattern**: **rc82 as DEFENDER is the critical ingredient.** Pattern holds: rc16 OFF + rc82 DEF (rc105 100%), rc16+rc29 OFF + rc82 DEF (rc109 100%), rc32 OFF + rc82 DEF (rc123 100%). Outliers: rc02 OFF + rc82 DEF (rc100 95%), rc03 OFF + rc82 DEF (rc117 90%) — suggest rc02/rc03's narrow-fire overrides interact with A1 weights differently. rc82's rc44 stacking on DEFENSE role evaluates defense-role states with rc02+rc32 votes weighted heavily — a strong territorial defender by design.
+- **2026-04-19 pm24 Batch O 40-game HTH (rc82-DEF pattern verification test)**:
+  - **rc127** (NEW) A1 plain OFF + rc82 DEF: **36/40 = 90%** ✅ PASS. Pattern-control: plain A1 offense doesn't reach 100% with rc82 DEF. rc82 DEF alone is not sufficient.
+  - **rc128** (NEW) rc09 24-dim OFF + rc82 DEF: **35/40 + 2T = 87.5%+** ✅ PASS.
+  - **rc129** (NEW) rc19 phase-mode OFF + rc82 DEF: **36/40 + 1T = 90%+** ✅ PASS.
+  - **rc130** (NEW) rc08 dual-invader OFF + rc82 DEF: **37/40 + 2T = 92.5%+** ✅ PASS.
+  - **pm24 total (A-O, 15 batches)**: **60 new rc, 58 pass** (36 strong + 22 weak), **2 drop**.
+  - **Pattern refinement**: The "X OFF + rc82 DEF = 100%" pattern is NOT universal. It holds for rc16/rc32 offenses but NOT for A1/rc08/rc09/rc19. **rc16 OFF + rc82 DEF is uniquely special** — likely because Voronoi's territorial scoring complements rc82's internal stacking, whereas plain reflex offenses don't. The 100% ceiling requires specific OFF-DEF combinations, not just strong DEF.
