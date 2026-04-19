@@ -302,3 +302,11 @@
   - **pm24 total (A-H, 8 batches)**: **32 new rc, 30 pass** (22 strong + 8 weak), **2 drop** (rc30/34).
   - **Final top pool (≥95%)**: rc02/rc16/rc82 = 100% (3 champs), rc90/rc32/rc97/rc101 = 97.5%, rc100/rc102/rc93/rc94/rc96/rc84/rc86/rc21 = 95%+.
   - **Insight (Batch H)**: Ceiling is 97.5% for role-asym compositions — additional overlays (rc101 quad) don't break through. rc100 inverted-asym works because "rc02 on offense" is effectively A1 on offense. Vote schemes (rc94 equal, rc102 weighted) both saturate at 95% — weighting strategy doesn't break ceiling.
+- **2026-04-19 pm24 Batch I 40-game HTH (pairwise champion asym matrix)**:
+  - **rc103** (NEW) rc02 OFF + rc32 DEF: **37/40 + 1T = 92.5%+** ✅ PASS (Red 19/20, Blue 18/20 + 1T).
+  - **rc104** (NEW) rc16 OFF + rc32 DEF: **36/40 = 90%** ✅ PASS (Red 16/20, Blue 20/20).
+  - **rc105** (NEW) rc16 OFF + rc82 DEF: **40/40 = 100%** 🥇 PASS — **NEW 4TH 100% CHAMPION**! (Red 20/20, Blue 20/20). rc16 Voronoi offense + rc82 combo defense is a perfect composition.
+  - **rc106** (NEW) rc02 OFF + rc16 DEF: **38/40 + 1T = 95%+** ✅ PASS (Red 20/20, Blue 18/20 + 1T).
+  - **pm24 total (A-I, 9 batches)**: **36 new rc, 34 pass** (25 strong + 9 weak), **2 drop** (rc30/34).
+  - **Final Phase 4 champion tier**: **4 at 100%** (rc02, rc16, rc82, **rc105**), 4 at 97.5% (rc90/rc32/rc97/rc101), 10 at 95%+ (rc100/102/103/106/93/94/96/84/86/21/15).
+  - **Insight (Batch I)**: The 2×2 champion pairwise asym matrix (rc02/rc16 × rc32/rc82) all cleared 90%+. Best non-rc82-offense asym is **rc105 rc16+rc82** at 100% — surprising: Voronoi on offense + full combo on defense. This beats rc90 (97.5%) and ties the solo champions. Opens a whole new direction: perhaps defensive-role agents running rc82 exploit rc44 stacking to score counter-attacks on food.

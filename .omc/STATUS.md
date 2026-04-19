@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-19 pm24 end — **32 new rc** (A-H batches). **30 pass** (22 strong, 8 weak), 2 drop. **3 champions at 100%** (rc02/rc16/rc82), **4 at 97.5%** (rc90/rc32/rc97/rc101), **8 at 95%+**. Ceiling for role-asym compositions appears to be 97.5% — additional stacking doesn't break through. Server Order 4 Phase 2a still early.
+**Last updated:** 2026-04-19 pm24 end — **36 new rc** (A-I batches). **34 pass** (25 strong, 9 weak), 2 drop. **🎉 4 champions at 100%** (rc02/rc16/rc82/**rc105** NEW), 4 at 97.5%, 10 at 95%+. **rc105 breaks the 97.5% asym ceiling** — rc16 OFF + rc82 DEF is a perfect composition. Server Order 4 Phase 2a still early.
 **Update protocol:** revise this file at end of each session and after each milestone (per `wiki/convention/session-log-protocol`).
 
 ## 🚨 pm25 entry point (authoritative)
