@@ -31,9 +31,29 @@ VENV_PYTHON = REPO / '.venv' / 'bin' / 'python'
 
 
 # Variant definitions: name → env override dict (str agent name tag for v3b)
+# Marker '__BETA_AGENT__': use zoo_reflex_rc_tempo_beta (no env vars)
+# Marker dict with '__BETA__': use zoo_reflex_rc_tempo_beta WITH env overrides
+# Marker dict with '__V3B__': use zoo_reflex_rc_tempo_beta_v3b
+# else: use zoo_reflex_rc_tempo_beta_v3a with given env dict
 VARIANTS = {
     # === Reference ===
     'beta_v2d': '__BETA_AGENT__',  # pm30 committed β (endpoint-only Voronoi)
+
+    # === β safety sweep (pm31 S3: reduce distant die) ===
+    'beta_abort3':      {'__BETA__': '1', 'BETA_ABORT_DIST': '3'},
+    'beta_abort4':      {'__BETA__': '1', 'BETA_ABORT_DIST': '4'},
+    'beta_slack2':      {'__BETA__': '1', 'BETA_CHASE_SLACK': '2'},
+    'beta_slack3':      {'__BETA__': '1', 'BETA_CHASE_SLACK': '3'},
+    'beta_path5':       {'__BETA__': '1', 'BETA_PATH_ABORT_RATIO': '5'},
+    'beta_path4':       {'__BETA__': '1', 'BETA_PATH_ABORT_RATIO': '4'},
+    'beta_combo_a':     {'__BETA__': '1', 'BETA_ABORT_DIST': '3',
+                          'BETA_CHASE_SLACK': '2'},
+    'beta_combo_b':     {'__BETA__': '1', 'BETA_ABORT_DIST': '4',
+                          'BETA_CHASE_SLACK': '2',
+                          'BETA_PATH_ABORT_RATIO': '5'},
+    'beta_safe':        {'__BETA__': '1', 'BETA_ABORT_DIST': '3',
+                          'BETA_CHASE_SLACK': '2',
+                          'BETA_PATH_ABORT_RATIO': '6'},
 
     # === v3a (A* + Voronoi + Slack DP) ===
     'v3a_default': {},  # margin=1, full-path Voronoi, strict trigger
@@ -186,6 +206,9 @@ def main():
         if env_dict == '__BETA_AGENT__':
             agent = 'zoo_reflex_rc_tempo_beta'
             env_dict_pass = {}
+        elif isinstance(env_dict, dict) and env_dict.get('__BETA__'):
+            agent = 'zoo_reflex_rc_tempo_beta'
+            env_dict_pass = {k: v for k, v in env_dict.items() if k != '__BETA__'}
         elif isinstance(env_dict, dict) and env_dict.get('__V3B__'):
             agent = 'zoo_reflex_rc_tempo_beta_v3b'
             env_dict_pass = {k: v for k, v in env_dict.items() if k != '__V3B__'}

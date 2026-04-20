@@ -346,8 +346,16 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         if not legal:
             return None
 
-        # Defender safety: if visible non-scared ghost within 2 of my_pos, abort.
-        # Also abort if visible defender is closer to capsule than I am (by margin).
+        # Defender safety with env-var overridable thresholds (pm31 tuning).
+        # Defaults preserve pm30 committed behavior exactly.
+        def _iv(name, default):
+            try:
+                return int(os.environ.get(name, default))
+            except Exception:
+                return default
+        abort_dist = _iv('BETA_ABORT_DIST', 2)                 # d_me <= X → abort
+        chase_slack = _iv('BETA_CHASE_SLACK', 1)               # def_to_cap + X < me_to_cap → abort
+        path_abort_ratio = _iv('BETA_PATH_ABORT_RATIO', 0)     # abort if d_me <= d_to_cap/R (0=off)
         try:
             for opp_idx in self.getOpponents(gameState):
                 ost = gameState.getAgentState(opp_idx)
@@ -360,10 +368,14 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                     continue
                 opp_pos = (int(opp_pos[0]), int(opp_pos[1]))
                 d_me = distance_fn(my_pos, opp_pos)
-                if d_me <= 2:
+                if d_me <= abort_dist:
                     return None  # rc82 handles escape
+                if path_abort_ratio > 0:
+                    threshold = max(abort_dist, d_to_cap // path_abort_ratio)
+                    if d_me <= threshold:
+                        return None  # proportional early abort
                 d_opp_cap = distance_fn(opp_pos, capsule)
-                if d_opp_cap + 1 < d_to_cap:
+                if d_opp_cap + chase_slack < d_to_cap:
                     return None  # defender will reach capsule first
         except Exception:
             return None
