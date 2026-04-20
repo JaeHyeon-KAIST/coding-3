@@ -8,16 +8,29 @@
 
 ## pm31 TL;DR (NEXT SESSION — READ FIRST)
 
-### 🎯 pm31 immediate priorities
+### 🚨 **첫 액션**: `.omc/plans/pm31-strategy-kickoff.md` 읽고 유저에게 Q1~Q4 물어 **전략 결정 후 구현 진입**. pm30 마지막에 유저가 전략회의를 pm31로 미룸.
 
-1. **pm30 2000g HTH 결과 확인**: `ssh jdl_wsl "tail -40 logs/hth_beta_pm30.log"` + `experiments/artifacts/rc_tempo/hth_beta_pm30.csv` Mac pull + analyze_hth.py로 Wilson CI 체크. 합격 여부 판정.
-2. **DISTANT layout 대응** (pm30 남긴 과제):
+### 🎯 pm31 의사결정 큐
+
+1. **Q1 다음 메인 방향**: A (data-rule) / B (CEM 학습) / C (αβ search) / **Opp config 분기 먼저** 중 택 1. 현재 가장 매력적으로 보이는 건 **opp_pacman_count 분기** (β 발동을 1+1 케이스에 한정, 2-def/2-att 낭비 제거). 그 후 A/B/C.
+2. **Q2 C 선택 시 defender 모델**: greedy / pessimistic / observation-based classifier(rc46 style, 추천) 중 택.
+3. **Q3 UNSAFE layout runtime chase** (pm30 scope-cut) — orthogonal, 병행 가능.
+4. **Q4 DISTANT 약점** — Phase 3 weight / Agent B pre-position / scared trip 조절.
+
+### 전략 인사이트 (pm30 전략회의 요약)
+
+- **β chase 로직은 1+1 race 케이스에서만 가치 높음**. 2-defender는 단순 food 1-2 deposit로 승리, 2-attacker는 chase 낭비.
+- **"greedy 추격" defender 가정은 baseline 한 놈만 맞음**. 실제 opp pool은 territorial/pincer/static/search 다양.
+- **성능 peak**: C (αβ search) > B (CEM) > A (data-rule). **"학습" 의도**: B. **안전/빠름**: A.
+
+### 후속 tactical TODOs (전략 확정 후)
+
+1. **DISTANT layout 대응**:
    - Phase 3 `DEFAULT_RISK_WEIGHTS` 튜닝 (현재 w_de=3, w_ap=2, w_dh=0.5, w_vor=5, w_iso=2)
-   - Agent B pre-midline-positioning (2e) — Phase 1에서 B가 b_start에 미리 도달해 swarm 시작 빠르게
+   - Agent B pre-midline-positioning — Phase 1에서 B가 b_start에 미리 도달해 swarm 시작 빠르게
    - rc47 distant 30T 교착 해결 방안 수색
-3. **UNSAFE layout runtime chase** (pm30 scope-cut): 비안전 capsule도 상황 좋으면 먹기.
-4. **Submission flatten 준비**: rc-tempo β v2d를 `your_best.py` / `20200492.py`로 flatten. `experiments/flatten_multi.py` 사용.
-5. **Phase 4 round-robin tournament**: β v2d + rc166 + rc82 + rc47 + monster 등 포함.
+2. **Submission flatten**: β v2d를 `your_best.py` / `20200492.py`로 flatten. `experiments/flatten_multi.py` 사용.
+3. **Phase 4 round-robin tournament**: β v2d + rc166 + rc82 + rc47 + monster 등 포함.
 
 ### pm30 committed state
 
