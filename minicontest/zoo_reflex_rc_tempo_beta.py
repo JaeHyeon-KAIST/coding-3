@@ -310,14 +310,15 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         return super()._chooseActionImpl(gameState)
 
     def _choose_capsule_chase_action(self, gameState):
-        """Phase 1 A: BFS path to capsule with full-path defender safety.
+        """Phase 1 A: greedy step toward capsule with pm29 safety + pm30 Stage 2d score gate.
 
-        Returns action if every waypoint on path is defender-safe.
-        Returns None to fall back to rc82 (on danger or when we're a ghost in home).
+        pm30 decision (2026-04-20): Revert full-path BFS (v2a/v2a2 66g smoke showed
+        no overall gain vs pm29; regressions on rc82/rc166 composite defenders
+        outweighed monster/rc32 improvements).  Keep pm29's 2-cell early abort +
+        defender-closer-to-capsule abort.  Add Stage 2d score-conditional gate.
 
-        pm30 Stage 2a: full-path BFS verification (vs pm29's greedy 1-step).
-        For each waypoint W_i at BFS-distance i, require
-        min_def d(def, W_i) > i + CHASE_MARGIN — i.e. defender cannot intercept.
+        Returns action if chase is safe and score-permissive.  Returns None for
+        rc82 fallback otherwise.
         """
         if RCTEMPO_TEAM.capsule is None:
             return None
@@ -325,16 +326,29 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         if my_pos is None:
             return None
 
+        # Stage 2d: score-conditional gate.
+        # If we're already leading by a wide margin, no need to risk a chase —
+        # rc82 handles patrol/defense.  "Lead" is from our team's perspective
+        # (red → getScore, blue → −getScore).
+        try:
+            raw_score = gameState.getScore()
+            my_score = raw_score if self.red else -raw_score
+            if my_score >= 5:
+                return None  # lead secure, defer to rc82
+        except Exception:
+            pass  # fall through if framework guarantees change
+
         distance_fn = _distance_fn_from_apsp(self.apsp, self.distancer)
         capsule = RCTEMPO_TEAM.capsule
+        d_to_cap = distance_fn(my_pos, capsule)
 
         legal = gameState.getLegalActions(self.index)
         if not legal:
             return None
 
-        # Collect visible, non-scared, non-pacman defenders
+        # Defender safety: if visible non-scared ghost within 2 of my_pos, abort.
+        # Also abort if visible defender is closer to capsule than I am (by margin).
         try:
-            defenders = []
             for opp_idx in self.getOpponents(gameState):
                 ost = gameState.getAgentState(opp_idx)
                 if getattr(ost, 'isPacman', False):
@@ -344,34 +358,17 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                 opp_pos = gameState.getAgentPosition(opp_idx)
                 if opp_pos is None:
                     continue
-                defenders.append((int(opp_pos[0]), int(opp_pos[1])))
+                opp_pos = (int(opp_pos[0]), int(opp_pos[1]))
+                d_me = distance_fn(my_pos, opp_pos)
+                if d_me <= 2:
+                    return None  # rc82 handles escape
+                d_opp_cap = distance_fn(opp_pos, capsule)
+                if d_opp_cap + 1 < d_to_cap:
+                    return None  # defender will reach capsule first
         except Exception:
             return None
 
-        # Early abort: any defender within 2 of me → rc82 escape
-        for dp in defenders:
-            if distance_fn(my_pos, dp) <= 2:
-                return None
-
-        # BFS path me → capsule (shortest maze path)
-        walls = gameState.getWalls()
-        path = _bfs_path(walls, my_pos, capsule, limit=60)
-        if path is None or len(path) < 2:
-            return None
-
-        # Per-waypoint defender intercept check.
-        # margin=-1: abort only when defender is strictly closer to a waypoint
-        # than I am (d_def < i).  Equal distance (d_def == i) commits.  This
-        # is strictly more permissive than pm29's single-cell "d_def+1<d_cap"
-        # check because it applies at every wp, not just the terminal capsule.
-        CHASE_MARGIN = -1
-        for i, wp in enumerate(path[1:], start=1):
-            for dp in defenders:
-                d_def = distance_fn(dp, wp)
-                if d_def <= i + CHASE_MARGIN:
-                    return None  # defender strictly ahead at waypoint i
-
-        # All waypoints safe — step toward capsule
+        # Greedy step toward capsule
         return _next_step_toward(gameState, my_pos, capsule, legal, distance_fn)
 
     def _choose_scared_action(self, gameState):
