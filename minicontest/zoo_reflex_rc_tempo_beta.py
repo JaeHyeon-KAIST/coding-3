@@ -359,8 +359,10 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         if path is None or len(path) < 2:
             return None
 
-        # Per-waypoint defender intercept check
-        CHASE_MARGIN = 1  # defender needs >i+1 cells away to be safe
+        # Per-waypoint defender intercept check.
+        # margin=0: defender must strictly exceed my BFS distance at every wp.
+        # Equivalent to "I arrive at wp at least 1 move before any defender".
+        CHASE_MARGIN = 0
         for i, wp in enumerate(path[1:], start=1):
             for dp in defenders:
                 d_def = distance_fn(dp, wp)
