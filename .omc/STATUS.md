@@ -1,6 +1,59 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-20 pm26 END — **SWITCH BREAKTHROUGH: rc160 = 97.5% [0.944, 0.990] NEW PEAK**:
+**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 구현 + 2000g HTH 검증 + γ 기각**:
+- 🏆 **rc-tempo β**: 2000g HTH **68.6% overall**, **71% H2H vs rc82**, **100% vs h1test distant**.
+- ✅ **β = rc-tempo V0.1 확정 제출 후보** (submission candidate tier 2, rc166 tier 1).
+- ❌ **γ REJECTED**: 0/200 vs rc166 default — entry-DP 예측 가능성 취약점.
+- 📊 β vs γ H2H coin flip (101/200).
+- 🔧 **Flow**: Mac + Server 병렬 HTH (2000g Mac β + 2000g Server γ), resumable CSV checkpoint.
+- 📂 Session log: `.omc/wiki/2026-04-20-pm29-rc-tempo-v01-beta-gamma-hth.md`.
+
+### pm29 full β HTH table (n=200 per cell)
+
+| Opponent | Default WR | Distant WR | avg_score def | avg_score dist |
+|---|---|---|---|---|
+| baseline | 95.0% [.91, .97] | 78.0% [.72, .83] | +4.66 | +0.89 |
+| zoo_reflex_rc82 | **71.0%** [.64, .77] | 51.5% [.45, .58] | +5.71 | +1.72 |
+| zoo_reflex_rc166 | 50.0% [.43, .57] | 53.5% [.47, .60] | +4.62 | -1.34 |
+| monster_rule_expert | 66.0% [.59, .72] | 44.5% [.38, .51] | +3.04 | +1.87 |
+| zoo_reflex_h1test | 77.0% [.71, .82] | **100.0%** [.98, 1.00] | +5.33 | +17.57 |
+
+**OVERALL: 1373/2000 = 68.6%** [0.666, 0.706]
+
+### Submission tier (pm29 확정)
+
+| Tier | Agent | 사용 목적 | 근거 |
+|---|---|---|---|
+| 1 (primary) | **rc166** | Code 40pt (baseline WR) | 98.5% vs baseline 200g |
+| 2 (tournament) | **rc-tempo β** | Extra 30pt (H2H strength) | 71% H2H vs rc82, 100% vs h1test distant |
+| fallback | rc82 | Tournament backup | 97% baseline WR, strong composite |
+
+---
+
+**Last updated:** 2026-04-20 pm28 END — **rc-tempo V0.1 설계 완료 (미구현) + Server Order 4 (A4) 분석**:
+- 🏁 **rc-tempo V0.1 design lock** — deterministic weighted-orienteering paradigm, capsule-assisted return. 설계만 완료, 구현은 pm29 착수.
+- 📐 **핵심 insight (user)**: Scared 40-move 창을 "개수 max" 가 아닌 **"위험 food 우선"** (dead-end, funnel, 고립) weighted DP. 쉬운 food는 Agent B + 후속 trip에서.
+- 🔢 **DP 실측 (defaultCapture 0.12s / distantCapture 0.22s / strategicCapture 2.32s)** — 모두 15s init 예산 내.
+- 🎯 **Ceiling per trip**: default 7 / distant 9 / strategic 13 food (+Agent B swarm +entry = 12-21 food/trip deposit).
+- 🔧 **V0.1 scope lock**: 1-capsule 맵 only (default, distant, strategic). 나머지 rc82 fallback.
+- 📄 **Design doc**: `.omc/plans/rc-tempo-design.md` (READ FIRST in pm29).
+- 🔄 **Server Order 4 (A4)**: fitness 0.968 peak (A1 1.065 미달), 건강한 수렴 (gen15 peak + 4 gen stagnation). 서버 root unarchived, pm29 cleanup.
+- ⚠️ **your_best/baseline{1,2,3}.py 전부 아직 DummyAgent** — M7 flatten_multi 사용해 rc166/rc-tempo 결정 후 populate.
+
+---
+
+**pm27 END:** — **NEW PEAK rc166/rc177 = 98.5% 200g + 11 new Tier 2/3 paradigms + M7 flatten_agent WORKING**:
+- 🏆 **rc166** (rc82 if score≥3 else rc16) and **rc177** (rc82 if score≥2 else rc16) both **197/200 = 98.5%** Wilson 95% [0.957, 0.995] → **co-peak** at 200g.
+- **rc166 vs rc177 H2H = 100-0-0 Red** → rc166 strictly better despite identical baseline WR. **rc166 primary submission candidate**.
+- **rc82 vs rc166 H2H = 29-0-31 Blue** → rc82 dominates direct combat (pm26 finding confirmed, rc82 = tournament candidate).
+- **Threshold sweep** (rc160/rc177/rc166/rc178/rc179 = 97.5/98.5/98.5/95/98) → sweet spot at ≥2 / ≥3.
+- **11 new Tier 2/3 paradigms** implemented: Tier 2 rc25 (Quiescence 98%), rc37 (Novelty 94%), rc38 (MAP-Elites 87%), rc41 (SARSA 93%), **rc47 Engine αβ 95% 200g [0.910, 0.974]**, rc49 (SIPP-lite 95%). Tier 3 rc58 (Coord-Graph 87%), rc59 (Reward Machines 90%), rc60 (Difference Rewards 90%), rc65 (ToM L2 74%), rc75 (MAML/Reptile 90%).
+- **7 drops**: rc26 (too slow), rc35/rc36 (rollout opp-model bug), rc42/rc43 (Double-Q/TD failed), rc67 (stochastic RM+ broken), rc185 (switch continuity issue).
+- **M7 flatten_agent WORKING** via `experiments/flatten_multi.py` — recursive dep resolution, strips zoo_* imports keeping stdlib nested imports, injects evolved SEED_WEIGHTS. Parity verified: flat_rc166 98% 100g vs original 98.5%/200g.
+
+---
+
+**pm26 END:** — **SWITCH BREAKTHROUGH: rc160 = 97.5% [0.944, 0.990] NEW PEAK**:
 - **🏆 rc160 (`if score >= 1: rc82 else rc16`)** 200g = 195/200 = **97.5%** Wilson [0.944, 0.990]. +0.5pp over rc82 solo (97%).
 - **rc159/rc166/rc167** = 99% at 100g (CI overlaps rc160). Simplest 2-way wins.
 - **rc152** 4-way (rc82 / rc16 small-lead / A1 / rc52b): 98%.

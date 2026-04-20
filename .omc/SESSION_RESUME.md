@@ -1,13 +1,226 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-20 pm26 END — **SWITCH-BASED BREAKTHROUGH + Tournament H2H finding**:
-- 🏆 **rc160** (`if score >= 1: rc82 else rc16`) = **97.5%** vs baseline [0.944, 0.990] (200g).
-- **24 new rc** in pm26 session (rc141-rc174) — switch pattern exploration.
-- **Critical H2H**: rc82 beats rc160 **32-11-17** in 60-game direct battle. Switch advantage doesn't generalize.
-- **100g corrections**: rc82 97%, rc16 92%, rc105 95% (pm23/24 40g "100%" were variance-inflated).
-- REINFORCE variance confirmed: rc52b 92% was lucky outlier (rc52c/rc52d 86% regression).
+**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 구현 + 2000g HTH 검증 완료**:
+- 🏆 **rc-tempo β**: 2000g HTH overall **68.6% WR** [0.666, 0.706], **71% H2H vs rc82**, **100% vs h1test on distant**.
+- ✅ **β = rc-tempo V0.1 submission candidate** (tournament 30pt, rc82 H2H 우위).
+- ❌ **γ REJECTED**: 0/200 vs rc166 default (catastrophic). Entry-DP 아이디어는 V0.2 재설계.
+- 📊 **β vs γ H2H**: 101/200 (50.5% coin flip).
+- 📐 **Files**: `minicontest/{zoo_rctempo_core, zoo_reflex_rc_tempo_beta, zoo_reflex_rc_tempo_gamma}.py`, `experiments/rc_tempo/{hth_resumable, analyze_hth, capsule_safety, two_agent_split, viz_risk}.py`.
+- 📄 **Session log**: `.omc/wiki/2026-04-20-pm29-rc-tempo-v01-beta-gamma-hth.md`.
 
-## pm27 TL;DR (NEXT SESSION — READ FIRST)
+## pm30 TL;DR (NEXT SESSION — READ FIRST)
+
+### 🎯 pm30 immediate priorities
+
+1. **Phase 4 round-robin tournament** — Pool expanded with rc-tempo β. Dispatch server 16-worker.
+2. **M7 flatten** — rc166 → `20200492.py` (primary, 98.5% 200g baseline). Optionally rc-tempo β → alt submission.
+3. **M8 output.csv** — populate `your_baseline{1,2,3}.py` + final.
+4. **M9 ICML report** — rc-tempo paradigm as distinctive methodology.
+
+### 📊 pm29 Leaderboard (vs rc-tempo β, 200g per cell)
+
+| Opponent | default WR | distant WR |
+|---|---|---|
+| baseline | 95.0% | 78.0% |
+| rc82 | **71.0%** 🏆 | 51.5% |
+| rc166 | 50.0% | 53.5% |
+| monster | 66.0% | 44.5% |
+| h1test | 77.0% | **100.0%** 🏆 |
+
+### ⚠️ Known issues / TODOs
+
+- γ HTH partial (1577/2000 before WSL dropped) — 재시작 완료, 추후 분석만 하면 됨
+- `RCTEMPO_METRICS_CSV` env propagation 작동 안 함 (ProcessPool subprocess chain 이슈) — WR 데이터로 충분
+- **your_best/baseline{1,2,3}.py 여전히 DummyAgent** — M7 flatten 필요
+
+### 📂 Critical reference docs
+
+- `.omc/plans/rc-tempo-design.md` — V0.1 original design (일부 revision 필요 — strategic는 static unsafe, 실제로 제외됨)
+- `.omc/wiki/2026-04-20-pm29-rc-tempo-v01-beta-gamma-hth.md` — pm29 full session log
+- `experiments/artifacts/rc_tempo/hth_beta.csv` — 2000g β HTH raw data
+- `experiments/artifacts/rc_tempo/hth_gamma.csv` — γ HTH raw data
+- `experiments/rc_tempo/analyze_hth.py` — per-opp Wilson CI analyzer
+
+---
+
+**Last updated:** 2026-04-20 pm28 END — **rc-tempo V0.1 설계 완료 (미구현), Server Order 4 분석 완료**:
+- 🏁 **rc-tempo V0.1 design locked** → `.omc/plans/rc-tempo-design.md` (상세). 다음 세션 구현 착수.
+- 🧠 **Paradigm novel**: 우리 rc 139개 중 첫 **deterministic orienteering** agent. User-driven design (pm28 전체 세션).
+- 📐 **Key insight (user)**: 40 scared 창은 "개수 max"가 아닌 **"위험 food 우선"** (dead-end/funnel) weighted DP. 쉬운 food는 Agent B 또는 후속 trip에서.
+- ⏱️ **DP 실측**: defaultCapture 0.12s / distantCapture 0.22s / strategicCapture 2.32s — 모두 15초 init 예산 내.
+- 🔢 **Ceiling (DP)**: default 7 / distant 9 / strategic 13 food per scared trip. +B swarm +entry = 1 trip ~12-21 food deposit (18 game-end).
+- 🎯 **Server Order 4 (A4)**: fitness 0.968 peak, A1(1.065) 미달. 건강한 수렴 (gen 15 peak + 4 gen stagnation). `experiments/artifacts/final_weights.py` 서버 root에 unarchived.
+- ⚠️ **your_best/baseline1/2/3.py 전부 아직 DummyAgent** (2021 원본). 제출 직전 flatten 필수.
+
+## pm29 TL;DR (NEXT SESSION — READ FIRST)
+
+### 🎯 pm29 immediate priorities (in order)
+
+1. **rc-tempo V0.1 구현** (1일) — 13 tasks in TaskList. 순서:
+   - Task #1 스켈레톤 → #10 fallback → #2 topology → #13 risk map → #3 food split → #4 entry → #5 weighted DP → #8/#9 runtime → #11 HTH test → #12 AI_USAGE
+   - **Design doc**: `.omc/plans/rc-tempo-design.md` (READ FIRST)
+   - 100g HTH 목표: vs baseline ≥ 97% (rc82 동급), H2H vs rc82 ≥ 50% (초월 후보)
+
+2. **서버 A4 archive** (5분) — ssh jdl_wsl, `experiments/artifacts/` 루트 2a/2b gen JSON + final_weights.py를 `phase2_A4_s2026_a1init_20dim/` 로 이동. Mac pull.
+
+3. **Phase 4 라운드 로빈 검토** — rc-tempo 구현 후 Pool에 추가. rc166 vs rc-tempo vs rc82 tier 확정.
+
+4. **your_best.py 채우기** — Phase 4 챔피언 (rc166 or rc-tempo) flatten via `experiments/flatten_multi.py`. **your_baseline1/2/3** 도 동시 채움 (M8 output.csv 용).
+
+### 📐 rc-tempo V0.1 설계 핵심 (user-driven)
+
+**Paradigm**: Precomputed orienteering (not reactive). 맵 정보 static → init 15s에 전체 trip 계획 baked.
+
+**Phase state machine:**
+1. Entry: precomputed route, skip too-deep food (`depth > max_opp_depth × 0.85`)
+2. Capsule approach: A within 5 → swarm_safe 체크 → B midline pre-position
+3. **Scared (40 move)**: A executes **weighted DP** (risk sum max, not count max). B crosses midline → safe food cleanup.
+4. Deposit: A role-flip to defense.
+5. 2nd cycle: rc82 reactive
+
+**Weighted orienteering objective:**
+```
+risk(f) = 3 × dead_end_depth
+        + 2 × ap_count_on_path_to_home
+        + 0.5 × dist_to_home / 10
+        + 5 × (low_voronoi_margin)
+        + 2 × isolated_food
+```
+DP bitmask. Same state space, only `best_state` 판정이 `risk_sum` 기준.
+
+**왜 weighted?** Scared 창은 "평소 위험해서 못 먹는 food" 전용. 일반 food는 언제든 후속 trip.
+
+**Agent A vs B:**
+- A: DP로 고위험 food 우선 (dead-end, funnel, 외톨이)
+- B: swarm join 후 저위험 food cleanup (개수 극대화)
+
+### 🔒 V0.1 Scope (lock)
+
+**타겟 (1 capsule)**: defaultCapture, distantCapture, strategicCapture
+**Fallback (rc82 redirect)**: alleyCapture, blox, crowded, fast, medium, office, tiny (0 capsules), jumboCapture (2 capsules — V2), testCapture (tiny/asymmetric)
+
+**V0.2+ 보류:**
+- Capsule chaining (jumbo: 78 scared 연장)
+- Voronoi safe route table (defender position별)
+- Top-3 anti-deterministic variants
+- Scared ghost hunt
+- Dead-end entry whitelist full
+
+### 🚨 Known issues / TODOs
+
+- **your_baseline{1,2,3}.py + your_best.py 아직 DummyAgent** — 제출 전 필수 populate
+- **Server A4 unarchived** — 다음 세션 cleanup
+- rc-tempo가 rc82 < 이면 V0.2 설계 회귀, rc166 교체 시나리오 포기 가능
+- DP 2.3s on strategicCapture — 다른 precompute 포함 시 15s 예산 여유 체크 필요
+
+### 📂 Critical reference docs
+
+- **`.omc/plans/rc-tempo-design.md`** — V0.1 전체 설계 (READ FIRST)
+- `experiments/test_orienteering.py` — DP timing 실측 스크립트
+- `minicontest/zoo_reflex_rc82.py` — fallback delegate용 (아직 수정 X, 참조만)
+- `experiments/flatten_multi.py` — submission flatten 도구
+- `.omc/wiki/2026-04-20-pm28-rc-tempo-design.md` — pm28 session log (예정)
+
+### Next action order (pm29 opening)
+
+1. Read `.omc/plans/rc-tempo-design.md` (전체 설계)
+2. `ssh jdl_wsl` A4 archive (5분)
+3. Task #1 (파일 스켈레톤) 착수
+4. 순차 구현 + 10g smoke test between stages
+5. 100g HTH 측정 → rc82/rc166 비교
+
+---
+
+## pm27 TL;DR (이전 세션 — NEW PEAK rc166/rc177 = 98.5% 200g + 11 Tier 2/3 paradigms + M7 flatten working)
+- 🏆 **rc166** (`if score ≥ 3: rc82 else rc16`) & **rc177** (`≥ 2 threshold`) both **98.5% 200g** [0.957, 0.995].
+- **rc166 > rc177 H2H 100-0-0** (strictly better despite identical baseline WR) → **rc166 = primary submission candidate**.
+- **rc82 > rc166 H2H 29-0-31** (pm26 finding confirmed, **rc82 = tournament candidate**).
+- **11 new Tier 2/3 paradigms** implemented: rc25/37/38/41/47/49 (Tier 2) + rc58/59/60/65/75 (Tier 3).
+- **rc47 Engine αβ** strong non-composite: 95% 200g [0.910, 0.974].
+- **M7 flatten_agent DONE**: `experiments/flatten_multi.py` recursive dep resolver, verified rc166 → 2205-line standalone `20200492.py`-style file, parity 98%/100g.
+
+## pm28 TL;DR (historical — pm28에서 진행한 priorities였음, 대부분 rc-tempo 설계로 대체됨)
+
+### 🎯 pm28 immediate priorities (old — mostly superseded)
+
+1. **Phase 4 round-robin tournament** (server). Pool expanded to ~40+ agents with pm27 additions. 5 layouts × 3 seeds × 2 colors. Dispatch: `ssh jdl_wsl` + `tmux work`. Expected tiering: rc82 > rc166 > rc47 > rc25 > mid-tier (rc37/41/49/59/60/75) > lower-tier (rc38/58/65).
+2. **Submission decision**:
+   - **Safe/baseline 40pt**: rc166 (98.5% 200g [0.957, 0.995]) via `experiments/flatten_multi.py --agent zoo_reflex_rc166 --weights experiments/artifacts/phase2_A1_17dim_final_weights.py --out minicontest/20200492.py`
+   - **Tournament 30pt**: rc82 (H2H dominant) OR let Phase 4 decide
+3. **Check Server Order 4 status** (pm26 SSH timeout). Retry `ssh jdl_wsl "pgrep -af evolve.py | wc -l && ls experiments/artifacts/2?_gen*.json | tail -5"`. If finished → add to Phase 4 pool.
+4. **M8/M9/M10**: `your_baseline1/2/3.py` population, ICML report (Intro/Methods/Results/Conclusion), ZIP packaging.
+
+### 📊 200g authoritative leaderboard
+
+| rc | 200g WR | Wilson 95% |
+|---|---|---|
+| **rc166** (≥3 thresh) | **98.5%** | [0.957, 0.995] |
+| **rc177** (≥2 thresh) | **98.5%** | [0.957, 0.995] |
+| rc159 (4-way) | 98.0% | [0.950, 0.992] |
+| rc160 (≥1 thresh) | 97.5% | [0.944, 0.990] |
+| rc82 (composite) | 97.0% | [0.935, 0.986] |
+| rc47 (engine αβ) | 95.0% | [0.910, 0.974] |
+
+### 🧪 pm27 Tier 2/3 catalog (11 new)
+
+**Tier 2** (search + inference heuristics):
+- `rc25` Quiescence Search (αβ d4 + q-ext +2) — 98% 100g
+- `rc37` Novelty Search (position anti-loop) — 94% 100g
+- `rc38` MAP-Elites inference (12-niche archive) — 87% 100g
+- `rc41` SARSA 4-step self-only rollout — 93% 100g
+- `rc47` Engine αβ (IDDFS + history + PVS-lite) — **95% 200g**
+- `rc49` SIPP-lite (3-step teammate reservation) — 95% 100g
+
+**Tier 3**:
+- `rc58` Coord-Graph UCT (pairwise spreading) — 87% 100g
+- `rc59` Reward Machines (5-stage FSM) — 90% 100g
+- `rc60` Difference Rewards (aristocrat utility) — 90% 100g
+- `rc65` ToM L2 (2-ply adversarial over rc82) — 74% 100g (weak)
+- `rc75` MAML/Reptile (layout-family adjust) — 90% 100g
+
+**Drops**: rc26 (too slow), rc35/rc36 (rollout opp-model bug), rc42/rc43 (Double-Q/TD variants failed), rc67 (stochastic RM+ broken), rc185 (switch continuity break).
+
+### 🔧 M7 flatten_agent (working)
+
+```bash
+.venv/bin/python experiments/flatten_multi.py \
+  --agent zoo_reflex_rc166 \
+  --weights experiments/artifacts/phase2_A1_17dim_final_weights.py \
+  --out minicontest/20200492.py
+```
+Recursively resolves dep chain (rc166 → rc82 → rc44 → {A1, rc02, rc16, rc32}), strips zoo_* imports (keeps nested stdlib like `import importlib.util`), injects evolved SEED_WEIGHTS. Output ~2200 lines. Verified parity via 100g HTH: flat 98/100 vs original 98.5%/200g.
+
+### 🔑 Critical insights (pm26+pm27)
+
+1. **Baseline WR ≠ tournament strength**. rc166 has higher baseline (98.5%) but loses H2H to rc82 (0-29-31). Switch composites exploit baseline's weaknesses; don't generalize.
+2. **H2H deadlock among strong agents**. rc47 vs rc166 = all 60 Tie (search + reflex composite neutralize each other).
+3. **Threshold sweep sweet spot**: rc177 (≥2) = rc166 (≥3) at 98.5% 200g. Below (rc160 ≥1) or above (rc178 ≥4) both lose ~1pp.
+4. **Search paradigm works when fixed bugs**: rc47 needs `static_eval` (max over self's legal at any state), not stale `leaf_eval(state, last_action)`. Also MUST use A1 evolved weights not seed.
+5. **Rollout opp-model bug**: if opponent uses MY `evaluate(self, …)` (biased to self's perspective) → catastrophic. rc35/rc36 failed here. rc41's self-only rollout fixed it (93% WR).
+
+### 📂 Reference docs
+
+- `.omc/wiki/2026-04-20-pm27-tier2-3-expansion-11-paradigms-m7-flatten.md` — full session log
+- `.omc/plans/pm27-batch-ii-tier23.md` — Tier 2/3 plan (partially executed)
+- `.omc/plans/rc-pool.md` — full catalog (needs pm27 update)
+- `experiments/flatten_multi.py` — multi-file flatten
+- Recent commits: should see pm27 commit as latest
+
+### 🚨 Known issues / TODOs
+
+- Server Order 4 status unknown since pm26 (SSH timeout 2026-04-19 evening).
+- pm27 drops kept in `minicontest/` for audit trail (rc26/35/36/42/43/67); can delete later if clutter.
+- `your_baseline{1,2,3}.py` still DummyAgent — populate before M8 output.csv.
+
+### Next action order
+
+1. Read `STATUS.md` (detailed table).
+2. `ssh jdl_wsl "pgrep -af evolve.py | wc -l"` — Order 4 alive?
+3. If Order 4 done: add O4 to Phase 4 pool and launch tournament.
+4. If not reachable: launch Phase 4 with current pool (~40 agents including pm27 additions).
+5. Post-tournament: M7 flatten final champion to `20200492.py`, run 100g HTH sanity, update AI_USAGE.md.
+
+## pm27 TL;DR (historical — this session just completed)
 
 ### 🎯 pm27 immediate priorities
 
