@@ -55,6 +55,15 @@ VARIANTS = {
                           'BETA_CHASE_SLACK': '2',
                           'BETA_PATH_ABORT_RATIO': '6'},
 
+    # === β_retro (retrograde tablebase) ===
+    'beta_retro':         {'__RETRO__': '1'},                           # V+1 + V=0 far
+    'beta_retro_never':   {'__RETRO__': '1', 'BETA_RETRO_DRAW_MODE': 'never'},
+    'beta_retro_always':  {'__RETRO__': '1', 'BETA_RETRO_DRAW_MODE': 'always'},
+    'beta_retro_far3':    {'__RETRO__': '1', 'BETA_RETRO_DRAW_MODE': 'far',
+                            'BETA_RETRO_DRAW_MIN_DIST': '3'},
+    'beta_retro_far8':    {'__RETRO__': '1', 'BETA_RETRO_DRAW_MODE': 'far',
+                            'BETA_RETRO_DRAW_MIN_DIST': '8'},
+
     # === v3a (A* + Voronoi + Slack DP) ===
     'v3a_default': {},  # margin=1, full-path Voronoi, strict trigger
     'v3a_loose': {'V3A_TRIGGER_MODE': 'loose'},
@@ -212,6 +221,9 @@ def main():
         elif isinstance(env_dict, dict) and env_dict.get('__V3B__'):
             agent = 'zoo_reflex_rc_tempo_beta_v3b'
             env_dict_pass = {k: v for k, v in env_dict.items() if k != '__V3B__'}
+        elif isinstance(env_dict, dict) and env_dict.get('__RETRO__'):
+            agent = 'zoo_reflex_rc_tempo_beta_retro'
+            env_dict_pass = {k: v for k, v in env_dict.items() if k != '__RETRO__'}
         else:
             agent = 'zoo_reflex_rc_tempo_beta_v3a'
             env_dict_pass = env_dict

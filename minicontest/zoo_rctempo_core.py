@@ -912,6 +912,169 @@ def _neighbors_plus_stop(walls, cell):
     return out
 
 
+# ---------------------------------------------------------------------------
+# 8. pm31 V3c — Retrograde analysis (game-theoretic tablebase) for capsule chase
+# ---------------------------------------------------------------------------
+
+def _neighbors_with_stop(walls, cell):
+    """Adjacent cells + STOP (same cell) — legal moves (incl. no move)."""
+    x, y = cell
+    W, H = walls.width, walls.height
+    out = [cell]
+    for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < W and 0 <= ny < H and not walls[nx][ny]:
+            out.append((nx, ny))
+    return out
+
+
+def build_retrograde_table(walls, capsule, restrict_opp_side=True,
+                             is_red_team=True):
+    """Compute minimax value table V[(me, def, turn) → ±1 | 0] for
+    the 1-me vs 1-def capsule chase subgame on opp territory.
+
+    Values:
+        +1: I (the chasing pacman) can force-win (reach capsule) regardless
+            of what the defender does. Retrograde-verified.
+        -1: Defender can force-catch me regardless of what I do.
+         0: Unresolved (neither can force outcome → draw / infinite cycle).
+
+    Assumes:
+      - Perfect information (minicontest has no fog-of-war)
+      - Deterministic transitions (pacman rules)
+      - 1 me + 1 defender only (no teammate / second opponent)
+      - Defender not scared (0-timer); if scared, commit is trivially safe
+
+    Args:
+        walls: game layout walls grid.
+        capsule: target cell (opp-side capsule).
+        restrict_opp_side: limit state space to opp territory + midline.
+        is_red_team: affects which side is "opp".
+
+    Returns:
+        V: dict[(me, def, turn), int] where turn ∈ {0 = my turn, 1 = def turn}.
+    """
+    W, H = walls.width, walls.height
+    mid = W // 2
+
+    # Open cells
+    all_open = [(x, y) for x in range(W) for y in range(H) if not walls[x][y]]
+
+    if restrict_opp_side:
+        # For red team: opp side is x >= mid
+        # For blue team: opp side is x < mid
+        # Include midline crossing cells so A entering from home side is captured.
+        if is_red_team:
+            cells = [c for c in all_open if c[0] >= mid - 1]
+        else:
+            cells = [c for c in all_open if c[0] <= mid]
+    else:
+        cells = all_open
+
+    cell_set = set(cells)
+
+    # Precompute in-region neighbors
+    nbrs = {}
+    for c in cells:
+        nn = _neighbors_with_stop(walls, c)
+        nbrs[c] = [n for n in nn if n in cell_set]
+
+    # Initialize V
+    V = {}
+    for me in cells:
+        for d in cells:
+            for turn in (0, 1):
+                if me == capsule:
+                    V[(me, d, turn)] = +1
+                elif me == d:
+                    V[(me, d, turn)] = -1
+                else:
+                    V[(me, d, turn)] = 0
+
+    # Retrograde iteration
+    for _ in range(200):  # upper bound on iterations
+        changes = 0
+        for me in cells:
+            if me == capsule:
+                continue
+            me_nbrs = nbrs[me]
+            for d in cells:
+                if me == d:
+                    continue
+                d_nbrs = nbrs[d]
+
+                key0 = (me, d, 0)
+                if V[key0] == 0:
+                    best = -2
+                    for me_next in me_nbrs:
+                        if me_next == d:
+                            v = -1
+                        else:
+                            v = V[(me_next, d, 1)]
+                        if v > best:
+                            best = v
+                            if best == +1:
+                                break  # early exit
+                    if best != 0:
+                        V[key0] = best
+                        changes += 1
+
+                key1 = (me, d, 1)
+                if V[key1] == 0:
+                    worst = +2
+                    for d_next in d_nbrs:
+                        if d_next == me:
+                            v = -1
+                        else:
+                            v = V[(me, d_next, 0)]
+                        if v < worst:
+                            worst = v
+                            if worst == -1:
+                                break
+                    if worst != 0:
+                        V[key1] = worst
+                        changes += 1
+
+        if changes == 0:
+            break
+
+    return V
+
+
+def retrograde_best_action(V, walls, me, defender, cell_set=None):
+    """Given precomputed V and current state, return best next cell for me.
+
+    Strategy: pick the move that maximizes V[(me_next, defender, 1)].
+    Ties broken by preferring closer-to-capsule moves (handled by caller via
+    passing explicit tie-break key).
+
+    Args:
+        V: retrograde table.
+        walls: layout walls.
+        me, defender: current positions.
+        cell_set: optional set of in-region cells (for filtering).
+
+    Returns:
+        (best_next_cell, best_value)
+        best_value ∈ {+1, -1, 0} — expected game value after this move.
+    """
+    me_nbrs = _neighbors_with_stop(walls, me)
+    if cell_set is not None:
+        me_nbrs = [n for n in me_nbrs if n in cell_set]
+
+    best_next = me
+    best_v = -2
+    for me_next in me_nbrs:
+        if me_next == defender:
+            v = -1
+        else:
+            v = V.get((me_next, defender, 1), 0)
+        if v > best_v:
+            best_v = v
+            best_next = me_next
+    return best_next, best_v
+
+
 def ab_capsule_chase(walls, my_pos, capsule, defender, scared_ticks,
                       distance_fn, max_depth=6, time_budget=0.2,
                       home_cells=None):
