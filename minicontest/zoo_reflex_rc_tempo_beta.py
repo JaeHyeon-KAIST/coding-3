@@ -360,14 +360,16 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
             return None
 
         # Per-waypoint defender intercept check.
-        # margin=0: defender must strictly exceed my BFS distance at every wp.
-        # Equivalent to "I arrive at wp at least 1 move before any defender".
-        CHASE_MARGIN = 0
+        # margin=-1: abort only when defender is strictly closer to a waypoint
+        # than I am (d_def < i).  Equal distance (d_def == i) commits.  This
+        # is strictly more permissive than pm29's single-cell "d_def+1<d_cap"
+        # check because it applies at every wp, not just the terminal capsule.
+        CHASE_MARGIN = -1
         for i, wp in enumerate(path[1:], start=1):
             for dp in defenders:
                 d_def = distance_fn(dp, wp)
                 if d_def <= i + CHASE_MARGIN:
-                    return None  # defender intercepts waypoint i
+                    return None  # defender strictly ahead at waypoint i
 
         # All waypoints safe — step toward capsule
         return _next_step_toward(gameState, my_pos, capsule, legal, distance_fn)
