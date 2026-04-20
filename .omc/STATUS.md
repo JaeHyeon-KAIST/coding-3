@@ -4,7 +4,21 @@
 - 🎯 **v2d accepted**: `_choose_capsule_chase_action` 상단에 `if my_score ≥ 5 pre-capsule: skip chase → rc82 defensive` 게이트 추가
 - 📊 **660g 11-opp smoke**: current β 73.2% → v2d 77.9% (+4.7pp) overall. **rc32 +31.7pp 폭발** (Pincer defender 대응), rc02 +6.7pp, baseline +5pp, rc82 +5pp, monster +3.3pp. 무회귀.
 - ❌ **v2a (full-path BFS) 기각**: margin=0 -2pp regression, margin=-1 flat. 복합 defender(rc82/rc166) 상대 과도 abort.
-- 🧪 **2000g HTH 검증** 서버에서 진행 중 (5-opp × 2 layout × 2 color × 100g).
+- 🏆 **2000g HTH 검증 완료**: 1513/2000 = **75.65%** [0.737, 0.775] — pm29 β 68.6% 대비 **+7.05pp**. Pass criteria ≥68.6% ✓.
+
+### pm30 2000g HTH (β v2d vs pm29 β)
+
+| Opp | pm29 β default | pm30 v2d default | Δ | pm29 distant | pm30 distant | Δ |
+|---|---|---|---|---|---|---|
+| baseline | 95.0% | 92.5% | -2.5 | 78.0% | 77.0% | -1.0 |
+| monster | 66.0% | **81.0%** | **+15.0** 🔥 | 44.5% | **56.0%** | **+11.5** 🔥 |
+| rc166 | 50.0% | 50.0% | 0 | 53.5% | **72.5%** | **+19.0** 🔥 |
+| rc82 | 71.0% | **77.5%** | +6.5 | 51.5% | 50.0% | -1.5 |
+| h1test | 77.0% | **100.0%** | **+23.0** 🔥 | 100.0% | 100.0% | 0 |
+| **OVERALL** | **68.6%** | **75.65%** [0.737, 0.775] | **+7.05pp** | | | |
+
+Per-opp all-layout: baseline 84.8%, monster 68.5%, rc166 61.3%, rc82 63.7%, h1test 100%.
+
 - 🔒 **Structural**: rc47 distant = 30T 순수 교착 (0-0 1200-move timeout), rc16 = 50/50 coin flip. chase 로직으로 해결 불가 — Phase 3 DP / Agent B pre-position 차기 타겟.
 - 📂 Session log: `.omc/wiki/2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md`
 

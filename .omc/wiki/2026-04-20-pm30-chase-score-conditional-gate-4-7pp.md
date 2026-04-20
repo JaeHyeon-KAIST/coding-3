@@ -1,9 +1,9 @@
 ---
 title: "2026-04-20 pm30 β_chase score-conditional gate +4.7pp"
-tags: ["pm30", "rc-tempo", "beta", "chase", "score-gate", "smoke", "multi-opp"]
+tags: ["pm30", "rc-tempo", "beta", "chase", "score-gate", "smoke", "multi-opp", "hth", "2000g"]
 created: 2026-04-20T10:41:24.931Z
-updated: 2026-04-20T10:41:24.931Z
-sources: ["experiments/artifacts/rc_tempo/smoke_pm30_current.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2a.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2a2.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2d.csv", "minicontest/zoo_reflex_rc_tempo_beta.py"]
+updated: 2026-04-20T10:52:01.653Z
+sources: ["experiments/artifacts/rc_tempo/smoke_pm30_current.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2a.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2a2.csv", "experiments/artifacts/rc_tempo/smoke_pm30_v2d.csv", "minicontest/zoo_reflex_rc_tempo_beta.py", "experiments/artifacts/rc_tempo/hth_beta_pm30.csv"]
 links: []
 category: session-log
 confidence: high
@@ -80,4 +80,64 @@ schemaVersion: 1
 - `minicontest/zoo_reflex_rc_tempo_beta.py::_choose_capsule_chase_action` — score gate 추가
 - `experiments/artifacts/rc_tempo/smoke_pm30_{current,v2a,v2a2,v2d}.csv` — per-variant 660g data
 - `experiments/artifacts/rc_tempo/hth_beta_pm30.csv` — 2000g 검증 (진행 중)
+
+---
+
+## Update (2026-04-20T10:52:01.653Z)
+
+# pm30 β v2d — 2000g HTH result (appended)
+
+**2026-04-20 pm30 CLOSING**
+
+**2000g HTH (5-opp × 2 layout × 2 color × 100g per cell, server 16 workers, 9 min wall)**: OVERALL = **1513/2000 = 75.65%** [Wilson 0.737, 0.775].
+
+vs pm29 β 2000g baseline = 1373/2000 = 68.6% → **+7.05pp 개선**.
+
+## Per-opp table (v2d, 400g combined)
+
+| Opp | Default 200g | Distant 200g | All layouts 400g |
+|---|---|---|---|
+| baseline | 185/200 = 92.5% | 154/200 = 77.0% | 339/400 = 84.75% |
+| monster_rule_expert | 162/200 = 81.0% | 112/200 = 56.0% | 274/400 = 68.50% |
+| zoo_reflex_h1test | 200/200 = 100.0% | 200/200 = 100.0% | 400/400 = 100.00% |
+| zoo_reflex_rc166 | 100/200 = 50.0% | 145/200 = 72.5% | 245/400 = 61.25% |
+| zoo_reflex_rc82 | 155/200 = 77.5% | 100/200 = 50.0% | 255/400 = 63.75% |
+
+## Comparison to pm29 β
+
+| Opp × layout | pm29 200g | pm30 200g | Δpp |
+|---|---|---|---|
+| baseline default | 95.0% | 92.5% | -2.5 |
+| baseline distant | 78.0% | 77.0% | -1.0 |
+| monster default | 66.0% | **81.0%** | **+15.0** |
+| monster distant | 44.5% | **56.0%** | **+11.5** |
+| h1test default | 77.0% | **100.0%** | **+23.0** |
+| h1test distant | 100.0% | 100.0% | 0 |
+| rc166 default | 50.0% | 50.0% | 0 |
+| rc166 distant | 53.5% | **72.5%** | **+19.0** |
+| rc82 default | 71.0% | **77.5%** | +6.5 |
+| rc82 distant | 51.5% | 50.0% | -1.5 |
+
+## Pass criteria
+
+- Overall WR ≥ 68.6% (pm29 β baseline) → 75.65% ✓
+- H2H vs rc166 default ≥ 55% target → 50% ✗ (miss by 5pp, but rc166 all-layouts 61.25% still improved vs pm29's ~52%)
+- 0 crashes ✓
+
+## Interpretation
+
+Score-conditional gate (`if my_score ≥ 5 pre-capsule: skip chase → rc82 defensive`) is a **net gain across non-baseline-direction opponents**. The small -2.5pp on baseline default is likely noise (Wilson CI of 95%→92.5% overlaps) or caused by skipping the aggressive chase that was actually winning vs baseline before. 
+
+Three dimensions of gain:
+1. **monster** (rule-based defender): big gains both layouts — gate prevents bait chases into rule fires.
+2. **rc166 distant** (switch composite): +19pp — gate avoids feeding rc166's switch conditions on the big map.
+3. **h1test default** (aggressive both-OFFENSE with no defense): +23pp — gate lets us bank a +5 lead and defend it (h1test has no effective defense, so all we need is preservation).
+
+The only wash: rc82 distant (-1.5pp), baseline (-1-2.5pp). Likely noise given sample sizes.
+
+## Final β (pm30 committed state)
+
+- `minicontest/zoo_reflex_rc_tempo_beta.py` at commit `e304b52` → HTH verified at commit `3b41410`.
+- `experiments/artifacts/rc_tempo/hth_beta_pm30.csv` = raw 2000g data.
+- pm30 close.
 

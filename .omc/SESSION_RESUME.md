@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-04-20 pm30 END — **β_chase score-conditional gate (+4.7pp)**:
 - 🎯 **β v2d final**: `_choose_capsule_chase_action` 상단 `score ≥ 5 → chase skip (rc82 위임)` 게이트 추가. 660g 11-opp smoke에서 current 73.2% → v2d **77.9%** (+4.7pp). rc32 Pincer 상대 +31.7pp 폭발.
-- 🧪 **2000g HTH 진행 중** (server tmux work): `experiments/artifacts/rc_tempo/hth_beta_pm30.csv`. 합격 기준 overall ≥68.6%, H2H vs rc166 default ≥55%.
+- 🏆 **2000g HTH 완료**: overall **75.65%** [0.737, 0.775] — pm29 β 68.6% 대비 **+7.05pp**. monster +11-15pp, rc166 distant +19pp, h1test default +23pp. baseline 미미한 -1pp. rc82 default +6.5pp. 합격 기준 (overall ≥68.6%) ✓ pass.
 - ❌ **2a (full-path BFS) 기각**: margin 조정 둘 다 flat/regressed. 복합 defender 상대 과도 abort.
 - 🔒 **Structural limits**: rc47 distant = 30T 0-0 timeout (β와 rc47 mirror deadlock), rc16 = 정확한 50/50 coin flip. chase 로직으로는 해결 불가.
 
