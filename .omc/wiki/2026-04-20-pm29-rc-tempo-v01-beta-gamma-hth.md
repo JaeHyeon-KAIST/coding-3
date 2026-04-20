@@ -121,9 +121,36 @@
 - `RCTEMPO_METRICS_CSV` env var propagation through ProcessPoolExecutor subprocess chain not working; metrics analyzable via game outcome instead
 - Phase 4 tournament not yet — pool now has: rc82, rc166, rc-tempo_β, A1, h1test, monster, + pm24 champions
 
+## Late-session capsule-chase patch (β_chase)
+
+Observation during analysis: β's `scared_seen` rate was only ~30-50% on default/distant
+— meaning A reached & ate capsule in less than half of games. rc82's natural
+`f_distToCapsule=8.0` is not a strong enough driver against competing feature pressure.
+
+### Patch: Agent A phase-1 BFS-to-capsule
+
+Added `_choose_capsule_chase_action` to `ReflexRCTempoBetaAgent`:
+- Phase 1 + role A: compute greedy step toward capsule via `_next_step_toward`
+- Abort (return None → rc82 fallback) when:
+  - Visible non-scared defender within 2 maze cells
+  - Defender reaches capsule before us (`d_opp_cap + 1 < d_to_cap`)
+
+### 10g smoke (vs baseline, pm29 end)
+
+| Layout | Before (scared_seen / wins) | After (scared_seen / wins) |
+|---|---|---|
+| defaultCapture | 30% / 10-win-10 | **70%** / 9-win-1-tie |
+| distantCapture | 30% / 6-win-4-loss | **90%** / 9-win-1-loss |
+
+### Status
+- Full 2000g HTH not rerun (user deferred to pm30)
+- Partial chase HTH data: `experiments/artifacts/rc_tempo/hth_beta_chase_partial.csv` (159 games)
+- Authoritative 2000g β HTH: `experiments/artifacts/rc_tempo/hth_beta.csv` (original β, pre-patch)
+
 ## Next-session priority
 
-1. Full Phase 4 round-robin tournament with rc-tempo_β added to pool (40+ agents)
-2. M7 flatten rc166 → `20200492.py` (primary submission)
-3. M7 flatten rc-tempo_β → `20200492_alt.py` for comparison
-4. M9 ICML report — rc-tempo paradigm is a distinctive methodology bullet
+1. **β_chase full HTH 2000g** — measure improvement over original β's 68.6% baseline
+2. Full Phase 4 round-robin tournament with rc-tempo_β_chase in pool
+3. M7 flatten rc166 → `20200492.py` (primary submission)
+4. M7 flatten rc-tempo_β_chase → `20200492_alt.py` for comparison
+5. M9 ICML report — rc-tempo paradigm is a distinctive methodology bullet

@@ -1,21 +1,33 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 구현 + 2000g HTH 검증 완료**:
-- 🏆 **rc-tempo β**: 2000g HTH overall **68.6% WR** [0.666, 0.706], **71% H2H vs rc82**, **100% vs h1test on distant**.
-- ✅ **β = rc-tempo V0.1 submission candidate** (tournament 30pt, rc82 H2H 우위).
-- ❌ **γ REJECTED**: 0/200 vs rc166 default (catastrophic). Entry-DP 아이디어는 V0.2 재설계.
-- 📊 **β vs γ H2H**: 101/200 (50.5% coin flip).
-- 📐 **Files**: `minicontest/{zoo_rctempo_core, zoo_reflex_rc_tempo_beta, zoo_reflex_rc_tempo_gamma}.py`, `experiments/rc_tempo/{hth_resumable, analyze_hth, capsule_safety, two_agent_split, viz_risk}.py`.
-- 📄 **Session log**: `.omc/wiki/2026-04-20-pm29-rc-tempo-v01-beta-gamma-hth.md`.
+**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 2000g HTH 완료 + capsule-chase 개선 (HTH 중단, pm30 재개)**:
+- 🏆 **rc-tempo β (original, 2000g)**: overall **68.6% WR**, **71% H2H vs rc82**, **100% vs h1test on distant**.
+- ❌ **γ REJECTED**: 2000g HTH 0/200 vs rc166 default.
+- 📊 **β vs γ H2H**: 101/200 coin flip.
+- ✨ **β_chase 추가 개선 (세션 말미)**: A가 phase 1에서 BFS로 capsule 직진 + defender safety. 10g smoke:
+  - defaultCapture: scared_seen **30% → 70%** (capsule 먹는 비율), wins 9/10
+  - distantCapture: scared_seen **30% → 90%**, wins 9/10 (vs 원래 β 6/10)
+- ⏸️ **β_chase full HTH는 pm30에 재실행** (159/2000 partial data: `experiments/artifacts/rc_tempo/hth_beta_chase_partial.csv`)
 
 ## pm30 TL;DR (NEXT SESSION — READ FIRST)
 
 ### 🎯 pm30 immediate priorities
 
-1. **Phase 4 round-robin tournament** — Pool expanded with rc-tempo β. Dispatch server 16-worker.
-2. **M7 flatten** — rc166 → `20200492.py` (primary, 98.5% 200g baseline). Optionally rc-tempo β → alt submission.
-3. **M8 output.csv** — populate `your_baseline{1,2,3}.py` + final.
-4. **M9 ICML report** — rc-tempo paradigm as distinctive methodology.
+1. **β_chase full HTH 2000g** — Mac or server. 이전 β (68.6% overall) 대비 얼마나 개선되는지 측정. scared_seen 30%→70-90% 기대치 실증 필요.
+2. **추가 capsule-chase 로직 튜닝 고려**:
+   - 현재: BFS greedy + defender ≤ 2 abort + "defender beats us to capsule" abort
+   - 개선 옵션: (a) defender 예측 경로 고려 (단순 distance 비교가 아닌), (b) 2-ply lookahead, (c) 여러 capsule 경로 중 선택
+3. **Phase 4 round-robin tournament** — β_chase 포함 pool.
+4. **M7 flatten** — rc166 → `20200492.py` (primary). β_chase도 대안 후보.
+5. **M9 ICML report** — rc-tempo paradigm as distinctive methodology.
+
+### pm29 committed state
+
+| Agent | HTH Overall (2000g) | vs baseline | H2H vs rc82 | 비고 |
+|---|---|---|---|---|
+| **β (original)** | 68.6% | 95% / 78% | **71%** | submission candidate tier 2 |
+| γ | 66.1% | 90% / 66% | 45% | REJECTED (rc166 default 0%) |
+| **β_chase (new)** | pending | pending | pending | smoke 10g: def 9/10, dist 9/10 |
 
 ### 📊 pm29 Leaderboard (vs rc-tempo β, 200g per cell)
 

@@ -263,8 +263,65 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                 self._maybe_log_food(gameState, action)
                 return action
 
+        # Phase 1 + Agent A: commit to capsule approach
+        if phase == 1 and self._my_role() == 'A':
+            action = self._choose_capsule_chase_action(gameState)
+            if action is not None:
+                return action
+
         # Pre-capsule / post-scared: rc82 plays naturally
         return super()._chooseActionImpl(gameState)
+
+    def _choose_capsule_chase_action(self, gameState):
+        """Phase 1 A: BFS toward capsule with defender safety fallback.
+
+        Returns action if we can safely step toward capsule.
+        Returns None to fall back to rc82 (on danger or when we're a ghost in home).
+        """
+        if RCTEMPO_TEAM.capsule is None:
+            return None
+        my_state = gameState.getAgentState(self.index)
+        my_pos = gameState.getAgentPosition(self.index)
+        if my_pos is None:
+            return None
+
+        # Only chase when already on enemy side (Pacman), OR close enough to midline
+        # that crossing is next step. If still deep on own side, rc82 plays and
+        # carries toward midline naturally.
+        distance_fn = _distance_fn_from_apsp(self.apsp, self.distancer)
+        capsule = RCTEMPO_TEAM.capsule
+        d_to_cap = distance_fn(my_pos, capsule)
+
+        # If we're already at capsule, eat it (next step IS capsule)
+        legal = gameState.getLegalActions(self.index)
+        if not legal:
+            return None
+
+        # Defender safety: if visible non-scared ghost within 2 of my_pos, abort
+        try:
+            for opp_idx in self.getOpponents(gameState):
+                ost = gameState.getAgentState(opp_idx)
+                if getattr(ost, 'isPacman', False):
+                    continue
+                if int(getattr(ost, 'scaredTimer', 0) or 0) > 0:
+                    continue
+                opp_pos = gameState.getAgentPosition(opp_idx)
+                if opp_pos is None:
+                    continue
+                opp_pos = (int(opp_pos[0]), int(opp_pos[1]))
+                d_me = distance_fn(my_pos, opp_pos)
+                if d_me <= 2:
+                    return None  # rc82 handles escape
+                # Also check: defender between me and capsule closer than I am?
+                d_opp_cap = distance_fn(opp_pos, capsule)
+                if d_opp_cap + 1 < d_to_cap:
+                    # Defender will reach capsule first; don't commit now
+                    return None
+        except Exception:
+            return None
+
+        # Step toward capsule (greedy)
+        return _next_step_toward(gameState, my_pos, capsule, legal, distance_fn)
 
     def _choose_scared_action(self, gameState):
         plan = RCTEMPO_TEAM.top_plan
