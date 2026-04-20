@@ -300,3 +300,11 @@
 - **Pages:** session-log-2026-04-20-3aca635a.md
 - **Summary:** Auto-captured session log for 644a4ecf-8a3d-4d51-bb5d-3df93aca635a
 
+## [2026-04-20T09:28:32.806Z] ingest
+- **Pages:** session-log-2026-04-20-87aabc3a.md
+- **Summary:** Auto-captured session log for 04d94520-953a-4401-933f-70db87aabc3a
+
+## [2026-04-20T10:41:24.931Z] ingest
+- **Pages:** 2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md
+- **Summary:** Created new page "2026-04-20 pm30 β_chase score-conditional gate +4.7pp"
+

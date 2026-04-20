@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 59 pages | Last updated: 2026-04-20T04:46:52.952Z
+> 64 pages | Last updated: 2026-04-20T10:41:24.958Z
 
 ## convention
 
@@ -57,6 +57,8 @@
 - [2026-04-19 pm26 END — switch-based rc160 breakthrough (97.5% 200g)](2026-04-19-pm26-end-switch-based-rc160-breakthrough-97-5-200g.md) — # 2026-04-19 pm26 END — switch-based rc160 breakthrough (97.5% 200g)
 - [2026-04-19 pm26 — rc52b + rc46/141/142 adaptive sprint](2026-04-19-pm26-rc52b-rc46-141-142-adaptive-sprint.md) — # 2026-04-19 pm26 — rc52b + rc46/141/142 adaptive sprint
 - [2026-04-20 pm27 Tier2/3 expansion + M7 flatten + rc166/rc177 co-peak](2026-04-20-pm27-tier2-3-expansion-m7-flatten-rc166-rc177-co-peak.md) — # 2026-04-20 pm27 Tier2/3 expansion + M7 flatten + rc166/rc177 co-peak
+- [2026-04-20 pm28 — rc-tempo V0.1 설계 (weighted orienteering)](2026-04-20-pm28-rc-tempo-design-weighted-orienteering.md) — # 2026-04-20 pm28 — rc-tempo V0.1 설계 (weighted orienteering)
+- [2026-04-20 pm30 β_chase score-conditional gate +4.7pp](2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md) — # 2026-04-20 pm30 β_chase score-conditional gate +4.7pp
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
@@ -81,3 +83,6 @@
 - [Session Log 2026-04-19](session-log-2026-04-19-5427c373.md) — # Session Log 2026-04-19
 - [Session Log 2026-04-19](session-log-2026-04-19-a0d467b9.md) — # Session Log 2026-04-19
 - [Session Log 2026-04-19](session-log-2026-04-19-a17ba1cd.md) — # Session Log 2026-04-19
+- [Session Log 2026-04-20](session-log-2026-04-20-3aca635a.md) — # Session Log 2026-04-20
+- [Session Log 2026-04-20](session-log-2026-04-20-87aabc3a.md) — # Session Log 2026-04-20
+- [Session Log 2026-04-20](session-log-2026-04-20-fa8032a1.md) — # Session Log 2026-04-20

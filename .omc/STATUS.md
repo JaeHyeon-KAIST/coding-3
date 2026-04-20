@@ -1,6 +1,32 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 구현 + 2000g HTH 검증 + γ 기각**:
+**Last updated:** 2026-04-20 pm30 END — **β_chase score-conditional gate (+4.7pp on 660g 11-opp smoke)**:
+- 🎯 **v2d accepted**: `_choose_capsule_chase_action` 상단에 `if my_score ≥ 5 pre-capsule: skip chase → rc82 defensive` 게이트 추가
+- 📊 **660g 11-opp smoke**: current β 73.2% → v2d 77.9% (+4.7pp) overall. **rc32 +31.7pp 폭발** (Pincer defender 대응), rc02 +6.7pp, baseline +5pp, rc82 +5pp, monster +3.3pp. 무회귀.
+- ❌ **v2a (full-path BFS) 기각**: margin=0 -2pp regression, margin=-1 flat. 복합 defender(rc82/rc166) 상대 과도 abort.
+- 🧪 **2000g HTH 검증** 서버에서 진행 중 (5-opp × 2 layout × 2 color × 100g).
+- 🔒 **Structural**: rc47 distant = 30T 순수 교착 (0-0 1200-move timeout), rc16 = 50/50 coin flip. chase 로직으로 해결 불가 — Phase 3 DP / Agent B pre-position 차기 타겟.
+- 📂 Session log: `.omc/wiki/2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md`
+
+### pm30 smoke table (660g, 11 opponents, 2 layouts, 2 colors)
+
+| Opp | current 73.2% | v2d 77.9% | Δ |
+|---|---|---|---|
+| baseline | 85.0% | **90.0%** | +5.0 |
+| monster_rule_expert | 68.3% | 71.7% | +3.3 |
+| zoo_distill_rc22 | 100.0% | 100.0% | 0 |
+| zoo_reflex_h1c | 100.0% | 100.0% | 0 |
+| zoo_reflex_h1test | 100.0% | 100.0% | 0 |
+| zoo_reflex_rc02 | 78.3% | **85.0%** | +6.7 |
+| zoo_reflex_rc16 | 50.0% | 50.0% | 0 |
+| zoo_reflex_rc166 | 66.7% | 66.7% | 0 |
+| zoo_reflex_rc32 | 48.3% | **80.0%** | **+31.7** 🔥 |
+| zoo_reflex_rc47 | 50.0% | 50.0% | 0 (30T deadlock distant) |
+| zoo_reflex_rc82 | 58.3% | 63.3% | +5.0 |
+
+---
+
+**Earlier 2026-04-20 pm29 END** — rc-tempo V0.1 β 구현 + 2000g HTH 검증 + γ 기각:
 - 🏆 **rc-tempo β**: 2000g HTH **68.6% overall**, **71% H2H vs rc82**, **100% vs h1test distant**.
 - ✅ **β = rc-tempo V0.1 확정 제출 후보** (submission candidate tier 2, rc166 tier 1).
 - ❌ **γ REJECTED**: 0/200 vs rc166 default — entry-DP 예측 가능성 취약점.

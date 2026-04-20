@@ -1,6 +1,65 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-20 pm29 END — **rc-tempo V0.1 β 2000g HTH 완료 + capsule-chase 개선 (HTH 중단, pm30 재개)**:
+**Last updated:** 2026-04-20 pm30 END — **β_chase score-conditional gate (+4.7pp)**:
+- 🎯 **β v2d final**: `_choose_capsule_chase_action` 상단 `score ≥ 5 → chase skip (rc82 위임)` 게이트 추가. 660g 11-opp smoke에서 current 73.2% → v2d **77.9%** (+4.7pp). rc32 Pincer 상대 +31.7pp 폭발.
+- 🧪 **2000g HTH 진행 중** (server tmux work): `experiments/artifacts/rc_tempo/hth_beta_pm30.csv`. 합격 기준 overall ≥68.6%, H2H vs rc166 default ≥55%.
+- ❌ **2a (full-path BFS) 기각**: margin 조정 둘 다 flat/regressed. 복합 defender 상대 과도 abort.
+- 🔒 **Structural limits**: rc47 distant = 30T 0-0 timeout (β와 rc47 mirror deadlock), rc16 = 정확한 50/50 coin flip. chase 로직으로는 해결 불가.
+
+## pm31 TL;DR (NEXT SESSION — READ FIRST)
+
+### 🎯 pm31 immediate priorities
+
+1. **pm30 2000g HTH 결과 확인**: `ssh jdl_wsl "tail -40 logs/hth_beta_pm30.log"` + `experiments/artifacts/rc_tempo/hth_beta_pm30.csv` Mac pull + analyze_hth.py로 Wilson CI 체크. 합격 여부 판정.
+2. **DISTANT layout 대응** (pm30 남긴 과제):
+   - Phase 3 `DEFAULT_RISK_WEIGHTS` 튜닝 (현재 w_de=3, w_ap=2, w_dh=0.5, w_vor=5, w_iso=2)
+   - Agent B pre-midline-positioning (2e) — Phase 1에서 B가 b_start에 미리 도달해 swarm 시작 빠르게
+   - rc47 distant 30T 교착 해결 방안 수색
+3. **UNSAFE layout runtime chase** (pm30 scope-cut): 비안전 capsule도 상황 좋으면 먹기.
+4. **Submission flatten 준비**: rc-tempo β v2d를 `your_best.py` / `20200492.py`로 flatten. `experiments/flatten_multi.py` 사용.
+5. **Phase 4 round-robin tournament**: β v2d + rc166 + rc82 + rc47 + monster 등 포함.
+
+### pm30 committed state
+
+| Variant | 660g Overall | Status |
+|---|---|---|
+| current β (pm29 committed) | 73.2% | baseline |
+| v2a (full-path BFS margin=0) | 71.2% | REJECTED -2pp |
+| v2a2 (margin=-1) | 73.2% | REJECTED flat |
+| **v2d (score ≥ +5 skip)** | **77.9%** | **ACCEPTED +4.7pp** |
+
+### 📊 pm30 Leaderboard (β v2d vs current, 60g per opp)
+
+| Opponent | current WR | v2d WR | Δpp |
+|---|---|---|---|
+| baseline | 85.0% | 90.0% | +5.0 |
+| monster_rule_expert | 68.3% | 71.7% | +3.3 |
+| zoo_reflex_rc02 | 78.3% | **85.0%** | +6.7 |
+| zoo_reflex_rc32 | 48.3% | **80.0%** | **+31.7** 🔥 |
+| zoo_reflex_rc82 | 58.3% | 63.3% | +5.0 |
+| zoo_reflex_rc166 | 66.7% | 66.7% | 0 |
+| zoo_reflex_rc16 | 50.0% | 50.0% | 0 (coin flip structural) |
+| zoo_reflex_rc47 | 50.0% | 50.0% | 0 (30T deadlock distant) |
+| zoo_distill/h1c/h1test | 100% | 100% | 0 |
+
+### ⚠️ Known issues / TODOs carry-over
+
+- your_best/baseline{1,2,3}.py 여전히 DummyAgent — M7 flatten 필요
+- UNSAFE layout chase 비구현 — 비안전 capsule 런타임 판정 차기 세션
+- DISTANT layout 약점 (rc32/rc82 distant) 남은 과제
+
+### 📂 Critical reference docs
+
+- `.omc/wiki/2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md` — pm30 전체 session log
+- `experiments/rc_tempo/smoke_multi_opp.py` — 11-opp smoke harness
+- `experiments/artifacts/rc_tempo/smoke_pm30_v2d.csv` — 660g authoritative v2d
+- `experiments/artifacts/rc_tempo/hth_beta_pm30.csv` — 2000g HTH (진행 중/완료)
+- `experiments/rc_tempo/analyze_hth.py` — per-opp Wilson CI analyzer
+- `minicontest/zoo_reflex_rc_tempo_beta.py` — current agent (v2d committed)
+
+---
+
+**Earlier 2026-04-20 pm29 END** — rc-tempo V0.1 β 2000g HTH 완료 + capsule-chase 개선 (HTH 중단, pm30 재개):
 - 🏆 **rc-tempo β (original, 2000g)**: overall **68.6% WR**, **71% H2H vs rc82**, **100% vs h1test on distant**.
 - ❌ **γ REJECTED**: 2000g HTH 0/200 vs rc166 default.
 - 📊 **β vs γ H2H**: 101/200 coin flip.
