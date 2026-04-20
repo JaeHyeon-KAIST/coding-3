@@ -97,6 +97,43 @@ def _distance_fn_from_apsp(apsp, distancer_fallback):
     return _dist
 
 
+def _bfs_path(walls, start, goal, limit=60):
+    """Shortest maze path start→goal. Returns [start, ..., goal] or None.
+
+    limit bounds BFS expansion to avoid wall-time surprises on big maps.
+    """
+    if start == goal:
+        return [start]
+    w, h = walls.width, walls.height
+    parent = {start: None}
+    q = deque([start])
+    expanded = 0
+    while q and expanded < limit * limit:
+        u = q.popleft()
+        expanded += 1
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            nx, ny = u[0] + dx, u[1] + dy
+            if nx < 0 or nx >= w or ny < 0 or ny >= h:
+                continue
+            if walls[nx][ny]:
+                continue
+            v = (nx, ny)
+            if v in parent:
+                continue
+            parent[v] = u
+            if v == goal:
+                # reconstruct
+                path = [v]
+                cur = u
+                while cur is not None:
+                    path.append(cur)
+                    cur = parent[cur]
+                path.reverse()
+                return path
+            q.append(v)
+    return None
+
+
 def _next_step_toward(gameState, my_pos, target, legal, distance_fn):
     """Pick legal action that minimizes distance to target. Tie-break by index."""
     if my_pos == target:
@@ -273,32 +310,31 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         return super()._chooseActionImpl(gameState)
 
     def _choose_capsule_chase_action(self, gameState):
-        """Phase 1 A: BFS toward capsule with defender safety fallback.
+        """Phase 1 A: BFS path to capsule with full-path defender safety.
 
-        Returns action if we can safely step toward capsule.
+        Returns action if every waypoint on path is defender-safe.
         Returns None to fall back to rc82 (on danger or when we're a ghost in home).
+
+        pm30 Stage 2a: full-path BFS verification (vs pm29's greedy 1-step).
+        For each waypoint W_i at BFS-distance i, require
+        min_def d(def, W_i) > i + CHASE_MARGIN — i.e. defender cannot intercept.
         """
         if RCTEMPO_TEAM.capsule is None:
             return None
-        my_state = gameState.getAgentState(self.index)
         my_pos = gameState.getAgentPosition(self.index)
         if my_pos is None:
             return None
 
-        # Only chase when already on enemy side (Pacman), OR close enough to midline
-        # that crossing is next step. If still deep on own side, rc82 plays and
-        # carries toward midline naturally.
         distance_fn = _distance_fn_from_apsp(self.apsp, self.distancer)
         capsule = RCTEMPO_TEAM.capsule
-        d_to_cap = distance_fn(my_pos, capsule)
 
-        # If we're already at capsule, eat it (next step IS capsule)
         legal = gameState.getLegalActions(self.index)
         if not legal:
             return None
 
-        # Defender safety: if visible non-scared ghost within 2 of my_pos, abort
+        # Collect visible, non-scared, non-pacman defenders
         try:
+            defenders = []
             for opp_idx in self.getOpponents(gameState):
                 ost = gameState.getAgentState(opp_idx)
                 if getattr(ost, 'isPacman', False):
@@ -308,19 +344,30 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                 opp_pos = gameState.getAgentPosition(opp_idx)
                 if opp_pos is None:
                     continue
-                opp_pos = (int(opp_pos[0]), int(opp_pos[1]))
-                d_me = distance_fn(my_pos, opp_pos)
-                if d_me <= 2:
-                    return None  # rc82 handles escape
-                # Also check: defender between me and capsule closer than I am?
-                d_opp_cap = distance_fn(opp_pos, capsule)
-                if d_opp_cap + 1 < d_to_cap:
-                    # Defender will reach capsule first; don't commit now
-                    return None
+                defenders.append((int(opp_pos[0]), int(opp_pos[1])))
         except Exception:
             return None
 
-        # Step toward capsule (greedy)
+        # Early abort: any defender within 2 of me → rc82 escape
+        for dp in defenders:
+            if distance_fn(my_pos, dp) <= 2:
+                return None
+
+        # BFS path me → capsule (shortest maze path)
+        walls = gameState.getWalls()
+        path = _bfs_path(walls, my_pos, capsule, limit=60)
+        if path is None or len(path) < 2:
+            return None
+
+        # Per-waypoint defender intercept check
+        CHASE_MARGIN = 1  # defender needs >i+1 cells away to be safe
+        for i, wp in enumerate(path[1:], start=1):
+            for dp in defenders:
+                d_def = distance_fn(dp, wp)
+                if d_def <= i + CHASE_MARGIN:
+                    return None  # defender intercepts waypoint i
+
+        # All waypoints safe — step toward capsule
         return _next_step_toward(gameState, my_pos, capsule, legal, distance_fn)
 
     def _choose_scared_action(self, gameState):
