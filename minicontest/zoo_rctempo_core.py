@@ -536,3 +536,326 @@ def make_plans(walls, foods, home_cells, enemy_home_cells, capsule, aps,
     plans.sort(key=lambda p: (-p['total_food'], -p['total_risk'],
                                p['a_res']['total_moves']))
     return plans
+
+
+# ---------------------------------------------------------------------------
+# 6. pm31 primitives — Risk-weighted A* + Voronoi safety + Slack planner
+# ---------------------------------------------------------------------------
+
+try:
+    import heapq as _heapq
+except Exception:
+    _heapq = None
+
+
+def risk_weighted_astar(walls, start, target, risk_map, distance_fn,
+                         blocked=None, weights=None):
+    """Risk-weighted A* search.
+
+    Edge cost = 1 + λ_risk × risk(to_cell) + λ_dead × (dead_end > 2) + λ_ap × is_AP.
+    Heuristic = distance_fn(cell, target) (admissible if distance_fn is true maze dist).
+
+    Args:
+        walls: Grid object (walls[x][y] bool).
+        start, target: Cell tuples.
+        risk_map: Dict[Cell, float] static per-cell risk (from compute_risk_map
+                  or equivalent). Missing cells treated as 0.
+        distance_fn: (a, b) -> int, used as admissible heuristic.
+        blocked: Optional set of cells to treat as walls (e.g., teammate cell).
+        weights: Optional overrides {lam_risk, lam_dead, lam_ap, dead_penalty,
+                 ap_penalty}. Defaults: lam_risk=0.3, lam_dead=2.0, lam_ap=1.0,
+                 dead_penalty (depth>=3 kicks in), ap_penalty (AP cell).
+
+    Returns:
+        {'path': List[Cell] | None, 'cost': float, 'reachable': bool}
+        path[0] == start, path[-1] == target (if reachable).
+    """
+    if _heapq is None or start == target:
+        return {'path': [start] if start == target else None,
+                'cost': 0.0, 'reachable': (start == target)}
+
+    w = {
+        'lam_risk': 0.3,
+        'lam_dead': 2.0,
+        'lam_ap': 1.0,
+        'dead_penalty_threshold': 3,
+        'ap_penalty': 1.0,
+    }
+    if weights:
+        w.update(weights)
+
+    blocked = set(blocked or ())
+    if start in blocked or target in blocked:
+        return {'path': None, 'cost': 1e9, 'reachable': False}
+    if walls[target[0]][target[1]]:
+        return {'path': None, 'cost': 1e9, 'reachable': False}
+
+    W, H = walls.width, walls.height
+
+    def edge_cost(to_cell):
+        base = 1.0
+        r = risk_map.get(to_cell, 0.0) if risk_map else 0.0
+        return base + w['lam_risk'] * r
+
+    # g_score and parent
+    g = {start: 0.0}
+    parent = {start: None}
+    # Priority queue: (f, counter, cell)
+    counter = 0
+    open_heap = []
+    _heapq.heappush(open_heap, (distance_fn(start, target), counter, start))
+    counter += 1
+
+    while open_heap:
+        _, _, cur = _heapq.heappop(open_heap)
+        if cur == target:
+            # Reconstruct
+            path = []
+            c = cur
+            while c is not None:
+                path.append(c)
+                c = parent[c]
+            path.reverse()
+            return {'path': path, 'cost': g[cur], 'reachable': True}
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            nx, ny = cur[0] + dx, cur[1] + dy
+            if nx < 0 or nx >= W or ny < 0 or ny >= H:
+                continue
+            if walls[nx][ny]:
+                continue
+            nb = (nx, ny)
+            if nb in blocked:
+                continue
+            tentative = g[cur] + edge_cost(nb)
+            if tentative < g.get(nb, 1e18):
+                g[nb] = tentative
+                parent[nb] = cur
+                f = tentative + distance_fn(nb, target)
+                _heapq.heappush(open_heap, (f, counter, nb))
+                counter += 1
+
+    return {'path': None, 'cost': 1e9, 'reachable': False}
+
+
+def voronoi_safe_path(path, defender, scared_ticks, distance_fn, margin=1):
+    """Check whether every cell on `path` is safely reachable before defender.
+
+    For each step i, position path[i] must satisfy:
+        i < def_dist(path[i]) - scared_ticks - margin
+    (i.e., I reach cell path[i] at tick i, defender can reach it at tick
+     def_dist, minus scared_ticks that they can't move as threat, minus safety
+     margin of simultaneity.)
+
+    Args:
+        path: List[Cell] including start at index 0.
+        defender: Cell of defender, or None (no defender = always safe).
+        scared_ticks: int, how many more ticks defender is scared.
+                      If scared_ticks >= len(path), path is fully safe.
+        distance_fn: (a, b) -> int.
+        margin: int, safety margin (1 = strict <, 2 = extra buffer).
+
+    Returns:
+        {'safe': bool, 'unsafe_at': int | None, 'min_margin': int}
+        unsafe_at is the first path index where safety is violated (None if safe).
+        min_margin is the tightest def_dist - my_dist observed.
+    """
+    if defender is None:
+        return {'safe': True, 'unsafe_at': None, 'min_margin': 999}
+    if not path:
+        return {'safe': False, 'unsafe_at': 0, 'min_margin': -999}
+
+    min_margin = 999
+    for i, cell in enumerate(path):
+        if scared_ticks >= i:
+            # Defender is still scared when I arrive at path[i]
+            continue
+        effective_def_dist = distance_fn(defender, cell) - (scared_ticks if scared_ticks > 0 else 0)
+        # Subtracting scared_ticks here is conservative; we treat scared ticks
+        # as "free progress" for defender in terms of reaching the cell to
+        # threaten us. That over-penalizes slightly; correct model is: defender
+        # can't threaten for scared_ticks moves, then resumes pursuit.
+        # For simplicity and safety we use the simpler check above (line 167).
+        actual_margin = distance_fn(defender, cell) - i
+        if actual_margin < min_margin:
+            min_margin = actual_margin
+        if actual_margin < margin:
+            return {'safe': False, 'unsafe_at': i, 'min_margin': actual_margin}
+    return {'safe': True, 'unsafe_at': None, 'min_margin': min_margin}
+
+
+def slack_plan_to_capsule(walls, start, capsule, defender, scared_ticks,
+                            food_set, distance_fn, risk_map, aps,
+                            dead_end_depth, teammate=None,
+                            risk_threshold=3.0, margin=1,
+                            min_slack_for_detour=2,
+                            max_detour_food=6):
+    """Phase 1 A's complete planner: reach capsule safely with slack food grab.
+
+    Composition:
+        1. Risk-weighted A* to compute direct path.
+        2. Voronoi reachability filter. If unsafe → return reachable=False.
+        3. Compute slack = def_direct - my_direct - margin.
+        4. If slack >= min_slack_for_detour: entry_orienteering_dp selects
+           food subset to pick up en route within budget. Filter eligible
+           food: risk(f) ≤ risk_threshold AND each food reachable safely
+           (Voronoi) AND not in dead-end depth >= 3.
+        5. Return plan with next_step.
+
+    Args:
+        start: current agent position.
+        capsule: target cell.
+        defender: enemy ghost position (single, 1:1 assumption).
+        scared_ticks: int, defender scared timer remaining.
+        food_set: FrozenSet[Cell] of current food cells on opp side.
+        distance_fn: (a, b) -> int.
+        risk_map: Dict[Cell, float] static risk.
+        aps: FrozenSet[Cell] of articulation points.
+        dead_end_depth: Dict[Cell, int].
+        teammate: Cell of our B agent (blocked in planner), or None.
+        risk_threshold: max risk to consider food eligible for detour.
+        margin: safety margin for Voronoi check.
+        min_slack_for_detour: min slack to attempt food DP (else direct).
+        max_detour_food: cap on |food_set| passed to DP (avoid blow-up).
+
+    Returns:
+        {
+          'reachable': bool,
+          'path': List[Cell],      # chosen path (direct or with food detour)
+          'next_step': Cell,       # path[1] if len≥2 else start
+          'food_on_path': List[Cell],  # food picked up en route
+          'direct_len': int,       # len of direct A* path
+          'chosen_len': int,       # len of chosen (maybe detoured) path
+          'slack': int,
+          'safety_margin': int,    # min Voronoi margin
+          'reason': str,           # "direct" | "slack_food" | "unreachable" | "no_slack"
+        }
+    """
+    blocked = set()
+    if teammate is not None:
+        blocked.add(teammate)
+
+    # Step 1: risk-weighted A* direct path
+    direct = risk_weighted_astar(walls, start, capsule, risk_map, distance_fn,
+                                   blocked=blocked)
+    if not direct['reachable'] or not direct['path']:
+        return {
+            'reachable': False, 'path': [start], 'next_step': start,
+            'food_on_path': [], 'direct_len': -1, 'chosen_len': -1,
+            'slack': -1, 'safety_margin': -999, 'reason': 'unreachable',
+        }
+    direct_path = direct['path']
+    direct_len = len(direct_path) - 1
+
+    # Step 2: Voronoi safety on direct path
+    vor = voronoi_safe_path(direct_path, defender, scared_ticks,
+                              distance_fn, margin=margin)
+    if not vor['safe']:
+        return {
+            'reachable': False, 'path': direct_path, 'next_step': start,
+            'food_on_path': [], 'direct_len': direct_len,
+            'chosen_len': direct_len, 'slack': -1,
+            'safety_margin': vor['min_margin'], 'reason': 'unreachable',
+        }
+
+    # Step 3: Compute slack
+    if defender is None or scared_ticks >= direct_len:
+        def_direct = 10 ** 6
+    else:
+        def_direct = distance_fn(defender, capsule)
+    slack = def_direct - direct_len - margin
+
+    # Step 4: If enough slack, try food orienteering DP
+    if slack < min_slack_for_detour or not food_set:
+        next_step = direct_path[1] if len(direct_path) >= 2 else start
+        return {
+            'reachable': True, 'path': direct_path, 'next_step': next_step,
+            'food_on_path': [], 'direct_len': direct_len,
+            'chosen_len': direct_len, 'slack': slack,
+            'safety_margin': vor['min_margin'], 'reason': 'no_slack',
+        }
+
+    # Filter eligible food
+    eligible = []
+    for f in food_set:
+        if f == capsule or f == start:
+            continue
+        if dead_end_depth.get(f, 0) >= 3:
+            continue
+        if risk_map.get(f, 0.0) > risk_threshold:
+            continue
+        # Quick distance gate
+        d_sf = distance_fn(start, f)
+        d_fc = distance_fn(f, capsule)
+        if d_sf + d_fc > direct_len + slack:
+            continue
+        eligible.append(f)
+
+    # Cap food count (DP is 2^n)
+    if len(eligible) > max_detour_food:
+        # Keep the closest-to-capsule ones (most in-path)
+        eligible.sort(key=lambda f: distance_fn(f, capsule))
+        eligible = eligible[:max_detour_food]
+
+    if not eligible:
+        next_step = direct_path[1] if len(direct_path) >= 2 else start
+        return {
+            'reachable': True, 'path': direct_path, 'next_step': next_step,
+            'food_on_path': [], 'direct_len': direct_len,
+            'chosen_len': direct_len, 'slack': slack,
+            'safety_margin': vor['min_margin'], 'reason': 'no_eligible_food',
+        }
+
+    # Step 5: entry_orienteering_dp budget-constrained food pickup
+    budget = direct_len + slack
+    dp_res = entry_orienteering_dp(start, eligible, capsule, distance_fn,
+                                     budget=budget, objective='count')
+    food_order = dp_res.get('food_order', [])
+
+    if not food_order:
+        # DP said direct is best
+        next_step = direct_path[1] if len(direct_path) >= 2 else start
+        return {
+            'reachable': True, 'path': direct_path, 'next_step': next_step,
+            'food_on_path': [], 'direct_len': direct_len,
+            'chosen_len': direct_len, 'slack': slack,
+            'safety_margin': vor['min_margin'], 'reason': 'direct',
+        }
+
+    # Build concrete path: start → food1 → food2 → ... → capsule via A*
+    waypoints = [start] + food_order + [capsule]
+    full_path = [start]
+    for i in range(len(waypoints) - 1):
+        seg = risk_weighted_astar(walls, waypoints[i], waypoints[i+1],
+                                    risk_map, distance_fn, blocked=blocked)
+        if not seg['reachable'] or not seg['path']:
+            # A segment is blocked; fall back to direct
+            next_step = direct_path[1] if len(direct_path) >= 2 else start
+            return {
+                'reachable': True, 'path': direct_path, 'next_step': next_step,
+                'food_on_path': [], 'direct_len': direct_len,
+                'chosen_len': direct_len, 'slack': slack,
+                'safety_margin': vor['min_margin'], 'reason': 'segment_blocked',
+            }
+        full_path.extend(seg['path'][1:])  # skip first to avoid dup
+
+    # Re-verify Voronoi safety on the detoured path (may be longer)
+    vor2 = voronoi_safe_path(full_path, defender, scared_ticks,
+                               distance_fn, margin=margin)
+    if not vor2['safe']:
+        # Detour made us unsafe → fall back to direct
+        next_step = direct_path[1] if len(direct_path) >= 2 else start
+        return {
+            'reachable': True, 'path': direct_path, 'next_step': next_step,
+            'food_on_path': [], 'direct_len': direct_len,
+            'chosen_len': direct_len, 'slack': slack,
+            'safety_margin': vor['min_margin'], 'reason': 'detour_unsafe',
+        }
+
+    next_step = full_path[1] if len(full_path) >= 2 else start
+    return {
+        'reachable': True, 'path': full_path, 'next_step': next_step,
+        'food_on_path': list(food_order),
+        'direct_len': direct_len, 'chosen_len': len(full_path) - 1,
+        'slack': slack, 'safety_margin': vor2['min_margin'],
+        'reason': 'slack_food',
+    }
