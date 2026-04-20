@@ -167,6 +167,7 @@ class ReflexRCTempoBetaRetroAgent(ReflexRCTempoBetaAgent):
     DRAW_MIN_DIST = _env_int('BETA_RETRO_DRAW_MIN_DIST', 5)
     TRIGGER_MODE = os.environ.get('BETA_RETRO_TRIGGER_MODE', 'strict')
     EMERGENCY_ABORT = _env_int('BETA_RETRO_EMERGENCY_ABORT', 1)
+    TRACE = _env_int('BETA_RETRO_TRACE', 0)  # 1 = verbose per-tick logs
 
     def registerInitialState(self, gameState):
         # Let β v2d do its own precompute first (sets up RCTEMPO_TEAM for
@@ -303,6 +304,8 @@ class ReflexRCTempoBetaRetroAgent(ReflexRCTempoBetaAgent):
         else:
             trigger_on = (opp_pac == 1)
         if not trigger_on:
+            if self.TRACE:
+                print(f"[retro t={V3_RETRO_TEAM.tick}] me={my_pos} SKIP opp_pac={opp_pac}", file=sys.stderr)
             return None
 
         V3_RETRO_TEAM.metrics['retro_trigger_fires'] += 1
@@ -313,13 +316,20 @@ class ReflexRCTempoBetaRetroAgent(ReflexRCTempoBetaAgent):
 
         # Scared defender: trivially safe; direct chase
         if def_pos is None or def_scared > 0:
+            if self.TRACE:
+                print(f"[retro t={V3_RETRO_TEAM.tick}] me={my_pos} def_scared/none → greedy", file=sys.stderr)
             return self._greedy_step_toward(gameState, my_pos, capsule,
                                               distance_fn)
 
+        me_in = my_pos in V3_RETRO_TEAM.cell_set
+        def_in = def_pos in V3_RETRO_TEAM.cell_set
         # Check we are in V table region
-        if my_pos not in V3_RETRO_TEAM.cell_set or def_pos not in V3_RETRO_TEAM.cell_set:
+        if not me_in or not def_in:
             # Not in precomputed region (e.g., I'm on home side). Fall through
             # to rc82 (safe β v2d behavior) — no aggressive greedy chase.
+            if self.TRACE:
+                print(f"[retro t={V3_RETRO_TEAM.tick}] me={my_pos} def={def_pos} "
+                      f"NOT_IN_REGION (me_in={me_in}, def_in={def_in}) → β v2d", file=sys.stderr)
             V3_RETRO_TEAM.metrics['retro_aborts'] += 1
             return None
 
@@ -329,31 +339,81 @@ class ReflexRCTempoBetaRetroAgent(ReflexRCTempoBetaAgent):
 
         # Decision based on V and DRAW_MODE
         should_commit = False
+        reason = ''
         if v_current == +1:
             should_commit = True
+            reason = 'V=+1'
             V3_RETRO_TEAM.metrics['retro_commits_plus'] += 1
         elif v_current == 0:
             if self.DRAW_MODE == 'always':
                 should_commit = True
+                reason = 'V=0 always'
                 V3_RETRO_TEAM.metrics['retro_commits_draw'] += 1
             elif self.DRAW_MODE == 'far' and d_to_cap >= self.DRAW_MIN_DIST:
                 should_commit = True
+                reason = f'V=0 far (d_cap={d_to_cap})'
                 V3_RETRO_TEAM.metrics['retro_commits_draw'] += 1
+            else:
+                reason = f'V=0 near (d_cap={d_to_cap} < {self.DRAW_MIN_DIST}) or never'
+        else:
+            reason = 'V=-1'
         # v_current == -1 OR draw_mode='never' on 0 → don't commit
 
         if not should_commit:
+            if self.TRACE:
+                print(f"[retro t={V3_RETRO_TEAM.tick}] me={my_pos} def={def_pos} "
+                      f"d_cap={d_to_cap} ABORT reason={reason} (draw_mode={self.DRAW_MODE})", file=sys.stderr)
             V3_RETRO_TEAM.metrics['retro_aborts'] += 1
             return None
 
         # Emergency abort: defender adjacent = immediate death
         d_me = distance_fn(my_pos, def_pos)
         if d_me <= self.EMERGENCY_ABORT:
+            if self.TRACE:
+                print(f"[retro t={V3_RETRO_TEAM.tick}] EMERGENCY_ABORT d_me={d_me}", file=sys.stderr)
             return None
 
-        # Compute best action via V lookup on neighbors
+        # Compute best action. For V=+1, retrograde-directed. For V=0 commit,
+        # retrograde is indifferent (all draws) — use greedy toward capsule
+        # to ensure progress.
         walls = gameState.getWalls()
-        best_next, best_v = retrograde_best_action(
-            V, walls, my_pos, def_pos, cell_set=V3_RETRO_TEAM.cell_set)
+        if v_current == +1:
+            best_next, best_v = retrograde_best_action(
+                V, walls, my_pos, def_pos, cell_set=V3_RETRO_TEAM.cell_set)
+            # Also ensure retrograde didn't pick STOP on +1 (shouldn't happen,
+            # but be defensive — prefer moving closer to capsule on tie)
+            if best_next == my_pos:
+                # Find any neighbor with V=+1 closer to capsule
+                from zoo_rctempo_core import _neighbors_with_stop
+                best_d = distance_fn(my_pos, capsule)
+                for n in _neighbors_with_stop(walls, my_pos):
+                    if n == my_pos or n not in V3_RETRO_TEAM.cell_set:
+                        continue
+                    if n == def_pos:
+                        continue
+                    v_n = V.get((n, def_pos, 1), 0)
+                    if v_n == +1:
+                        d_n = distance_fn(n, capsule)
+                        if d_n < best_d:
+                            best_d = d_n
+                            best_next = n
+        else:
+            # V=0 draw commit — use greedy toward capsule (heuristic progress)
+            best_next = None
+            best_v = 0
+            legal = gameState.getLegalActions(self.index)
+            if legal:
+                action = self._greedy_step_toward(gameState, my_pos, capsule,
+                                                    distance_fn)
+                if action is not None:
+                    vec = Actions.directionToVector(action)
+                    bx, by = int(my_pos[0] + vec[0]), int(my_pos[1] + vec[1])
+                    best_next = (bx, by)
+
+        if self.TRACE:
+            print(f"[retro t={V3_RETRO_TEAM.tick}] me={my_pos}→{best_next} "
+                  f"def={def_pos} v_cur={v_current} best_v={best_v} COMMIT ({reason})",
+                  file=sys.stderr)
 
         # If best action actually worsens our value (-1), abort
         if best_v == -1:
