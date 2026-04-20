@@ -637,14 +637,20 @@ def risk_weighted_astar(walls, start, target, risk_map, distance_fn,
     return {'path': None, 'cost': 1e9, 'reachable': False}
 
 
-def voronoi_safe_path(path, defender, scared_ticks, distance_fn, margin=1):
-    """Check whether every cell on `path` is safely reachable before defender.
+def voronoi_safe_path(path, defender, scared_ticks, distance_fn, margin=1,
+                       mode='full', ap_cells=None, last_k=5):
+    """Check whether `path` is safely reachable before defender.
+
+    Modes:
+        'full'     — every cell must satisfy my_dist(i) < def_dist(cell) - margin
+                     (strictest; prone to over-abort on long paths).
+        'endpoint' — only the final cell (target) is checked (β v2d style).
+        'ap'       — only cells in `ap_cells` set checked (trap potential only).
+        'last_k'   — only the last `last_k` cells checked (near-target).
 
     For each step i, position path[i] must satisfy:
-        i < def_dist(path[i]) - scared_ticks - margin
-    (i.e., I reach cell path[i] at tick i, defender can reach it at tick
-     def_dist, minus scared_ticks that they can't move as threat, minus safety
-     margin of simultaneity.)
+        i < def_dist(path[i]) - margin
+    (defender cannot reach cell i before me, with safety margin).
 
     Args:
         path: List[Cell] including start at index 0.
@@ -653,28 +659,48 @@ def voronoi_safe_path(path, defender, scared_ticks, distance_fn, margin=1):
                       If scared_ticks >= len(path), path is fully safe.
         distance_fn: (a, b) -> int.
         margin: int, safety margin (1 = strict <, 2 = extra buffer).
+        mode: str as above.
+        ap_cells: iterable of AP cells (required for mode='ap').
+        last_k: int tail length (for mode='last_k').
 
     Returns:
         {'safe': bool, 'unsafe_at': int | None, 'min_margin': int}
-        unsafe_at is the first path index where safety is violated (None if safe).
-        min_margin is the tightest def_dist - my_dist observed.
     """
     if defender is None:
         return {'safe': True, 'unsafe_at': None, 'min_margin': 999}
     if not path:
         return {'safe': False, 'unsafe_at': 0, 'min_margin': -999}
+    # If defender scared for longer than the path, fully safe
+    if scared_ticks >= len(path):
+        return {'safe': True, 'unsafe_at': None, 'min_margin': 999}
+
+    n = len(path)
+
+    if mode == 'endpoint':
+        # Only check arrival at target (last cell)
+        i = n - 1
+        cell = path[-1]
+        actual_margin = distance_fn(defender, cell) - i
+        if actual_margin < margin:
+            return {'safe': False, 'unsafe_at': i, 'min_margin': actual_margin}
+        return {'safe': True, 'unsafe_at': None, 'min_margin': actual_margin}
+
+    if mode == 'last_k':
+        start_i = max(0, n - last_k)
+        indices = range(start_i, n)
+    elif mode == 'ap':
+        ap_set = set(ap_cells or ())
+        indices = [i for i, c in enumerate(path) if c in ap_set or i == n - 1]
+        if not indices:
+            indices = [n - 1]  # still check target
+    else:  # 'full'
+        indices = range(n)
 
     min_margin = 999
-    for i, cell in enumerate(path):
+    for i in indices:
+        cell = path[i]
         if scared_ticks >= i:
-            # Defender is still scared when I arrive at path[i]
             continue
-        effective_def_dist = distance_fn(defender, cell) - (scared_ticks if scared_ticks > 0 else 0)
-        # Subtracting scared_ticks here is conservative; we treat scared ticks
-        # as "free progress" for defender in terms of reaching the cell to
-        # threaten us. That over-penalizes slightly; correct model is: defender
-        # can't threaten for scared_ticks moves, then resumes pursuit.
-        # For simplicity and safety we use the simpler check above (line 167).
         actual_margin = distance_fn(defender, cell) - i
         if actual_margin < min_margin:
             min_margin = actual_margin
@@ -688,7 +714,9 @@ def slack_plan_to_capsule(walls, start, capsule, defender, scared_ticks,
                             dead_end_depth, teammate=None,
                             risk_threshold=3.0, margin=1,
                             min_slack_for_detour=2,
-                            max_detour_food=6):
+                            max_detour_food=6,
+                            voronoi_mode='full',
+                            voronoi_last_k=5):
     """Phase 1 A's complete planner: reach capsule safely with slack food grab.
 
     Composition:
@@ -748,7 +776,9 @@ def slack_plan_to_capsule(walls, start, capsule, defender, scared_ticks,
 
     # Step 2: Voronoi safety on direct path
     vor = voronoi_safe_path(direct_path, defender, scared_ticks,
-                              distance_fn, margin=margin)
+                              distance_fn, margin=margin,
+                              mode=voronoi_mode, ap_cells=aps,
+                              last_k=voronoi_last_k)
     if not vor['safe']:
         return {
             'reachable': False, 'path': direct_path, 'next_step': start,
@@ -840,7 +870,9 @@ def slack_plan_to_capsule(walls, start, capsule, defender, scared_ticks,
 
     # Re-verify Voronoi safety on the detoured path (may be longer)
     vor2 = voronoi_safe_path(full_path, defender, scared_ticks,
-                               distance_fn, margin=margin)
+                               distance_fn, margin=margin,
+                               mode=voronoi_mode, ap_cells=aps,
+                               last_k=voronoi_last_k)
     if not vor2['safe']:
         # Detour made us unsafe → fall back to direct
         next_step = direct_path[1] if len(direct_path) >= 2 else start
@@ -858,4 +890,181 @@ def slack_plan_to_capsule(walls, start, capsule, defender, scared_ticks,
         'direct_len': direct_len, 'chosen_len': len(full_path) - 1,
         'slack': slack, 'safety_margin': vor2['min_margin'],
         'reason': 'slack_food',
+    }
+
+
+# ---------------------------------------------------------------------------
+# 7. pm31 V2 — αβ minimax capsule chase (2-player perfect info)
+# ---------------------------------------------------------------------------
+
+import time as _time
+
+
+def _neighbors_plus_stop(walls, cell):
+    """Neighbors (N/S/E/W) + STOP (no move)."""
+    x, y = cell
+    W, H = walls.width, walls.height
+    out = [(cell, 'stop')]
+    for dx, dy, name in ((-1, 0, 'w'), (1, 0, 'e'), (0, -1, 's'), (0, 1, 'n')):
+        nx, ny = x + dx, y + dy
+        if 0 <= nx < W and 0 <= ny < H and not walls[nx][ny]:
+            out.append(((nx, ny), name))
+    return out
+
+
+def ab_capsule_chase(walls, my_pos, capsule, defender, scared_ticks,
+                      distance_fn, max_depth=6, time_budget=0.2,
+                      home_cells=None):
+    """α-β minimax for capsule chase.
+
+    Perfect-information zero-sum game. Me = MAX, defender = MIN.
+    No food tracking (for speed); pure capsule-reach vs get-caught.
+
+    State: (my_pos, def_pos, turn, scared).
+    Actions: me moves, then defender moves. Depth = total plies.
+
+    Terminal:
+        me reaches capsule: +1000 - depth (sooner better)
+        me caught (same cell as def, def not scared): -1000 + depth
+    Leaf (max_depth reached): heuristic eval
+        -dist(me, capsule) * 5  (closer to capsule = better)
+        + (scared > 0) * 20     (capsule active bonus)
+        - (caught_risk) * 30    (if me right next to def, worse)
+
+    Returns:
+        {'best_action_pos': Cell | None, 'score': float, 'nodes': int,
+         'depth_reached': int, 'time_used': float}
+    """
+    t0 = _time.time()
+    INF = 1e9
+    nodes = [0]
+
+    def my_neighbors(pos):
+        return _neighbors_plus_stop(walls, pos)
+
+    def def_neighbors(pos):
+        return _neighbors_plus_stop(walls, pos)
+
+    def eval_leaf(m, d, scared, depth):
+        # Penalize depth (we prefer resolutions sooner)
+        score = -distance_fn(m, capsule) * 5.0
+        if scared > 0:
+            score += 20.0
+        # Caught risk: if defender within 1 and not scared, high penalty
+        dm = distance_fn(m, d)
+        if scared <= 0:
+            if dm <= 1:
+                score -= 300.0
+            elif dm == 2:
+                score -= 50.0
+        return score
+
+    def is_terminal(m, d, scared):
+        # Me reached capsule
+        if m == capsule:
+            return True, 1000.0
+        # Me caught by defender
+        if m == d and scared <= 0:
+            return True, -1000.0
+        return False, 0.0
+
+    def over_budget():
+        return _time.time() - t0 > time_budget
+
+    def search(m, d, scared, depth, alpha, beta, my_turn):
+        nodes[0] += 1
+        if over_budget():
+            return eval_leaf(m, d, scared, depth)
+
+        term, tv = is_terminal(m, d, scared)
+        if term:
+            return tv - depth if tv > 0 else tv + depth
+
+        if depth >= max_depth:
+            return eval_leaf(m, d, scared, depth)
+
+        if my_turn:
+            best = -INF
+            moves = my_neighbors(m)
+            # Move ordering: prefer toward capsule first
+            moves.sort(key=lambda mv: distance_fn(mv[0], capsule))
+            for (new_m, _) in moves:
+                # Check terminal at this move
+                new_scared = max(0, scared - 1)
+                val = search(new_m, d, new_scared, depth + 1, alpha, beta, False)
+                if val > best:
+                    best = val
+                alpha = max(alpha, best)
+                if beta <= alpha:
+                    break
+                if over_budget():
+                    break
+            return best
+        else:
+            best = INF
+            moves = def_neighbors(d)
+            # Move ordering: defender prefers toward me
+            moves.sort(key=lambda mv: distance_fn(mv[0], m))
+            for (new_d, _) in moves:
+                new_scared = max(0, scared - 1)
+                val = search(m, new_d, new_scared, depth + 1, alpha, beta, True)
+                if val < best:
+                    best = val
+                beta = min(beta, best)
+                if beta <= alpha:
+                    break
+                if over_budget():
+                    break
+            return best
+
+    # Iterative deepening: try depth 2, 4, 6 within time budget
+    best_action_pos = None
+    best_score = -INF
+    depth_reached = 0
+
+    # If defender is None, just head straight to capsule
+    if defender is None:
+        for (np, _) in my_neighbors(my_pos):
+            if np == capsule:
+                return {
+                    'best_action_pos': np, 'score': 1000.0,
+                    'nodes': 1, 'depth_reached': 1,
+                    'time_used': _time.time() - t0,
+                }
+        # Pick closest-to-capsule move
+        best = min(my_neighbors(my_pos), key=lambda mv: distance_fn(mv[0], capsule))
+        return {
+            'best_action_pos': best[0], 'score': -distance_fn(best[0], capsule),
+            'nodes': 1, 'depth_reached': 1,
+            'time_used': _time.time() - t0,
+        }
+
+    for d_limit in range(2, max_depth + 1, 2):
+        if over_budget():
+            break
+        iter_best_action = None
+        iter_best_score = -INF
+        for (new_m, _) in sorted(my_neighbors(my_pos),
+                                   key=lambda mv: distance_fn(mv[0], capsule)):
+            new_scared = max(0, scared_ticks - 1)
+            score = search(new_m, defender, new_scared,
+                            1, -INF, INF, False)
+            if score > iter_best_score:
+                iter_best_score = score
+                iter_best_action = new_m
+            if over_budget():
+                break
+        if iter_best_action is not None:
+            best_action_pos = iter_best_action
+            best_score = iter_best_score
+            depth_reached = d_limit
+        # Override with depth limit
+        max_depth_this_iter = d_limit
+
+    return {
+        'best_action_pos': best_action_pos,
+        'score': best_score,
+        'nodes': nodes[0],
+        'depth_reached': depth_reached,
+        'time_used': round(_time.time() - t0, 4),
     }

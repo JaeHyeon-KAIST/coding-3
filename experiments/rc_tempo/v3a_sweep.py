@@ -30,34 +30,41 @@ SMOKE = HERE / 'phase1_smoke.py'
 VENV_PYTHON = REPO / '.venv' / 'bin' / 'python'
 
 
-# Variant definitions: name → env override dict
+# Variant definitions: name → env override dict (str agent name tag for v3b)
 VARIANTS = {
-    # baselines
-    'v3a_default': {},  # current defaults: margin=1, rt=3, slack>=2, greedy=off, strict
-    'beta_v2d': '__BETA_AGENT__',  # use zoo_reflex_rc_tempo_beta (reference)
+    # === Reference ===
+    'beta_v2d': '__BETA_AGENT__',  # pm30 committed β (endpoint-only Voronoi)
 
-    # margin sweep
-    'v3a_m0': {'V3A_MARGIN': '0'},
-    'v3a_m2': {'V3A_MARGIN': '2'},
-
-    # risk threshold sweep (more food eligible)
-    'v3a_rt5': {'V3A_RISK_THRESHOLD': '5'},
-    'v3a_rt10': {'V3A_RISK_THRESHOLD': '10'},
-
-    # greedy fallback on unreachable
-    'v3a_greedy': {'V3A_GREEDY_FALLBACK': '1'},
-    'v3a_m0_greedy': {'V3A_MARGIN': '0', 'V3A_GREEDY_FALLBACK': '1'},
-
-    # loose trigger (opp_pacman >= 1 instead of ==1)
+    # === v3a (A* + Voronoi + Slack DP) ===
+    'v3a_default': {},  # margin=1, full-path Voronoi, strict trigger
     'v3a_loose': {'V3A_TRIGGER_MODE': 'loose'},
-    'v3a_loose_greedy': {'V3A_TRIGGER_MODE': 'loose', 'V3A_GREEDY_FALLBACK': '1'},
 
-    # slack_min=1 (more aggressive slack grab)
-    'v3a_slack1': {'V3A_SLACK_MIN': '1', 'V3A_RISK_THRESHOLD': '5'},
+    # NEW: endpoint-only Voronoi (match β v2d check style)
+    'v3a_endpoint': {'V3A_VORONOI_MODE': 'endpoint'},
+    'v3a_endpoint_loose': {'V3A_VORONOI_MODE': 'endpoint',
+                            'V3A_TRIGGER_MODE': 'loose'},
+    'v3a_endpoint_rt10': {'V3A_VORONOI_MODE': 'endpoint',
+                           'V3A_RISK_THRESHOLD': '10'},
+    'v3a_endpoint_combo': {'V3A_VORONOI_MODE': 'endpoint',
+                            'V3A_TRIGGER_MODE': 'loose',
+                            'V3A_RISK_THRESHOLD': '10',
+                            'V3A_SLACK_MIN': '1'},
 
-    # Combo: best-case of reasonable tuning
-    'v3a_combo': {'V3A_MARGIN': '0', 'V3A_GREEDY_FALLBACK': '1',
-                   'V3A_RISK_THRESHOLD': '5', 'V3A_SLACK_MIN': '1'},
+    # AP-only Voronoi (check only articulation points + target)
+    'v3a_ap': {'V3A_VORONOI_MODE': 'ap'},
+    'v3a_ap_loose': {'V3A_VORONOI_MODE': 'ap', 'V3A_TRIGGER_MODE': 'loose'},
+
+    # last_k tail check
+    'v3a_lastk': {'V3A_VORONOI_MODE': 'last_k', 'V3A_LAST_K': '5'},
+
+    # === v3b (αβ minimax) ===
+    'v3b_default': {'__V3B__': '1'},  # strict trigger, depth=6, budget=0.15
+    'v3b_loose': {'__V3B__': '1', 'V3B_TRIGGER_MODE': 'loose'},
+    'v3b_d4': {'__V3B__': '1', 'V3B_MAX_DEPTH': '4'},
+    'v3b_d8': {'__V3B__': '1', 'V3B_MAX_DEPTH': '8', 'V3B_TIME_BUDGET': '0.3'},
+    'v3b_fast': {'__V3B__': '1', 'V3B_MAX_DEPTH': '4', 'V3B_TIME_BUDGET': '0.05'},
+    'v3b_loose_d4': {'__V3B__': '1', 'V3B_TRIGGER_MODE': 'loose',
+                      'V3B_MAX_DEPTH': '4'},
 }
 
 
@@ -179,6 +186,9 @@ def main():
         if env_dict == '__BETA_AGENT__':
             agent = 'zoo_reflex_rc_tempo_beta'
             env_dict_pass = {}
+        elif isinstance(env_dict, dict) and env_dict.get('__V3B__'):
+            agent = 'zoo_reflex_rc_tempo_beta_v3b'
+            env_dict_pass = {k: v for k, v in env_dict.items() if k != '__V3B__'}
         else:
             agent = 'zoo_reflex_rc_tempo_beta_v3a'
             env_dict_pass = env_dict
