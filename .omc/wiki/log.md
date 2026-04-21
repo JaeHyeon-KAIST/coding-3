@@ -328,3 +328,27 @@
 - **Pages:** 2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md
 - **Summary:** Created new page "2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + Mac smoke"
 
+## [2026-04-21T07:08:09.306Z] ingest
+- **Pages:** session-log-2026-04-21-86d8fbdd.md
+- **Summary:** Auto-captured session log for 79055b6d-10b2-494b-851b-916b86d8fbdd
+
+## [2026-04-21T10:59:25.229Z] query
+- **Pages:** 2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md, 2026-04-20-pm28-rc-tempo-design-weighted-orienteering.md, 2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md, 2026-04-19-pm22-rc-pool-80-candidates-autopilot-phase-2b.md, pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced.md, 2026-04-21-pm31-retrograde-analysis-safety-knobs.md, 2026-04-15-pm3-h1c-rejected-capture-py-4-loop-discovery.md, a1-champion-weights-hth-profile-strategy-interpretation-pm19.md, 2026-04-15-pm2-h1b-rejected-strategic-replanning.md, 2026-04-16-pm18-phase-1-b1-c4-done-a1-launched-learning-confirme.md, 2026-04-19-pm25-rc22-policy-distillation-first-tier-3-pass.md, glossary-cs470-a3-project-terms.md, m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md, next-session-execution-plan-performance-max-6-phase-pipeline.md, 2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem.md, 2026-04-15-pm5-tournament-py-csv-append-resume-patch-autopilot.md, 2026-04-15-pm6-m4-v1-first-tournament-seed-lock-confirmation.md, 2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md, 2026-04-16-pm13-m4b-4-m5-dry-run-5-killed-m6-budget-5-overshoot-.md, 2026-04-16-pm16-m6-a-1-smoke-cem-learns-best-0-16-0-77-in-4-gens.md
+- **Summary:** Query "β capsule chase trigger 전략 공격 넘어오는 순간" → 20 results (of 28 total)
+
+## [2026-04-21T11:07:01.270Z] query
+- **Pages:** 2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md, 2026-04-15-pm4-40-game-apples-to-apples-reverification-h1b-redem.md, 2026-04-20-pm28-rc-tempo-design-weighted-orienteering.md, 2026-04-19-pm22-rc-pool-80-candidates-autopilot-phase-2b.md, 2026-04-15-pm3-h1c-rejected-capture-py-4-loop-discovery.md, pm19-ccg-hybrid-paradigm-analysis-path-1-vs-2-vs-3-mcts-offense-.md, 2026-04-19-pm24-8-new-rc-implemented-6-pass-2-drop.md, pm20-expanded-roadmap-17-tasks-3-axis-development-ccg-enhanced.md, 2026-04-15-pm2-h1b-rejected-strategic-replanning.md, 2026-04-19-pm25-full-tier-3-sprint-4-rc-s-reinforce-honesty-corr.md, m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md, next-session-execution-plan-performance-max-6-phase-pipeline.md, 2026-04-16-pm18-phase-1-b1-c4-done-a1-launched-learning-confirme.md, 2026-04-19-pm24-mega-sprint-68-rc-8-champions.md, 2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md, glossary-cs470-a3-project-terms.md, pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md, 2026-04-15-pm5-tournament-py-csv-append-resume-patch-autopilot.md, 2026-04-15-pm7-m4c-1-seed-workaround-m4-v2-canonical-elo-autopil.md, 2026-04-16-pm14-option-a-complete-4-loop-bypass-4-55-speedup-m6-.md
+- **Summary:** Query "40 step scared window 두 번째 캡슐 연장 both offense 공격 넘어가" → 20 results (of 44 total)
+
+## [2026-04-21T14:45:28.026Z] ingest
+- **Pages:** 2026-04-21-pm33-2-cap-chain-strategy-abstract-graph-design-pivot.md
+- **Summary:** Created new page "2026-04-21 pm33 — 2-cap chain strategy + abstract graph design (pivot from freeze-checkpoint)"
+
+## [2026-04-21T14:49:44.590Z] ingest
+- **Pages:** session-log-2026-04-21-9b68aff1.md
+- **Summary:** Auto-captured session log for 4b54973b-007c-4de4-a185-a3679b68aff1
+
+## [2026-04-21T17:47:25.227Z] ingest
+- **Pages:** 2026-04-22-pm34-abstract-graph-port-20-30-win-feasibility.md
+- **Summary:** Created new page "2026-04-22 pm34 - abstract graph port + 20/30 WIN feasibility"
+

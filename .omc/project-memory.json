@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776677315580,
+  "lastScanned": 1776782988879,
   "projectRoot": "/Users/jaehyeon/KAIST/26 Spring/인공지능개론/coding 3",
   "techStack": {
     "languages": [],
@@ -51,7 +51,7 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 1,
-      "lastAccessed": 1776677315573,
+      "lastAccessed": 1776782988865,
       "keyFiles": [
         "AI_USAGE.md"
       ]
@@ -60,7 +60,7 @@
       "path": "experiments",
       "purpose": null,
       "fileCount": 24,
-      "lastAccessed": 1776677315573,
+      "lastAccessed": 1776782988866,
       "keyFiles": [
         "README.md",
         "distill_rc22.py",
@@ -73,7 +73,7 @@
       "path": "icml2021_style",
       "purpose": null,
       "fileCount": 15,
-      "lastAccessed": 1776677315574,
+      "lastAccessed": 1776782988867,
       "keyFiles": [
         "algorithm.sty",
         "algorithmic.sty",
@@ -86,7 +86,7 @@
       "path": "logs",
       "purpose": null,
       "fileCount": 68,
-      "lastAccessed": 1776677315577,
+      "lastAccessed": 1776782988869,
       "keyFiles": [
         "rc105_verify_blue50_2331.log",
         "rc105_verify_red50_2331.log",
@@ -98,8 +98,8 @@
     "minicontest": {
       "path": "minicontest",
       "purpose": null,
-      "fileCount": 200,
-      "lastAccessed": 1776677315577,
+      "fileCount": 203,
+      "lastAccessed": 1776782988876,
       "keyFiles": [
         "20200492.py",
         "baseline.py",
@@ -112,8 +112,8 @@
   "hotPaths": [
     {
       "path": "minicontest/zoo_reflex_rc_tempo_beta.py",
-      "accessCount": 48,
-      "lastAccessed": 1776742018150,
+      "accessCount": 50,
+      "lastAccessed": 1776755755038,
       "type": "file"
     },
     {
@@ -130,15 +130,27 @@
     },
     {
       "path": "minicontest/capture.py",
-      "accessCount": 13,
-      "lastAccessed": 1776748407262,
+      "accessCount": 19,
+      "lastAccessed": 1776771274163,
       "type": "directory"
     },
     {
       "path": "experiments/rc_tempo/phase1_runner.py",
-      "accessCount": 12,
-      "lastAccessed": 1776741899888,
+      "accessCount": 13,
+      "lastAccessed": 1776755652592,
       "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_core.py",
+      "accessCount": 12,
+      "lastAccessed": 1776756082538,
+      "type": "file"
+    },
+    {
+      "path": "minicontest",
+      "accessCount": 12,
+      "lastAccessed": 1776759963060,
+      "type": "directory"
     },
     {
       "path": "minicontest/zoo_rctempo_core.py",
@@ -159,9 +171,9 @@
       "type": "file"
     },
     {
-      "path": "minicontest/zoo_core.py",
-      "accessCount": 7,
-      "lastAccessed": 1776690511821,
+      "path": "docs/AI_USAGE.md",
+      "accessCount": 8,
+      "lastAccessed": 1776794642864,
       "type": "file"
     },
     {
@@ -171,10 +183,10 @@
       "type": "file"
     },
     {
-      "path": "docs/AI_USAGE.md",
+      "path": "minicontest/mazeGenerator.py",
       "accessCount": 7,
-      "lastAccessed": 1776754737247,
-      "type": "file"
+      "lastAccessed": 1776767480683,
+      "type": "directory"
     },
     {
       "path": "minicontest/zoo_reflex_rc_tempo_beta_v3a.py",
@@ -183,9 +195,9 @@
       "type": "file"
     },
     {
-      "path": "minicontest",
-      "accessCount": 5,
-      "lastAccessed": 1776735753635,
+      "path": "minicontest/monster_rule_expert.py",
+      "accessCount": 6,
+      "lastAccessed": 1776756028665,
       "type": "directory"
     },
     {
@@ -193,12 +205,6 @@
       "accessCount": 4,
       "lastAccessed": 1776677643291,
       "type": "file"
-    },
-    {
-      "path": "minicontest/mazeGenerator.py",
-      "accessCount": 4,
-      "lastAccessed": 1776743359582,
-      "type": "directory"
     },
     {
       "path": "minicontest/game.py",
@@ -223,6 +229,12 @@
       "accessCount": 3,
       "lastAccessed": 1776742571406,
       "type": "file"
+    },
+    {
+      "path": "minicontest/layout.py",
+      "accessCount": 3,
+      "lastAccessed": 1776759776389,
+      "type": "directory"
     },
     {
       "path": "minicontest/zoo_reflex_tuned.py",
@@ -261,12 +273,6 @@
       "type": "file"
     },
     {
-      "path": "minicontest/layout.py",
-      "accessCount": 2,
-      "lastAccessed": 1776743319951,
-      "type": "directory"
-    },
-    {
       "path": "minicontest/layouts/defaultCapture.lay",
       "accessCount": 2,
       "lastAccessed": 1776746948265,
@@ -283,6 +289,12 @@
       "accessCount": 2,
       "lastAccessed": 1776748768366,
       "type": "file"
+    },
+    {
+      "path": "minicontest/zoo_reflex_rc_tempo_gamma.py",
+      "accessCount": 2,
+      "lastAccessed": 1776794489331,
+      "type": "directory"
     },
     {
       "path": "minicontest/zoo_reflex_rc82.py",
@@ -378,6 +390,24 @@
       "path": "experiments/rc_tempo/pm32_smoke_variants.txt",
       "accessCount": 1,
       "lastAccessed": 1776742933593,
+      "type": "file"
+    },
+    {
+      "path": "experiments/rc_tempo/freeze_smoke.py",
+      "accessCount": 1,
+      "lastAccessed": 1776755833760,
+      "type": "file"
+    },
+    {
+      "path": "experiments/rc_tempo/freeze_smoke2.py",
+      "accessCount": 1,
+      "lastAccessed": 1776755914556,
+      "type": "file"
+    },
+    {
+      "path": "experiments/rc_tempo/freeze_smoke3.py",
+      "accessCount": 1,
+      "lastAccessed": 1776756160253,
       "type": "file"
     }
   ],

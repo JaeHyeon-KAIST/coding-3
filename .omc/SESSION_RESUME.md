@@ -1,25 +1,178 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-21 pm32 END — **3-iter ralplan APPROVE + Mac coding done, server sweep DEFERRED to pm33**:
-- 🎯 **pm32 plan is execution-ready**: 1358-line consensus plan at `.omc/plans/pm32-sweep-plan.md` (Architect+Critic APPROVE after 3 iterations).
-- ✅ **Mac coding 완료 (Step A → C.2)**: 70 v3a_sweep variants (5P1+20AA+10AC+5RS+30 existing); 3 new β env vars (TRIGGER_GATE/TRIGGER_MAX_DIST/RETREAT_ON_ABORT) backward-compat; my_home_cells plumbing + MJ-7 leak guard; 5 new modules (composite, promote_t1_to_t2, analyze_pm32, filter_random_layouts, hth_sweep); 16 1-cap layouts (3 fixed + 8 capsule-swap + 5 hand-crafted topology); 25 unit tests PASS.
-- 🟡 **Mac smoke 통과 (~7.6min wall)**: 13/13 no crash; MJ-8 byte-identical (pm32_aa_none_d999 ≡ beta_v2d) ✓; 단 distantCapture trigger=0% at max_moves=200 (적이 invade 안 함 → β chase 불필요 → 측정 무의미하지만 무해).
-- 🐍 **Python 3.9.25 parity** Mac/jdl_wsl/sts 모두 일치 (capture.py md5 동일).
-- 🖥️ **2nd server sts provisioned**: Ryzen 9950X3D 32T (jdl_wsl 7950X 33T 동급, ~13% 빠름). 둘 다 idle, 활용 옵션 pm33에서 결정.
-- 📋 **DEFERRED**: Step E (git push + server pull), Step F1+F2+F3 (server T1 + T2 + HTH calibration). 모든 prereq 끝, **just push and run**.
+**Last updated:** 2026-04-22 pm34 END — **Abstract graph 구현 + 20/30 WIN feasibility 검증 완료**
 
-## pm33 TL;DR (NEXT SESSION — READ FIRST)
+## pm34 TL;DR
 
-### 🎯 Session goals (pm33)
-1. **Build freeze-checkpoint infra** (decided pm32 end): `phase1_runner.py`에 `--save-state-at-trigger <pkl>` + `--load-state <pkl>` + state-swap harness. pm34에서 활용.
-2. **Execute Step E → F1 → F2 → F3** (pm32 plan §6) — push code to jdl_wsl + sts, server smoke (workers=24, monster pre-check), T1 (1.8h), promote, T2 (1.8h), F3 HTH calibration (~1h). Total ~5h28m server wall.
-3. **2nd server (sts) 활용 결정**: Plan A (sts F3-on-4-refs early + F3-on-T2-winners 병행) OR Plan B (T1 50/50 split) OR C (sts standby).
+pm33에서 설계만 했던 abstract graph를 구현하고 food-level (19/30 WIN)과 비교. 초기 13/30 → 여러 버그 수정 거쳐 **최종 20/30 WIN** 도달. **Food-level 수준 초과**.
 
-### 🚨 First action
-1. Read this file + `.omc/plans/pm32-sweep-plan.md` (pm32 v3 plan — APPROVE'd).
-2. `git status` — confirm pm32 uncommitted changes still present.
-3. Decide: commit pm32 work + go to Step E? OR commit + build freeze-checkpoint first?
-4. If Step E first: `git push` → `ssh jdl_wsl 'cd ~/projects/coding-3 && git pull'` → similarly for sts.
+### 🎯 pm34 최종 상태
+
+- **20/30 WIN** (BEAM=500, 7s wall, 1.3s per map single-thread)
+- Food-level 19/30보다 +1 우월
+- β agent init 예산 (15s) 여유
+- WIN seeds: {1, 3, 5, 6, 7, 8, 10, 11, 12, 13, 14, 15, 19, 20, 21, 23, 25, 26, 28, 29}
+- 미해결: {2, 4, 16} — beam=5000에서 {2} 회복, seed 16은 cap-in-pocket 구조적 한계
+
+### 🔧 pm34 주요 수정/구현
+
+1. **Abstract graph 모듈화** (`experiments/rc_tempo/abstract_graph.py`) — PIL 제거, reusable
+2. **Beam search** (`abstract_search.py`) — bitmask + multi-source/sink + Pareto dedup
+3. **Tree knapsack DP** — `cost_table[k]` for partial pocket visits (all-or-nothing 제거)
+4. **Cap-in-pocket extended_main fix**
+5. **X revisit 허용** — chamber/loop neck 재통과 가능
+6. **Y-merge food-union 수정** — trunk food 이중 합산 버그 제거
+7. **Pareto dedup key** — food를 dedup key에 포함하여 partial-visit 옵션 보존
+
+### 🚨 pm35 first action
+
+β agent 구현 시작:
+- `minicontest/zoo_reflex_rc_tempo_gamma.py` 신규 파일 (or β 확장)
+- `registerInitialState`:
+  - `build_from_maze(game_state.data.layout)` 호출 (~5ms)
+  - 4 strategy beam_search_abstract (~1.3s)
+  - best plan을 action sequence로 변환
+- `chooseAction`:
+  - pre-planned action 반환
+  - 남는 ms에 beam 확장 (anytime refinement)
+- 30-map HTH 측정 vs β v2d 75.65% → target 85-95%
+
+### 📂 pm34 production files (β agent가 import할 것)
+
+- `experiments/rc_tempo/abstract_graph.py` — graph builder
+- `experiments/rc_tempo/abstract_search.py` — beam engine
+- (나중) `minicontest/zoo_rctempo_core.py` 확장: 위 두 모듈을 agent 환경에 맞게 포팅
+
+### 📊 pm34 beam scale 실측 (per map single-thread)
+
+| BEAM | WIN | per-map wall |
+|---|---|---|
+| 500 | 20/30 | 1.3s |
+| 2000 | 20/30 | 5s |
+| 5000 | 21/30 | 13s ⚠️ tight |
+| 20000 | 18/30 (non-monotonic regress) | 50s |
+
+### 🧪 pm34 탐구했지만 버려진 것
+
+- **Chamber atomization** via biconnected decomposition — regression (atomic 제약이 beam 유연성 파괴)
+- **Priority tweaks** (depth_sum 제거 등) — BEAM=500에서 결과 변화 無
+- **Larger beam** (20000) — non-monotonic, regress
+
+교훈: 남은 3 seed gap은 **beam search의 fundamental approximation** 한계. In-game에서 anytime refinement로 회복 기대.
+
+---
+
+(Earlier session TL;DRs below — pm33, pm32, pm31, pm30, pm29 preserved)
+
+**Earlier 2026-04-21 pm33 END** — **major strategic pivot: 2-cap chain + abstract graph design**:
+
+## pm33 TL;DR (big pivot — read carefully)
+
+### 🔄 What changed fundamentally
+
+pm33 planned to build **freeze-checkpoint infra** (pm32 handoff). Within the first hour, we pivoted entirely: "β doesn't need better measurement, it needs a fundamentally stronger strategy."
+
+The rest of the session designed a new strategy: **2-capsule chain + 2-offensive, with abstract-graph-based orienteering planning**.
+
+Freeze-checkpoint work: proven feasible (3 smoke tests PASS — game.state picklable, TEAM-dict restoration works) but **unused** because anytime refinement gives equivalent benefit without freeze infrastructure.
+
+### 🎯 New strategy (designed, NOT implemented)
+
+1. **Target**: `RANDOM<1..30>` layouts (2 capsules per side = 4 total, 34×18 prison-style, deterministic per seed). These are the likely tournament maps per CS470 assignment PDF (p.8).
+2. **Core play**: eat cap-1 → 40-tick scared → eat cap-2 within 39 A-moves to extend → total 79-move scared → harvest food with both A and B offensive → aim for 28+ deposits = 1-trip WIN.
+3. **Budget math**: scared timer decrements per opp-move. Cap-2 by A's 39th post-cap-1 move → 39 + 40 = 79 opp-moves scared = 79 A-moves budget.
+
+### 📊 Feasibility analysis (120 cases: 30 maps × 4 strategies)
+
+4 scenarios evaluated via food-level beam search:
+| # | Code | Strategy |
+|---|---|---|
+| S1 | CLOSE_SPLIT | A eats cap1 (close), B eats cap2 (far). Both harvest. |
+| S2 | CLOSE_BOTH | A eats cap1 → food → cap2 (detour), B pure food. |
+| S3 | FAR_SPLIT | A eats cap2, B eats cap1. |
+| S4 | FAR_BOTH | A eats cap2 → food → cap1 (detour), B pure food. |
+
+Results (with depth-priority tiebreaker, BEAM=1000 = best quality): **20/30 maps achieve 1-trip WIN (≥ 28 food)**. Remaining 10 get 22-27 food (DOMINATE level).
+
+Single-strategy wins: seeds 13 (S3), 16 (S4), 23 (S2), 29 (S4). All-four wins on 8+ seeds.
+
+### 🏗 Abstract graph (the design we converged to)
+
+See `.omc/plans/pm33-abstract-graph-2cap-strategy.md` for full doc. Summary:
+
+**Nodes**:
+- **X positions** (~20 for RANDOM1): main corridor cells with food OR pocket attach OR cap
+- **Pocket headers** (~12 for RANDOM1): `{food, cost, direction}` attached to X's
+- Merge rule: if 2+ headers share `(attach, first_cell)`, merge into ONE combined header with trunk-sharing cost (e.g., RANDOM1 (30,2): H12 cost 10 + H13 cost 6 → merged cost 12 food 4)
+
+**Edges (X-X only)**:
+- Distance-check rule: add iff `blocked_BFS(A, B) == plain_BFS(A, B)` (no detour)
+- ~30 edges for RANDOM1 (vs 190 full pairwise)
+
+**Preprocessing time**: ~5ms per map. Exact DP on abstract ≈ 100-400ms (vs food-level beam ~600ms).
+
+### ⏱ Time budgets
+
+| Phase | Budget (single-thread) | Use |
+|---|---|---|
+| registerInitialState | 15s | ~3s initial plan + 12s refinement |
+| Pre-capsule A moves (~20) | 20s | Anytime refinement (~19s spare) |
+| Pre-capsule B moves (~20) | 20s | Same |
+| Scared phase (79 moves) | 79s | Plan execution (~10ms/move) |
+
+**Effective plan compute**: ~55s. Far more than needed for exact DP on abstract graph.
+
+### 🚨 Critical gap to fix in pm34
+
+**The 120-case analysis uses FOOD-LEVEL graph, NOT the abstract graph we designed.** This is a major inconsistency — β agent will use abstract graph but our feasibility numbers are from food-level.
+
+**First pm34 action**: port analysis to abstract graph. Re-run 120 cases. Verify ~19-20 WIN holds.
+
+### 🎯 pm34 session goals
+
+1. **Port analysis to abstract graph** (exact DP on abstract, verify WIN count)
+2. **Implement new β agent** (`zoo_reflex_rc_tempo_gamma.py` or patch existing):
+   - registerInitialState: build abstract graph + run 4 strategies × BEAM=500
+   - chooseAction: return pre-planned action + anytime refinement
+3. **Anytime refinement scheduling**: expand beam or explore alternative strategies during spare ms
+4. **Pre-capsule navigation + post-scared return**
+5. **30-map HTH validation** (target: 85-95% WR vs pm30 β v2d 75.65%)
+6. **Flatten to 20200492.py** (submission)
+
+### 📂 Critical pm33 files (read these in pm34)
+
+- `.omc/plans/pm33-abstract-graph-2cap-strategy.md` — **full design doc (MUST READ)**
+- `experiments/rc_tempo/user_final_model_seed1.py` — **FINAL abstract graph implementation** (reference)
+- `experiments/rc_tempo/feasibility_4strategies_parallel.py` — 120-case analyzer (food-level — needs porting to abstract)
+- `experiments/artifacts/rc_tempo/random_map_images/random_01_FINAL.png` — final abstract graph visualization
+- `experiments/artifacts/rc_tempo/random_map_images/all_random_1_to_30.png` — all 30 maps composite
+
+### 🔑 Key constraints to remember
+
+- **Single-threaded only** (CLAUDE.md rule, tournament DQ otherwise)
+- **No external deps** (numpy/pandas only; PIL only used for analysis viz, remove from β)
+- **Grading maps** assumed `RANDOM<seed>` per assignment PDF. If TA uses Berkeley 1-cap maps → graceful fallback to β v2d behavior.
+- **Pocket definition** final = Definition B with Y-shape merge. Internal junctions NOT shown as X's (merged into main corridor attach).
+
+### 💡 User insights (drive implementation, not in analysis)
+
+1. **Pre-capsule food** — A grabs food on way to cap1/cap2 → +3-5 food realistic bonus
+2. **Post-scared return food** — on way home → +2-3 food
+3. **B pre-advance** — B positioned at midline before cap-1 eaten → B's 79-move budget fully utilized
+4. **Multi-trip** — don't need to 1-trip win; 2nd trip viable with re-respawned caps
+5. **Anytime refinement** — 15s init + 40s pre-capsule compute = 55s effective
+
+### 🚨 First action in pm34
+
+1. Read this file + `.omc/plans/pm33-abstract-graph-2cap-strategy.md`
+2. `open experiments/artifacts/rc_tempo/random_map_images/random_01_FINAL.png` to refresh visual memory of abstract graph
+3. Decide: port analysis to abstract first (verify 19-20 WIN) OR jump straight to β agent impl?
+   - **Recommended**: port analysis first (~2-4h, catches any abstract-specific bugs)
+
+### Deferred (still not implemented, may or may not need)
+
+- **Freeze-checkpoint infra** (pm32 handoff) — proven feasible, unused. Only build if abstract+anytime proves insufficient.
+- **Step E → F3 server sweep** (pm32 plan) — 70-variant sweep. Not needed if new β agent outperforms.
 
 ### pm32 committed state (file changes uncommitted but ALL Mac-tested)
 

@@ -1,6 +1,94 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-21 pm32 END — **3-iter ralplan consensus + Mac coding (Step A-C.2) + 16 layouts**:
+**Last updated:** 2026-04-22 pm34 END — **Abstract graph port + feasibility 20/30 WIN (식타 19 초과)**:
+- ✅ **Abstract graph 모듈화**: `experiments/rc_tempo/abstract_graph.py`. PIL 제거, 재사용 가능. `build_from_maze` 단일 API.
+- ✅ **Abstract beam search** (`experiments/rc_tempo/abstract_search.py`): bitmask vx/vh, multi-source start, multi-sink end, revisit-allowed, **Pareto dedup (food in key)**, **cost_table 기반 k-option 분기**.
+- ✅ **Tree knapsack DP for pockets** (`_tree_knapsack` + `build_pocket_headers_with_cost_table`): 각 pocket을 attach root로 재구성, post-order DP로 `cost_table[k]` 계산. Partial pocket visit 모델링. Y-merge overlap 자동 해소.
+- ✅ **Cap-in-pocket fix**: `extended_main` 으로 pocket 안 cap에도 edge 연결.
+- ✅ **4 strategy solvers** on abstract (`feasibility_4strategies_abstract.py`): solve_split/solve_both + ProcessPoolExecutor 병렬.
+- 📊 **120-case 최종: 20/30 WIN** (BEAM=500, 7s wall, 1.3s per map single-thread).
+  - Food-level 식타: 19/30 → **abstract +1 초과**
+  - 양쪽 동일 WIN: 16 seeds
+  - Abstract only WIN: {10, 14, 25, 29} (4 seeds)
+  - Food-level only WIN: {2, 4, 16} (3 seeds)
+- 🔬 **Beam scale test**: BEAM=500/2000/5000/20000 실험. BEAM=5000에서 21 WIN (seed 2 회복), BEAM=20000 오히려 18로 regress (priority heuristic non-monotonic).
+- 🔬 **Chamber/biconnected 프로토타입 실험** (`chamber_test.py`): leaf-block chamber atomization 시도 but **regression** (atomic 제약이 beam 유연성 제거). Biconnected decomposition으로 overlap은 해소했으나 성능 향상 無 → 롤백 (main code는 chamber 없이).
+- 🗺 **30 map 시각화** (`render_all_finals.py`): abstract graph 최신 state 반영. `experiments/artifacts/rc_tempo/random_map_images/random_{01..30}_FINAL.png`.
+- 🚨 **해결된 버그 2개**:
+  1. **Y-merge double-count**: 공통 trunk food가 각 branch에서 중복 합산 → food union 기반으로 수정
+  2. **Pareto dedup key**: 이전엔 `(ci, vx, vh, start)`로 food 무시하여 k=1 옵션이 k=2..max를 prune → `(ci, vx, vh, start, food)`로 수정
+- ⏱ **β agent init 예산**: BEAM=500 기준 per-map 1.3s → 15s 여유. BEAM=5000 per-map 13s (tight, risky).
+
+### pm34 key artifacts
+
+- `experiments/rc_tempo/abstract_graph.py` — **production module** (used by everything)
+- `experiments/rc_tempo/abstract_search.py` — beam search engine
+- `experiments/rc_tempo/feasibility_4strategies_abstract.py` — 120-case analyzer, 20/30 WIN
+- `experiments/rc_tempo/render_all_finals.py` — 30 map 렌더러
+- `experiments/rc_tempo/chamber_test.py` — biconnected chamber 실험 (참고용, regress 확인)
+- `experiments/artifacts/rc_tempo/random_map_images/random_{01..30}_FINAL.png` — updated 시각화
+
+### pm34 → pm35 handoff
+
+→ **β agent 구현 시작**. Baseline: BEAM=500 abstract로 initial plan, in-game anytime refinement로 BEAM 점진 확장.
+→ Implementation points: `registerInitialState`에서 abstract graph 빌드 (5ms) + 4-strategy beam (1.3s), `chooseAction`에서 pre-planned action + 남은 ms로 beam expand.
+→ Seed {2, 4, 16} 3 미해결 WIN은 in-game 성적으로 판단 (abstract가 놓쳐도 실전 WR에선 차이 미미 가능성).
+
+### Known pm34 issues / carry-over
+
+- Seed 16 cap-in-pocket 특수 케이스 미해결 (tree knapsack이 cap 통합 안함)
+- Seed 2, 4: beam=500 truncation, beam=5000에선 회복
+- Chamber modeling으로 state space 축소 시도했으나 atomic 제약이 regress 유발 → 현재 모델은 chamber 없이 leaf-pocket + main_corridor X만
+- `user_best/baseline{1,2,3}.py` still DummyAgent (pm35 flatten 대기)
+
+---
+
+**Earlier 2026-04-21 pm33 END** — **MAJOR STRATEGIC PIVOT: 2-cap chain + abstract graph design (not implemented yet)**:
+- 🔄 **Freeze-checkpoint WORK ABANDONED mid-session**. pm32 handoff goal was freeze infra; within 1h we pivoted to a stronger strategy design.
+- ✅ **Freeze-checkpoint feasibility PROVEN** via 3 smoke tests: `game.state` picklable, `random.getstate()` + `zoo_core.TEAM.__dict__` restoration works for determinism. Not used — anytime refinement gives equivalent benefit.
+- 🆕 **New target strategy (designed, NOT coded)**: 2-cap chain. Eat cap-1 → 40-tick scared → eat cap-2 within 39 A-moves to extend → total 79-move scared window. Both A and B offensive. Goal: **28+ food deposit in 1 trip = WIN**.
+- 📊 **Feasibility analysis (120 cases = 30 RANDOM<seed> × 4 strategies)**:
+  - S1 CLOSE_SPLIT (A eats cap1, B eats cap2): 10-12/30 WIN
+  - S2 CLOSE_BOTH (A detour both, B food): 14-15/30 WIN
+  - S3 FAR_SPLIT (A eats cap2, B eats cap1): 14-15/30 WIN
+  - S4 FAR_BOTH (A detour both reverse, B food): 13-17/30 WIN
+  - **Combined ANY strategy WIN: 18-20/30 (60-67%)** depending on beam width
+  - Other 10-12 maps: 22-27 food = DOMINATE level (85-95% expected WR)
+- 🏗 **Abstract graph designed** (after ~10 iterations with user):
+  - Nodes = X positions (main corridor: food OR pocket attach OR cap)
+  - Pocket headers = `{food, cost, direction}` attached to X's
+  - Y-shape merge: headers sharing `(attach, first_cell)` merged with trunk-sharing cost
+  - Edges = X-X with distance-check rule (blocked == plain BFS dist → no detour)
+  - **RANDOM1 example**: 20 X + 12 headers + 30 edges. Preprocessing ~5ms.
+- ⏱ **Time budget (single-thread, CLAUDE.md rule)**: 15s init + 40s pre-capsule refinement = **55s effective** — plenty for exact DP on abstract graph (~400ms).
+- 🚨 **Critical gap**: 120-case analysis uses FOOD-LEVEL graph. β agent will use ABSTRACT graph. Port required in pm34 before implementation.
+- 📋 **NOT done in pm33**: β agent implementation, abstract-graph-based analysis, in-game validation, submission flatten.
+
+### pm33 key artifacts
+
+- `.omc/plans/pm33-abstract-graph-2cap-strategy.md` — **FULL DESIGN DOC** (read first in pm34)
+- `experiments/rc_tempo/user_final_model_seed1.py` — **final abstract graph impl** (reference for β coding)
+- `experiments/rc_tempo/feasibility_4strategies_parallel.py` — 120-case food-level analyzer
+- `experiments/artifacts/rc_tempo/random_map_images/random_01_FINAL.png` — abstract graph viz
+- `experiments/artifacts/rc_tempo/random_map_images/all_random_1_to_30.png` — 30-map composite
+
+### pm33 → pm34 handoff
+
+→ `.omc/SESSION_RESUME.md` for 5-min onboarding.
+→ `.omc/plans/pm33-abstract-graph-2cap-strategy.md` for full 2-cap design + pm34 steps.
+
+### Key design decisions made this session
+
+1. **Grading map assumption**: `RANDOM<seed>` maps (per assignment PDF p.8). These are always 4-cap (2 per side), 34×18 prison-style.
+2. **Capsule budget**: scared timer is per-opp-move. Cap-2 must be eaten by A's 39th post-cap1 move → 79 total opp-moves of scared = 79 A-moves.
+3. **"Deep food"** redefinition: far from midline (x - mid_col), NOT pocket-internal depth. Depth priority = break ties by preferring deeper food.
+4. **Pocket definition**: after ~5 iterations, settled on Definition B (tip → main corridor trace) with Y-shape merge. Internal junctions NOT separate X's (no red triangle).
+5. **Edge rule**: distance-check (blocked == plain BFS). Avoids both over-connection and detour-edges.
+6. **Single-threaded**: critical constraint. Multiplied budgets accordingly (55s effective via anytime, not 15s).
+
+---
+
+**Earlier 2026-04-21 pm32 END** — **3-iter ralplan consensus + Mac coding (Step A-C.2) + 16 layouts**:
 - 🎯 **Plan v3 APPROVE'd via 3-iteration ralplan**: 1358-line plan at `.omc/plans/pm32-sweep-plan.md`. Architect+Critic both APPROVE. iter-1 11 fixes + iter-2 14 fixes + iter-3 8 operator-tracked.
 - ✅ **Mac coding 완료 (Step A through C.2)**: 70 variants in v3a_sweep (P1=5, AA=20, AC=10, RS=5, +30 existing); 3 new env vars in β agent (BETA_TRIGGER_GATE / BETA_TRIGGER_MAX_DIST / BETA_RETREAT_ON_ABORT) with full backward compat; my_home_cells plumbing + _maybe_retreat helper + MJ-7 leak guard.
 - 📦 **5 NEW modules created**: `composite.py` (compute_score + Wilson CI + Pearson_with_CI + Spearman_rho), `promote_t1_to_t2.py` (defaults locked: die-ceiling=2.5, stratify-angles, buffer-pp=2.0, data-quality-check), `analyze_pm32.py` (composite-only sort, conjunction ship rule), `filter_random_layouts.py`, `hth_sweep.py` (thin wrapper around existing hth_resumable.py — Architect iter-2 reuse fix).

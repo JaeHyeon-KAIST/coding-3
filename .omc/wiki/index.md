@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 68 pages | Last updated: 2026-04-21T07:04:06.661Z
+> 72 pages | Last updated: 2026-04-21T17:47:25.254Z
 
 ## convention
 
@@ -61,6 +61,8 @@
 - [2026-04-20 pm30 β_chase score-conditional gate +4.7pp](2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md) — # 2026-04-20 pm30 β_chase score-conditional gate +4.7pp
 - [2026-04-21 pm31 - Retrograde analysis + β safety knobs](2026-04-21-pm31-retrograde-analysis-safety-knobs.md) — # 2026-04-21 pm31 - Retrograde analysis + β safety knobs
 - [2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + Mac smoke](2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md) — # 2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + M...
+- [2026-04-21 pm33 — 2-cap chain strategy + abstract graph design (pivot from freeze-checkpoint)](2026-04-21-pm33-2-cap-chain-strategy-abstract-graph-design-pivot.md) — # 2026-04-21 pm33 — 2-cap chain strategy + abstract graph design (pivot from ...
+- [2026-04-22 pm34 - abstract graph port + 20/30 WIN feasibility](2026-04-22-pm34-abstract-graph-port-20-30-win-feasibility.md) — # 2026-04-22 pm34 - abstract graph port + 20/30 WIN feasibility
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
@@ -90,3 +92,5 @@
 - [Session Log 2026-04-20](session-log-2026-04-20-87aabc3a.md) — # Session Log 2026-04-20
 - [Session Log 2026-04-20](session-log-2026-04-20-fa8032a1.md) — # Session Log 2026-04-20
 - [Session Log 2026-04-21](session-log-2026-04-21-3b56dde7.md) — # Session Log 2026-04-21
+- [Session Log 2026-04-21](session-log-2026-04-21-86d8fbdd.md) — # Session Log 2026-04-21
+- [Session Log 2026-04-21](session-log-2026-04-21-9b68aff1.md) — # Session Log 2026-04-21
