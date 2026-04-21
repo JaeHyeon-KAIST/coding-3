@@ -312,3 +312,11 @@
 - **Pages:** 2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md
 - **Summary:** Updated "2026-04-20 pm30 β_chase score-conditional gate +4.7pp" with new content
 
+## [2026-04-20T11:09:45.901Z] ingest
+- **Pages:** session-log-2026-04-20-5eae0114.md
+- **Summary:** Auto-captured session log for 74d651af-f1f8-4263-a0ab-583a5eae0114
+
+## [2026-04-21T01:06:46.883Z] ingest
+- **Pages:** 2026-04-21-pm31-retrograde-analysis-safety-knobs.md
+- **Summary:** Created new page "2026-04-21 pm31 - Retrograde analysis + β safety knobs"
+

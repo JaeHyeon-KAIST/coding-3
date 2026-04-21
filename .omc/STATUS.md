@@ -1,6 +1,21 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-20 pm30 END — **β_chase score-conditional gate (+4.7pp on 660g 11-opp smoke)**:
+**Last updated:** 2026-04-21 pm31 END — **β Phase 1 primitive measurement + tuning sweep**:
+- 🎯 **Phase 1 meas framework built**: `phase1_runner.py` (early-exit cap/die), `phase1_smoke.py` + `v3a_sweep.py`. post-trigger metrics. 31 variants swept (β safety, v3a, v3b, β_retro).
+- 📊 **Best cap+die (240g × 6-opp × 2-layout × 2-color, max_moves=500)**:
+  - **β_path4** (BETA_PATH_ABORT_RATIO=4): **cap 55.8% / die 1.7%** ⭐ Pareto winner
+  - **β_slack3** (BETA_CHASE_SLACK=3): cap 54.3% / **die 1.3%** ⭐ Safety winner
+  - **β_retro** (retrograde tablebase, S5 fixed): cap 55.4% / die 2.1%
+  - β_v2d (pm30 baseline): cap 51.7% / die 2.1%
+- 🔬 **Retrograde tablebase** feasible: defaultCapture 0.77s / distantCapture 1.84s init. Builds minimax V[(me,def,turn)] → ±1/0 under perfect info.
+- 🐛 **β_retro S5 fix**: retrograde_best_action returned STOP on V=0 draws → A stuck. Fixed via greedy-toward-capsule on V=0 commits.
+- ❌ **v3a (A*+Voronoi+slack) + v3b (αβ) Pareto inferior** (cap 18-44%, die 5-10%).
+- 🧱 **Cap ceiling ~55-56% plateau** — next session needs different angle (trigger relax / pre-position / retreat planner / B coord).
+- ⚠️ **Full-game 1200-move HTH NOT yet done**; needed before flatten to confirm pm30 75.65% WR baseline preserved/improved.
+
+---
+
+**Earlier 2026-04-20 pm30 END** — **β_chase score-conditional gate (+4.7pp on 660g 11-opp smoke)**:
 - 🎯 **v2d accepted**: `_choose_capsule_chase_action` 상단에 `if my_score ≥ 5 pre-capsule: skip chase → rc82 defensive` 게이트 추가
 - 📊 **660g 11-opp smoke**: current β 73.2% → v2d 77.9% (+4.7pp) overall. **rc32 +31.7pp 폭발** (Pincer defender 대응), rc02 +6.7pp, baseline +5pp, rc82 +5pp, monster +3.3pp. 무회귀.
 - ❌ **v2a (full-path BFS) 기각**: margin=0 -2pp regression, margin=-1 flat. 복합 defender(rc82/rc166) 상대 과도 abort.
