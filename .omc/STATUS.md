@@ -1,6 +1,32 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-21 pm31 END — **β Phase 1 primitive measurement + tuning sweep**:
+**Last updated:** 2026-04-21 pm32 END — **3-iter ralplan consensus + Mac coding (Step A-C.2) + 16 layouts**:
+- 🎯 **Plan v3 APPROVE'd via 3-iteration ralplan**: 1358-line plan at `.omc/plans/pm32-sweep-plan.md`. Architect+Critic both APPROVE. iter-1 11 fixes + iter-2 14 fixes + iter-3 8 operator-tracked.
+- ✅ **Mac coding 완료 (Step A through C.2)**: 70 variants in v3a_sweep (P1=5, AA=20, AC=10, RS=5, +30 existing); 3 new env vars in β agent (BETA_TRIGGER_GATE / BETA_TRIGGER_MAX_DIST / BETA_RETREAT_ON_ABORT) with full backward compat; my_home_cells plumbing + _maybe_retreat helper + MJ-7 leak guard.
+- 📦 **5 NEW modules created**: `composite.py` (compute_score + Wilson CI + Pearson_with_CI + Spearman_rho), `promote_t1_to_t2.py` (defaults locked: die-ceiling=2.5, stratify-angles, buffer-pp=2.0, data-quality-check), `analyze_pm32.py` (composite-only sort, conjunction ship rule), `filter_random_layouts.py`, `hth_sweep.py` (thin wrapper around existing hth_resumable.py — Architect iter-2 reuse fix).
+- 🧪 **25 unit tests PASS**: T-U1 (env parsing), T-U2 (backward compat byte-identical), T-U3 a/b (retro×retreat + no-leak across layouts), T-U4 (composite ranks beta_path4>beta_v2d), T-U5 (Pearson + Spearman 11 cases incl ties + n<4 NaN).
+- 🗺️ **16 layouts ready** (1-cap-per-side ALL): 3 originals (defaultCapture, distantCapture, strategicCapture) + 8 capsule-swap variants (default×4, distant×2, strategic×2) + 5 hand-crafted topologies (corridor/open/fortress/zigzag/choke Capture). All verified by capture.py engine load.
+- 🐛 **mazeGenerator.py constraint discovered**: `add_pacman_stuff` always inserts capsules in pairs (max=4) → RANDOM<seed> always yields 2-cap maps. Plan's RANDOM-seed pool path infeasible → pivoted to hand-crafted layouts.
+- 🐍 **Python parity**: Mac upgraded 3.9.11 → 3.9.25 to match jdl_wsl + sts (numpy 2.0.2, pandas 2.3.3 all identical). md5 of capture.py identical across all 3.
+- 🖥️ **Second server `sts` provisioned**: AMD Ryzen 9950X3D (16C/32T, 30GB RAM, RTX 5090 unused), Ubuntu 24.04. uv + .venv 3.9.25 + numpy/pandas + smoke OK. Available for parallel work in pm33+.
+- 🟡 **Mac smoke (459s, 13 var × 6 opp × 2 layout × 2 color × 5g × workers=6)**: 13/13 no-crash; **MJ-8 byte-identical pass** (pm32_aa_none_d999 ≡ beta_v2d both 13.3/1.7); top 7 variants tied at score 10.1 (N=10/cell too small to discriminate, expected); ⚠️ **distantCapture trigger=0% at max_moves=200** — opp doesn't invade in 200 moves on bigger maps.
+- 🔑 **distantCapture trigger=0 reframed (NOT bug)**: trigger=0 means "opp doesn't attack → we win by score collection, no β chase needed". β variants indistinguishable on such layouts. Decision: keep max_moves=200 (matches "초반 200moves 전략" intent); trigger-rate-low layouts will be pruned in pm33 pre-sweep calibration OR accepted as wasted-but-harmless wall.
+- ❄️ **Freeze-checkpoint deferred**: pm33 = build save-state-at-trigger + state-swap harness; pm34 = use it for broader sweep (more variants/maps/situations).
+- 📋 **NOT done in pm32**: Step E (git push to servers), Step F1+F2+F3 (server sweep). All deferred to next session.
+
+### pm32 file changes (uncommitted)
+
+8 modified + 18 NEW (5 modules + 13 layouts + plan + fixtures + smoke variants list).
+
+### pm32 → pm33 handoff
+
+→ `.omc/SESSION_RESUME.md` for 5-min onboarding.
+→ `.omc/plans/pm32-sweep-plan.md` for full execution plan (Step E onward).
+→ `.omc/plans/open-questions.md` for unresolved + freeze-checkpoint pm33+pm34 plan.
+
+---
+
+**Earlier 2026-04-21 pm31 END** — **β Phase 1 primitive measurement + tuning sweep**:
 - 🎯 **Phase 1 meas framework built**: `phase1_runner.py` (early-exit cap/die), `phase1_smoke.py` + `v3a_sweep.py`. post-trigger metrics. 31 variants swept (β safety, v3a, v3b, β_retro).
 - 📊 **Best cap+die (240g × 6-opp × 2-layout × 2-color, max_moves=500)**:
   - **β_path4** (BETA_PATH_ABORT_RATIO=4): **cap 55.8% / die 1.7%** ⭐ Pareto winner

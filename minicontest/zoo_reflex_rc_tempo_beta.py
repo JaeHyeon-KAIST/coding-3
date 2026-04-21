@@ -21,6 +21,24 @@
 # Shared state:
 #   All per-team state stored on a module-level singleton `RCTEMPO_TEAM`
 #   so Agent A and B see the same plans / phase / tick.
+#
+# ---------------------------------------------------------------------------
+# Naming convention (pm32):
+#
+#   This file (β proper) uses BETA_TRIGGER_GATE with values:
+#     'none'        — chase always considered (default; pm31 behavior)
+#     'any'         — chase only if opp_pacman_count >= 1
+#     'exactly_one' — chase only if opp_pacman_count == 1
+#
+#   The sister file zoo_reflex_rc_tempo_beta_retro.py uses
+#   BETA_RETRO_TRIGGER_MODE with values 'strict' (default; ==1) | 'loose' (>=1).
+#
+#   These ARE intentionally different env-var names with different defaults —
+#   β v2d (this file) historically had no opp_pacman gate at all; β_retro
+#   needs a 1:1 chase subgame for the retrograde V table to be valid. Reusing
+#   one var would force one of the two agents to silently regress its
+#   committed default. Do not consolidate the two without a behavior audit.
+# ---------------------------------------------------------------------------
 
 from __future__ import annotations
 
@@ -56,6 +74,10 @@ class _RCTempoTeamState:
         self.plans = []  # list of (A, B) plan dicts
         self.top_plan = None
         self.capsule = None
+        # pm32 Angle C: actual home-side midline cells, used by _maybe_retreat
+        self.my_home_cells = []
+        # Legacy slots — never populated; kept for any external code that
+        # touched them. _maybe_retreat reads my_home_cells, NOT these.
         self.red_starts = []
         self.blue_starts = []
         self.a_index = None  # global agent index of A
@@ -212,6 +234,13 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
             return id(gameState)
 
     def _precompute_team(self, gameState):
+        # pm32 MJ-7: defense-in-depth slot reset for direct-call safety. Even
+        # if registerInitialState's reset path is bypassed (or _precompute_team
+        # early-returns below), the team's _maybe_retreat helper must NOT read
+        # stale my_home_cells from a previous (different layout's) game in the
+        # same subprocess.
+        RCTEMPO_TEAM.my_home_cells = []
+        RCTEMPO_TEAM.tempo_enabled = False
         walls = gameState.getWalls()
 
         # My team indices
@@ -234,6 +263,11 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                                  if not walls[mid - 1][y]]
             my_capsules_getter = gameState.getRedCapsules
             my_foods = list(self.getFood(gameState).asList())
+
+        # pm32 Angle C: persist the actual midline cells for _maybe_retreat.
+        # Note: this happens BEFORE the 1-capsule gate / safety-gate early
+        # returns below, so retreat is available even when tempo is disabled.
+        RCTEMPO_TEAM.my_home_cells = list(my_home_cells)
 
         my_capsules = list(my_capsules_getter())
 
@@ -309,6 +343,34 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         # Pre-capsule / post-scared: rc82 plays naturally
         return super()._chooseActionImpl(gameState)
 
+    def _maybe_retreat(self, gameState, my_pos, distance_fn):
+        """pm32 Angle C: when chase aborts and BETA_RETREAT_ON_ABORT=1, take one
+        greedy step toward the nearest home midline cell. Default OFF preserves
+        pm31 behavior (returns None → rc82 fallback).
+
+        Returns None when:
+          - BETA_RETREAT_ON_ABORT != '1' (env not set or set to '0')
+          - my_home_cells empty (e.g., team-state reset post-MJ-7 leak guard)
+          - no legal actions available
+        """
+        if os.environ.get('BETA_RETREAT_ON_ABORT', '0') != '1':
+            return None
+        home_cells = RCTEMPO_TEAM.my_home_cells
+        if not home_cells:
+            return None
+        try:
+            home_target = min(home_cells, key=lambda c: distance_fn(my_pos, c))
+        except Exception:
+            return None
+        legal = gameState.getLegalActions(self.index)
+        if not legal:
+            return None
+        # If we're already on a home cell, no need to step
+        if my_pos == home_target:
+            return None
+        return _next_step_toward(gameState, my_pos, home_target, legal,
+                                  distance_fn)
+
     def _choose_capsule_chase_action(self, gameState):
         """Phase 1 A: greedy step toward capsule with pm29 safety + pm30 Stage 2d score gate.
 
@@ -356,6 +418,33 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
         abort_dist = _iv('BETA_ABORT_DIST', 2)                 # d_me <= X → abort
         chase_slack = _iv('BETA_CHASE_SLACK', 1)               # def_to_cap + X < me_to_cap → abort
         path_abort_ratio = _iv('BETA_PATH_ABORT_RATIO', 0)     # abort if d_me <= d_to_cap/R (0=off)
+
+        # pm32 Angle A: trigger gating and distance gate. Defaults preserve pm31
+        # behavior (gate='none', dist=999 → no-op). See header doc for the
+        # naming-asymmetry rationale vs BETA_RETRO_TRIGGER_MODE.
+        trigger_gate = os.environ.get('BETA_TRIGGER_GATE', 'none')
+        if trigger_gate not in ('none', 'any', 'exactly_one'):
+            trigger_gate = 'none'  # silently ignore garbage
+        trigger_max_dist = _iv('BETA_TRIGGER_MAX_DIST', 999)
+
+        if trigger_gate != 'none':
+            try:
+                opp_pac = sum(
+                    1 for opp_idx in self.getOpponents(gameState)
+                    if getattr(gameState.getAgentState(opp_idx), 'isPacman', False)
+                )
+            except Exception:
+                opp_pac = 0
+            if trigger_gate == 'any' and opp_pac < 1:
+                return self._maybe_retreat(gameState, my_pos, distance_fn)
+            if trigger_gate == 'exactly_one' and opp_pac != 1:
+                return self._maybe_retreat(gameState, my_pos, distance_fn)
+
+        # Defensive guard (pm32): only enforce the cap when > 0. A stale =0
+        # must NOT abort all chases.
+        if trigger_max_dist > 0 and d_to_cap > trigger_max_dist:
+            return self._maybe_retreat(gameState, my_pos, distance_fn)
+
         try:
             for opp_idx in self.getOpponents(gameState):
                 ost = gameState.getAgentState(opp_idx)
@@ -369,14 +458,14 @@ class ReflexRCTempoBetaAgent(ReflexRC82Agent):
                 opp_pos = (int(opp_pos[0]), int(opp_pos[1]))
                 d_me = distance_fn(my_pos, opp_pos)
                 if d_me <= abort_dist:
-                    return None  # rc82 handles escape
+                    return self._maybe_retreat(gameState, my_pos, distance_fn)
                 if path_abort_ratio > 0:
                     threshold = max(abort_dist, d_to_cap // path_abort_ratio)
                     if d_me <= threshold:
-                        return None  # proportional early abort
+                        return self._maybe_retreat(gameState, my_pos, distance_fn)
                 d_opp_cap = distance_fn(opp_pos, capsule)
                 if d_opp_cap + chase_slack < d_to_cap:
-                    return None  # defender will reach capsule first
+                    return self._maybe_retreat(gameState, my_pos, distance_fn)
         except Exception:
             return None
 

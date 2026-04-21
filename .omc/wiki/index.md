@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 64 pages | Last updated: 2026-04-20T10:52:01.671Z
+> 68 pages | Last updated: 2026-04-21T07:04:06.661Z
 
 ## convention
 
@@ -59,6 +59,8 @@
 - [2026-04-20 pm27 Tier2/3 expansion + M7 flatten + rc166/rc177 co-peak](2026-04-20-pm27-tier2-3-expansion-m7-flatten-rc166-rc177-co-peak.md) — # 2026-04-20 pm27 Tier2/3 expansion + M7 flatten + rc166/rc177 co-peak
 - [2026-04-20 pm28 — rc-tempo V0.1 설계 (weighted orienteering)](2026-04-20-pm28-rc-tempo-design-weighted-orienteering.md) — # 2026-04-20 pm28 — rc-tempo V0.1 설계 (weighted orienteering)
 - [2026-04-20 pm30 β_chase score-conditional gate +4.7pp](2026-04-20-pm30-chase-score-conditional-gate-4-7pp.md) — # 2026-04-20 pm30 β_chase score-conditional gate +4.7pp
+- [2026-04-21 pm31 - Retrograde analysis + β safety knobs](2026-04-21-pm31-retrograde-analysis-safety-knobs.md) — # 2026-04-21 pm31 - Retrograde analysis + β safety knobs
+- [2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + Mac smoke](2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md) — # 2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + M...
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
@@ -84,5 +86,7 @@
 - [Session Log 2026-04-19](session-log-2026-04-19-a0d467b9.md) — # Session Log 2026-04-19
 - [Session Log 2026-04-19](session-log-2026-04-19-a17ba1cd.md) — # Session Log 2026-04-19
 - [Session Log 2026-04-20](session-log-2026-04-20-3aca635a.md) — # Session Log 2026-04-20
+- [Session Log 2026-04-20](session-log-2026-04-20-5eae0114.md) — # Session Log 2026-04-20
 - [Session Log 2026-04-20](session-log-2026-04-20-87aabc3a.md) — # Session Log 2026-04-20
 - [Session Log 2026-04-20](session-log-2026-04-20-fa8032a1.md) — # Session Log 2026-04-20
+- [Session Log 2026-04-21](session-log-2026-04-21-3b56dde7.md) — # Session Log 2026-04-21

@@ -1,6 +1,73 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-21 pm31 END — **β_retro + β safety knob sweep (Phase 1 primitive focus)**:
+**Last updated:** 2026-04-21 pm32 END — **3-iter ralplan APPROVE + Mac coding done, server sweep DEFERRED to pm33**:
+- 🎯 **pm32 plan is execution-ready**: 1358-line consensus plan at `.omc/plans/pm32-sweep-plan.md` (Architect+Critic APPROVE after 3 iterations).
+- ✅ **Mac coding 완료 (Step A → C.2)**: 70 v3a_sweep variants (5P1+20AA+10AC+5RS+30 existing); 3 new β env vars (TRIGGER_GATE/TRIGGER_MAX_DIST/RETREAT_ON_ABORT) backward-compat; my_home_cells plumbing + MJ-7 leak guard; 5 new modules (composite, promote_t1_to_t2, analyze_pm32, filter_random_layouts, hth_sweep); 16 1-cap layouts (3 fixed + 8 capsule-swap + 5 hand-crafted topology); 25 unit tests PASS.
+- 🟡 **Mac smoke 통과 (~7.6min wall)**: 13/13 no crash; MJ-8 byte-identical (pm32_aa_none_d999 ≡ beta_v2d) ✓; 단 distantCapture trigger=0% at max_moves=200 (적이 invade 안 함 → β chase 불필요 → 측정 무의미하지만 무해).
+- 🐍 **Python 3.9.25 parity** Mac/jdl_wsl/sts 모두 일치 (capture.py md5 동일).
+- 🖥️ **2nd server sts provisioned**: Ryzen 9950X3D 32T (jdl_wsl 7950X 33T 동급, ~13% 빠름). 둘 다 idle, 활용 옵션 pm33에서 결정.
+- 📋 **DEFERRED**: Step E (git push + server pull), Step F1+F2+F3 (server T1 + T2 + HTH calibration). 모든 prereq 끝, **just push and run**.
+
+## pm33 TL;DR (NEXT SESSION — READ FIRST)
+
+### 🎯 Session goals (pm33)
+1. **Build freeze-checkpoint infra** (decided pm32 end): `phase1_runner.py`에 `--save-state-at-trigger <pkl>` + `--load-state <pkl>` + state-swap harness. pm34에서 활용.
+2. **Execute Step E → F1 → F2 → F3** (pm32 plan §6) — push code to jdl_wsl + sts, server smoke (workers=24, monster pre-check), T1 (1.8h), promote, T2 (1.8h), F3 HTH calibration (~1h). Total ~5h28m server wall.
+3. **2nd server (sts) 활용 결정**: Plan A (sts F3-on-4-refs early + F3-on-T2-winners 병행) OR Plan B (T1 50/50 split) OR C (sts standby).
+
+### 🚨 First action
+1. Read this file + `.omc/plans/pm32-sweep-plan.md` (pm32 v3 plan — APPROVE'd).
+2. `git status` — confirm pm32 uncommitted changes still present.
+3. Decide: commit pm32 work + go to Step E? OR commit + build freeze-checkpoint first?
+4. If Step E first: `git push` → `ssh jdl_wsl 'cd ~/projects/coding-3 && git pull'` → similarly for sts.
+
+### pm32 committed state (file changes uncommitted but ALL Mac-tested)
+
+**Modified (8)**: zoo_reflex_rc_tempo_beta.py, zoo_reflex_rc_tempo_beta_retro.py, v3a_sweep.py, AI_USAGE.md, open-questions.md, wiki/index.md, wiki/log.md, project-memory.json
+
+**New (18)**:
+- 5 modules: composite.py, promote_t1_to_t2.py, analyze_pm32.py, filter_random_layouts.py, hth_sweep.py
+- 2 unit tests: test_composite.py, test_env_parsing.py
+- Plan: pm32-sweep-plan.md
+- 13 layouts: defaultCapture_cap{N,S,Center,Corner}, distantCapture_cap{N,Center}, strategicCapture_cap{N,Corner}, pm32_{corridor,open,fortress,zigzag,choke}Capture
+- Smoke variants list, T1 layouts list, fixtures
+
+### 📂 Critical pm32 files
+
+- `.omc/plans/pm32-sweep-plan.md` — full execution plan (1358 lines, 3-iter consensus)
+- `experiments/rc_tempo/composite.py` — single source of truth for ranking + Wilson + Pearson + Spearman
+- `experiments/rc_tempo/v3a_sweep.py` — extended VARIANTS (70 entries) + new CLI flags (`--variants-file`, `--layouts-file`, `--validate-csv`, `--allow-truncate`)
+- `experiments/rc_tempo/hth_sweep.py` — thin orchestrator wrapping existing hth_resumable.py for F3
+- `experiments/rc_tempo/pm32_smoke_variants.txt` — 13 variants for Mac smoke (passed)
+- `experiments/rc_tempo/pm32_t1_layouts.txt` — 16 layouts for T1
+- `minicontest/zoo_reflex_rc_tempo_beta.py` — 3 new env vars + my_home_cells + _maybe_retreat
+- `minicontest/layouts/pm32_*Capture.lay` — 5 hand-crafted topology files
+
+### ⚠️ Known issues for pm33
+
+- `mazeGenerator.py` 강제 2-cap (수정 금지, layouts/ 직접 작성으로 우회 함)
+- `distantCapture` trigger=0 at max_moves=200 (정상 동작 — 적이 invade 안 하는 layout. 측정 무의미하지만 무해. trigger-rate calibration in pm33 pre-sweep으로 확인하고 결정)
+- 채점 환경 Python 버전 모름 — Mac/jdl_wsl/sts 모두 3.9.25로 통일 (server에 맞춤)
+- `pm32_ac_retreat` Mac smoke cap%=0 (retreat가 너무 보수적; T2/F3 결과 보고 판단)
+
+### 🆕 Freeze-checkpoint plan (pm33 → pm34)
+
+**pm33** (이번 세션 후 다음): `phase1_runner.py` 확장
+- `--save-state-at-trigger <out_pkl>`: trigger 발동 즉시 GameState pickle 후 game 종료
+- `--load-state <in_pkl>`: pickle GameState 로드, β agent class swap (registerInitialState 재호출), 시뮬레이션 재개
+- Multi-state cache: 1 trigger state per (opp, layout, color, seed) → 70 variants × cached states에서 즉시 chase phase 측정
+- 예상 코딩: 4-6h. 위험: pickle 호환성, opponent internal state 정합성
+
+**pm34**: freeze-cache 활용 broader sweep
+- 변종 수 100+, layouts 30+, situations (ahead/behind/tied score) 분리
+- 기존 wall 5h28m → 예상 1-2h (pre-trigger phase 50-80% 절감)
+- AlphaZero식 checkpoint replay 패러다임 (pm34 명시적 implementation)
+
+---
+
+(Earlier session TL;DRs below — pm31, pm30, pm29 등 preserved for reference)
+
+**Earlier — 2026-04-21 pm31 END** — **β_retro + β safety knob sweep (Phase 1 primitive focus)**:
 - 🎯 **β_path4 / β_slack3 / β_retro all peak at cap ~55%, die ~1.5-2.1%** (240g × 6-opp × 2-layout × 2-color, max_moves=500, post-trigger).
 - 📊 **Phase 1 measurement framework built**: `phase1_runner.py` (early-exit at cap/die), `phase1_smoke.py` (harness), `v3a_sweep.py` (variant framework).
 - 🔬 **Retrograde tablebase proven feasible**: defaultCapture 0.77s / distantCapture 1.84s init on pure Python. V table → ±1/0 game-theoretic minimax values.

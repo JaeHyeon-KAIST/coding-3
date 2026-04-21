@@ -1,0 +1,15 @@
+# pm32 Mac smoke variants — 12 picks drawn ONLY from revised Step A enumerated set
+# (per pm32 plan §6.D, MAJOR #5). Used by Step D Mac smoke.
+beta_v2d
+beta_path4
+beta_retro
+pm32_p1_a3_s2_p4
+pm32_p1_a3_s3_p4
+pm32_aa_none_d999
+pm32_aa_none_d10
+pm32_aa_any_d10
+pm32_aa_one_d8
+pm32_ac_retreat
+pm32_ac_retreat_path4
+pm32_rs_retro_path4
+pm32_rs_retro_retreat

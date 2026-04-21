@@ -25,6 +25,28 @@
 #   BETA_RETRO_DRAW_MIN_DIST  int                       (default 5)
 #   BETA_RETRO_TRIGGER_MODE  'strict' (==1) | 'loose' (>=1)  (default 'strict')
 #   BETA_RETRO_EMERGENCY_ABORT  d_me threshold for emergency only  (default 1)
+#
+# ---------------------------------------------------------------------------
+# Naming convention (pm32):
+#
+#   This file (β_retro) uses BETA_RETRO_TRIGGER_MODE with values:
+#     'strict' (default; opp_pacman_count == 1 required)
+#     'loose'  (opp_pacman_count >= 1)
+#
+#   The sister file zoo_reflex_rc_tempo_beta.py uses BETA_TRIGGER_GATE with
+#   values 'none' (default; no gate) | 'any' (>=1) | 'exactly_one' (==1).
+#
+#   These ARE intentionally different env-var names with different defaults —
+#   β_retro needs a 1:1 chase subgame for the retrograde V table to be valid;
+#   β v2d historically had no opp_pacman gate at all. Reusing one var would
+#   force one of the two agents to silently regress its committed default.
+#   Do not consolidate the two without a behavior audit.
+#
+#   β_retro inherits β v2d's _choose_capsule_chase_action via the
+#   `super()._chooseActionImpl(gameState)` fallthrough path (line ~268). The
+#   pm32 BETA_RETREAT_ON_ABORT env var therefore also affects β_retro on
+#   chase-abort fallthrough — by design (T-U3 (a) regression test).
+# ---------------------------------------------------------------------------
 
 from __future__ import annotations
 
