@@ -1,6 +1,335 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-22 pm34 END — **Abstract graph port + feasibility 20/30 WIN (식타 19 초과)**:
+**Last updated:** 2026-04-29 — **pm46 v2 (CAPX) Phase 1 + Phase 2 + Phase 2.5 PASS, Phase 0 + Phase 3 in flight (Mac CAPX 510 + sts ABS 510 동시).**
+
+## ⭐ pm46 v2 status
+
+| Phase | Status | Result |
+|---|---|---|
+| 1 (CAPX Agent + Wrapper) | ✅ | 665 lines greenfield, py_compile OK |
+| 1 timing AC | ✅ | p95=67.6ms (limit 150ms) |
+| Algorithmic patch | ✅ | `CAPX_GATE_HORIZON=8` (full-path gate over-restrictive) |
+| 2 smoke (3×3) | ✅ | 9/9 eat_alive |
+| 2.5 tier-screen (17×5) | ✅ | 64/85 eat_alive (75.3%) |
+| Phase 4 partial compare | ✅ | CAPX 75% vs ABS 10% (+65pp) |
+| 0 ABS baseline (sts 510) | ⏳ | ~225/510 (44%) |
+| 3 CAPX matrix (Mac 510) | ⏳ | ~40/510 (8%) |
+
+Plan §3.3 acceptance bars status:
+- aggregate cap_eat_alive ≥ 50%: **75.3%** (tier-screen) ✅
+- aggregate died_pre_eat ≤ 60%: **0.0%** ✅
+- per-defender died_pre_eat < 80%: **all 0%** ✅
+- ≥12 of 17 strict improvement: 6 confirmed, ≥6 more expected after Phase 0 finish.
+
+Latest commit: `b315c4a omc-pm46-v2: CAPX agent + Phase 0/1/2 evidence`.
+
+## (Historical) ⭐ NEXT — pm46 v2 (capsule-only attacker, CAPX) (2026-04-29)
+
+## ⭐ NEXT — pm46 v2 (capsule-only attacker, CAPX) (2026-04-29)
+
+**목적 (사용자 명시)**: 팩맨 게임 다른 측면 (food/scoring/win/return-home) 무시. **A 공격 에이전트가 *죽지 않고* cap 1개라도 도착하는 로직 개발**. 17 defender × 30 seed = 510 게임 행렬 측정.
+
+**Plan**: `.omc/plans/omc-pm46-v2-capsule-only-attacker.md` (611 lines, ralplan APPROVE iter-3, 11 P-patches + 6 N-patches).
+
+**Phase 0 (sts 서버 background, 4-5h)**: ABS-solo 17×30=510 게임 *재측정* with corrected metric (`len(getCapsules())` delta, not `[ABS_A_FIRST_CAP_REACH]` 기존 잘못된 cap1-only). Output → `experiments/results/pm46_v2/abs_baseline_corrected.csv`.
+
+**Phase 1 (Mac, 3-4h coding 병렬)**: 새 CAPX agent `minicontest/zoo_reflex_rc_tempo_capx.py` — survival-weighted A* gate (P_survive sigmoid), defender-aware path with detour budget K=4 (hard cap 8), CAPX_HARD_ABANDON_MARGIN=-1, CAPX_MIN_PSURVIVE=0.2 floor, A* node cap 2000 (auto-lower 2000→1500→1000→500 if Mac p95 > 150ms).
+
+**다음 세션 첫 액션** (오프닝 sequence):
+1. `.omc/SESSION_RESUME.md` (이 파일 위) — onboarding
+2. `.omc/plans/omc-pm46-v2-capsule-only-attacker.md` — 권위 source, 611줄
+3. `q-answer.md` — B prep / safety gate 진단 (root-cause)
+4. `.omc/wiki/2026-04-29-pm46-v2-step-0-defender-zoo-inventory.md` — 17 defender 분류
+5. `git status` — 미커밋 변경 확인
+
+**즉시 시작 가능**: Phase 0 (sts) + Phase 1 (Mac) 병렬. 3 task 명시 in plan §6.
+
+---
+
+## (Historical) omc-pm46 v1 Phase 0 — PRETRIGGER classification (c) (2026-04-29, SUPERSEDED)
+
+**Result**: 4 단판 trace (RANDOM6/8 × `ABS_PRETRIGGER` on/off) **byte-identical** (line 1 timing noise만 다름). flag toggle 은 agent decision 에 0 영향 — `ABS_FIRST_CAP_TRIGGER=1` (default ON, omx-pm44 도입) 가 `_pre_scared_action` 진입을 완전히 덮어 legacy `ABS_PRETRIGGER` 분기에 도달 불가.
+
+**Classification (c) — different mechanism**:
+- (a) "B midline cross" reject — R8 trace 동안 B at (11, 1) → (12, 1), 모두 home-side (mid_x=16).
+- (b) "B home에서 부작용" N/A — PRETRIGGER 자체 영향 zero.
+- (c) **PRETRIGGER flag is dead under current default**. R6 회귀 = cap topology + 적 수비 강도 (`role_shape=0off_2def` 끝까지 trigger 못 일어남). R8 회귀 = post-trigger A pursuit (return_slack=0 razor edge, omx 영역).
+
+**진단 wiki**: `.omc/wiki/2026-04-29-pm46-phase-0-pretrigger-flag-is-dead-code-regression-hypothesis-.md`
+**raw logs**: `/tmp/pm46_phase0_random{6,8}_{off,pretrig}.log` (4개)
+
+**Phase 1 implication**: 핸드오프의 직접 전제 ("PRETRIGGER 안전 변형으로 home-only B prep 도입") 무효 — toggle 할 unsafe variant 가 코드에 존재하지 않음. 현 default 의 `_choose_b_prep_candidate` (omx-pm44) 가 이미 `ABS_B_PREP_HOME_MARGIN=2` 로 home-bias. Phase 1 의 의미 재정의 필요:
+
+- **Reframed Phase 1 GO**: 신규 `ABS_HOME_PRETRIGGER` flag 가 기존 `_choose_b_prep_candidate` 의 margin=0 (strict home) 옵션을 활성화. R6/R8 풀 의도 없고, R5 (b_start_blocked) 등 다른 seed 개선만 acceptance.
+- **Pivot 옵션**: R6 (cap routing / mode-commit A_only), R8 (post-trigger pursuit, omx) 별도 진단. Phase 1 deferred.
+
+**Open**: 사용자 결정 — Phase 1 reframed GO / pivot / hybrid.
+
+---
+
+## (Historical) pm45 CLOSED — retrograde feature retire (2026-04-29)
+
+**Disposition**: `ABS_USE_RETROGRADE=0` default kept. Retrograde feature marked dead-code via comment guards on `_a_first_cap_survival_test_retrograde` and `_retrograde_best_action_with_tiebreak`; env var still parseable for research, but no production code path enables it.
+
+**Plan doc**: `.omc/plans/omc-pm45-1def-multi-defender-cap-retention.md` (consensus iter 2 + Critic APPROVE-WITH-PATCHES)
+**Final decision wiki**: `.omc/wiki/2026-04-30-pm45-final-decision.md`
+**Phase 0 raw**: `experiments/results/pm45/phase0_*.csv` × 4, `phase0_summary.md`
+
+**Phase 0 evidence (sts, 4 def × 8 seeds × 2 flag = 64 games)**:
+
+| Defender | flag=0 caps | flag=1 caps | flag=0 died | flag=1 died | flag=0 score | flag=1 score | Net |
+|---|---|---|---|---|---|---|---|
+| **monster_rule_expert** (STRONG) | 5 | 1 | 3 | 4 | +14 | −6 | **NEGATIVE** ❌ |
+| baseline (weak) | 14 | 9 | 2 | 5 | +13 | +38 | mixed |
+| zoo_minimax_ab_d3_opp (STRONG) | 0 | 0 | 0 | 0 | 0 | 0 | UNMEASURABLE |
+| zoo_reflex_aggressive (weak) | 0 | 0 | 0 | 0 | 0 | 0 | UNMEASURABLE |
+
+Excluded a-priori: `monster_minimax_d4` (1200 ticks > 90s wall). Excluded by timeout: `monster_mcts_hand` (240s/game).
+
+→ **0/3 STRONG defenders net non-negative** → Phase 4 dead-code direct path (plan §"Phase 4 partial-pass matrix" cell `FAIL × FAIL`).
+
+**Architect h4 confirmed**: V table at `zoo_rctempo_core.py:1024-1036` assumes MIN-optimal defender; rule_expert is rule-based → structural mismatch. Both Mac historical (`pm41_vs_expert.csv`) and sts Phase 0 converge on same direction.
+
+**Key infra discovery (preserved for future)**:
+
+- `capture.py:1054` is hardcoded to iterate `lst = ['your_baseline1.py','your_baseline2.py','your_baseline3.py','baseline.py']` — runs **4 games per invocation** even with `-b override`. `_ABS_TEAM` global state pollutes subsequent games.
+- Single-game wrapper `experiments/rc_tempo/pm45_single_game.py` calls `capture.runGames()` directly to bypass this. **Must use this wrapper for any future deterministic single-game work.**
+- Mac and sts produce different agent decisions on identical code (md5 verified). Hypothesized cause: CPU-speed-dependent anytime beam search depth within 1-second per-turn budget. Direction (retrograde net negative) is consistent across both, magnitudes differ.
+
+**AI usage**: pm45 retire decision appended to `docs/AI_USAGE.md`.
+
+---
+
+## ⭐ NEXT — omc-pm46 (pre-pill mode commit + B prep)
+
+**Handoff**: `.omc/plans/omc-pm46-handoff-mode-commit-prep.md`
+**Companion**: `.omx/plans/omx-pm47-handoff-mode-aware-strategy.md` (symmetric omx side)
+
+**User reframing** (2026-04-29 합의):
+- Game 시작에 mode commit ("A+B" vs "A_only").
+- Mode 선택되면 모든 행동 일관 (B prep 포함).
+- `b_start_blocked` 는 post-pill recovery 문제가 아니라 pre-pill mode commit 누락이 진짜 원인.
+
+**책임 분담**:
+- omc (이 트랙, 시간축 우선): `decide_plan_mode()` stub (항상 "A+B" 반환), home-side B prep commit (midline 절대 안 넘음, ghost 상태 유지), 미래 진짜 decision logic은 Phase 2+.
+- omx (omx-pm47): A-only strategy library, 기존 S1-S4 + 새 A-only 카테고리에 mode 태그.
+
+**Phase 0 첫 액션** (다음 omc 세션, ~30분 Mac):
+- pm36 era `ABS_PRETRIGGER` 가 RANDOM6 / RANDOM8 (-28) 에서 회귀했던 원인 trace.
+- 가설: B 가 midline 넘어 잡혔을 가능성 → home-only 변형은 안전할 수 있음.
+- 분류 (a) midline cross / (b) home-only도 unsafe / (c) 기타 → Phase 1 implementation 결정.
+
+**함수 책임 충돌** (TRACK_SEPARATION § 6): pm46 작업은 시간축 omc 영역이지만 `_choose_b_prep_candidate`, `_gate_first_cap_trigger_action`, `_actual_first_cap_trigger_compat` 는 historical omx (pm44). 협업 규칙: omx 에 plan 으로 통보 후 진행. omx-pm47 핸드오프에 mode 태그 인터페이스 합의됨.
+
+**Out-of-scope**: omx 영역 (post-pill replanner, A-only strategy builder), 2-def 게릴라 (별도 plan), retrograde 부활 (pm45 종결).
+
+---
+
+## (Historical) pm44 — B-start mismatch handling complete
+
+**Problem fixed**: scared-start 시점 실제 B 위치가 선택된 ABS strategy 의 planned `b_start` 와 달라 `compat=b_start_mismatch` 가 발생했고, invalid ABS scared-window plan 이 실행될 수 있었다.
+
+**Implementation 상태**:
+- ✅ `_choose_b_prep_candidate()` 로 projected-reject B prep candidate 선택 경로 추가
+- ✅ `_gate_first_cap_trigger_action()` / `_actual_first_cap_trigger_compat()` 로 first-cap trigger 직전 compatibility gate 추가
+- ✅ `_select_strategy_at_scared_start()` 에 `b_start_mismatch` rerank/block 경로 추가
+- ✅ compatible strategy 가 없으면 `chosen=None`, `compat=b_start_blocked` 로 ABS plan 실행 차단 후 rc82/scared fallback
+- ✅ pre-trigger movement freeze 는 default 미채택. RANDOM6 회귀 evidence 때문에 pm44 기본 해결책에서 제외
+
+**Verification**:
+- `.venv/bin/python -m py_compile minicontest/zoo_reflex_rc_tempo_abs.py` ✅
+- Guard sweep with `ABS_REACH_EXIT=0`: `RANDOM5 6 8 9 11 12 16 21 28` ✅
+- Result: `compat=b_start_mismatch` 0건 ✅
+
+| seed | score | final compat/status |
+|---|---:|---|
+| RANDOM5 | +13 | `b_start_blocked` |
+| RANDOM6 | +20 | `ok` |
+| RANDOM8 | -28 | `ok` |
+| RANDOM9 | +21 | `ok` |
+| RANDOM11 | +2 | `no_scared_start` |
+| RANDOM12 | +14 | `ok` |
+| RANDOM16 | -12 | `no_scared_start` |
+| RANDOM21 | +9 | `ok` |
+| RANDOM28 | -17 | `ok` |
+
+**Next pm45 focus**:
+- Improve `b_start_blocked` and `no_scared_start` without reintroducing `b_start_mismatch`.
+- First inspect RANDOM5 (`b_start_blocked`) separately from RANDOM11/RANDOM16 (`no_scared_start`).
+- Keep mismatch guard as hard acceptance condition: any pm45 change must preserve zero `compat=b_start_mismatch` on guard sweep.
+- Do not default-enable pre-trigger freeze unless RANDOM6 and broader guard sweep recover.
+
+**AI usage**: pm44 production edit has been appended to `docs/AI_USAGE.md`.
+
+---
+
+## Previous pm41 — A 단독 1-defender 완벽 보장 (Retrograde Tablebase)
+
+**Plan doc**: `.omc/plans/pm41-1def-retrograde-completeness.md` (권위 source — 920줄, **§13 ralplan consensus review 필독**)
+
+**ralplan 상태** (2026-04-27): **APPROVE** by Critic after 3 iterations
+- iter 1: Planner RALPLAN-DR / Architect ITERATE (4) / Critic ITERATE (7 load-bearing, 3 verified bugs)
+- iter 2: Planner amendment patchset / Architect ITERATE (1 real defect: REPL loader)
+- iter 3: Planner 3-fix final / **Critic APPROVE** ✅
+
+**Implementation 상태** (Mac, 2026-04-27 phase 2+3 complete):
+- ✅ Phase 1 — retrograde core 정독
+- ✅ Phase 1.5 hard gate — V build 0.97-3.15s/cap, STOP-tie 5/5 reproduced, wrapper progress 10/10
+- ✅ Phase 2 — Amendment A/B/D (`zoo_reflex_rc_tempo_abs.py`: `_ABS_TEAM` +4 fields, `_build_once` V build flag-gated, `_a_first_cap_survival_test` dispatcher rewrite, `_a_first_cap_survival_test_bfs` factor, `_retrograde_best_action_with_tiebreak` helper)
+- ✅ Phase 3 — Amendment C/E (`_a_cap_test_action` retrograde_next consume, `_emit_a_cap_test_log` dedup sig + print body extension, `_update_abs_postmortem` REACH emission)
+- ⏸️ Phase 4 — Mac partial sweep done (18 seeds), server n=3 sweep pending
+- ⏸️ Phase 5 — default flip pending acceptance gate
+
+**Mac 18-seed flag=1 결과** (2026-04-27):
+- **11W / 2T / 5L** (mean -1.39)
+- ★ Recoveries: RANDOM8 (-28→+7) and RANDOM21 (-18→+9)
+- ⚠️ Regression: RANDOM5 (+28→-28) — needs server n=3 to confirm not stochastic
+- WIN: 0,1,2,4,6,8,12,13,14,15,21; TIE: 11,16; LOSS: 3,5,7,9,28
+
+**Acceptance gate (plan §13.2 Amendment F) — 미충족, server n=3 필요**:
+- W ≥ 25 in EVERY sweep (3 sweeps × 30 seeds)
+- timeout LOSS = 0 across all 3
+- outcome=died count = 0 across all 3
+- mean per-sweep ≥ +8.0
+- guard 회귀 없음 (RANDOM5 가 진짜 회귀인지 server 에서 확인)
+- init time < 12s (현재 2.5-3s 안전)
+
+**Default flip 보류** — `ABS_USE_RETROGRADE=0` 기본값 유지. Opt-in `ABS_USE_RETROGRADE=1` 만. Acceptance 통과 후 default ON.
+
+**서버 핸드오프 명령**:
+```
+ssh jdl_wsl
+cd ~/coding-3/minicontest
+git pull
+for r in 1 2 3; do
+  for s in $(seq 0 29); do
+    timeout 240 ABS_USE_RETROGRADE=1 ../.venv/bin/python capture.py \
+      -r zoo_reflex_rc_tempo_abs -b baseline -l RANDOM$s -n 1 -q 2>&1 \
+      | grep -E "Average Score|REACH" \
+      >> /tmp/pm41_sweep_r$r.log
+  done
+done
+```
+
+**RANDOM5 regression 추적 plan**:
+- ABS_FIRST_CAP_TRACE=1 + RANDOM5 단판 → 어디서 retrograde 결정이 BFS 와 갈리는지
+- RANDOM5 가 정말 1-defender 케이스인지 (2-defender 라면 TWO_DEF UNSAFE 가 옳음)
+- V=+1 이 false-SAFE 인지 (2nd opp 가 visible 안 잡혀서)
+
+**plan §13 amendment 강제 사항** (구현 시 본문 4.2/6.3/7/10 절 대신 §13.2 patchset 적용):
+- A: home-side BFS fallback + UNKNOWN_DEF check 위치 수정 (현 본문 dead code 버그)
+- B: `_retrograde_best_action_with_tiebreak` 신규 (STOP-wins-tie 방지, BFS-dist 1차 + non-STOP 2차)
+- C: `_a_cap_test_action` 가 `retrograde_next` 를 `path[1]` 보다 먼저 consume
+- D: V build 자체 flag-gate (현 본문은 flag OFF 시 init 시간 못 살림)
+- E: `[ABS_A_FIRST_CAP_REACH]` 신규 emission + dedup sig 확장
+- F: n=3 mandatory + timeout=0 headline (현 본문 W≥25 단일 sweep 통계적 noise)
+- H: 신규 Phase 1.5 hard gate (`Layout(randomLayout(8).split('\n'))`, `getLayout` 아님)
+
+**실행 경로 (Critic 권고)**: `clear-context` single Claude opus session. Phase 1→5 sequential, Phase 2/3 같은 함수 수정 → team 병렬 X. Phase 4 sweep 만 `run_in_background` 가능.
+
+**Why**:
+- pm40 의 `_a_first_cap_survival_test` 는 BFS path + per-step margin=1 의 약한 검사. 사용자 우려 직접: "그냥 BFS 로 가면 잡히는 거 아니야? 무조건 어떤 경우에도 잡히지 않고 필 먹는 게 확실해야 됨"
+- 직접 측정한 pm40 결과: **24W/3T/3L LOSS=[7,8,9] 전부 timeout** = "A 가 너무 보수적 reject → cap 안 먹음 → 1200 move 동안 점수 못 쌓음" 회귀
+- 특히 8번: pm38 +29 WIN guard → pm40 timeout LOSS
+
+**What**:
+- `zoo_rctempo_core.py:931 build_retrograde_table` 활용 — minimax V 1v1 tablebase, 이미 있는 자산 (pm31 β_retro 사용)
+- V[(me, def, 0)] = +1 ⟺ "잡히지 않고 cap 도달 force-win" **수학적 증명**
+- pm40 의 1-defender 분기를 V lookup 으로 교체
+
+**Scope** (사용자 명시 고정):
+- ✅ A only / 1-defender / pre-cap
+- ❌ 2-defender / 게릴라 / post-cap / B — 후속 plan (pm42+)
+
+**Acceptance**:
+- 30-seed sweep ≥ **25W**, **timeout LOSS = 0**, mean ≥ +8.0
+- guard seeds (6, 8, 11, 12, 21, 28) 회귀 없음
+- ABS_USE_RETROGRADE=0 rollback intact
+- init 시간 < 12s
+
+**현재 직접 측정 baseline (pm41 시작 시점, 2026-04-27 04:31)**:
+- 30-seed sweep: 24W / 3T / 3L mean +9.30 (timeout 0점 처리)
+- LOSS: 7, 8, 9 (모두 timeout)
+- TIE: 10, 11, 19
+
+**.omc vs .omx**: pm37/38/39/40 plan 은 `.omx/plans/` 에 있음 (codex 작업). pm41 부터는 `.omc/plans/` (Claude 세션) 에서 진행. 양쪽 동기화 필요한 시점 도래 — 단 pm41 작업 끝난 뒤 정리.
+
+---
+
+## (이전 진척) 2026-04-26 pm36 — Pocket merge/food-mask/hard-score done; next = trigger-aware capsule chain + return/deposit objective:
+- ✅ **Pocket merge cleanup**: `RING_OVERLAP_MODE` default is now `merge`; absorbed tree headers removed after merge; merged pockets include 0-food branches for single-entry topology.
+- ✅ **Exact per-food masks**: abstract beam now tracks `food_mask`; cross-agent disjointness uses `forbidden_food_mask`, not whole-header forbids. Ring/merged `_ring_dp()` reconstructs actual food sets. Tree headers exclude `attach` food from pocket-internal alts.
+- ✅ **Hard-food fallback**: graph computes `food_hard_scores`; beam returns `hard_score`; if no 28-food win exists, strategy selection can prefer hard-to-clean-up-later food within small count slack.
+- ✅ **Visualization update**: `experiments/artifacts/rc_tempo/pocket_viz/pockets_combo_30.png` now labels merged entries by depth:
+  - `X1` = planner-visible outer entry
+  - `X2+` = absorbed sub-pocket entries, visual explanation only
+- 📊 **Clean abstract feasibility**: merge + exact food masks / no attach double-count = **19/30 WIN**, mean food **27.6**.
+- 🧪 **Smoke**: `python3 experiments/run_match.py --red zoo_reflex_rc_tempo_abs --blue baseline --layout RANDOM --seed 1 --timeout 120` → no crash, Red win, score 18, wall 2.839s.
+- 🎯 **Next session focus**: stop pocket work unless visualization bug appears. Solve **capsule-trigger-aware planning**: how to plan before cap, at cap-eat trigger, B role switch/pre-advance, cap-2 timing, scared-window food plan, and return/deposit.
+- 🎯 **User-clarified objective**: plan quality must be judged by **returned/deposited food >= 28**, not eaten-only food. If 28 returned is infeasible, collect hard/deep/expensive food and leave close/easy cleanup food. But because only 28/30 is required, leaving two deep/hard foods can also be legal when that is the best feasible 28-return subset.
+- 📊 **Current default in-game baseline after compatibility/fallback fixes**: `ABS_PLANNER=abstract`, pretrigger off = **23W / 3T / 4L**, mean **+4.13** on 30 seeds vs baseline. Losses: 8, 9, 16, 28.
+- ⚠️ **Experimental variants are not default-safe**:
+  - `ABS_PLANNER=food ABS_FOOD_BEAM=100 ABS_PRETRIGGER=1` = 20W / 4T / 6L, mean +6.73. Recovers some seeds but creates regressions.
+  - `ABS_PLANNER=food ABS_FOOD_BEAM=100 ABS_PRETRIGGER=1 ABS_PRETRIGGER_B=0` = 21W / 2T / 7L, mean +4.90. Also regresses overall.
+  - Current diagnosis: blocker is trigger-time state mismatch and pretrigger defense/race tradeoff, not pocket representation alone.
+
+### Immediate next-session question
+
+기존 코드가 "필을 먹었다고 가정한 scared-window plan"과 "실제 게임에서 필을 먹으러 가는 과정/먹은 순간"을 잘 연결하지 못함. 다음 세션은 다음을 먼저 설계/시각화:
+
+1. Scared-start diagnostics: trigger agent, A/B positions, carrying counts, remaining capsules, chosen plan, cap2 slack, and assumption-match result.
+2. Execution gating: only run ABS scared strategy if actual trigger state matches plan starts; otherwise fallback to rc82.
+3. A가 cap-1까지 가는 pre-cap path와 incidental food.
+4. cap-1 먹은 tick/time을 scared-window origin으로 삼는 방식.
+5. B가 수비/대기 중이다가 trigger 시점에 어디서 시작한다고 모델링할지.
+6. cap-2 extension deadline: 39 moves 안에 누가 어떻게 먹는지.
+7. A/B path visualization with eaten/returned/left food, home return, and hard-score heat on failure seeds.
+
+---
+
+**Previous updated:** 2026-04-25 pm35 — **Euler tour wired + 30-seed in-game baseline 23/30 WIN (76.7% WR)**:
+- ✅ **Tree-knapsack DP에 traceback 추가** (`zoo_rctempo_gamma_graph.py:_tree_knapsack`): cost_list와 함께 cells_list[k] 반환. 각 k에 대한 Euler tour 셀 시퀀스 (attach → 안 → 회수 → attach).
+- ✅ **Header에 `cells_table` 필드** 추가 — beam 결정 후 plan_to_cells가 즉시 lookup.
+- ✅ **Agent `_plan_to_cells`의 'header' action wiring** (`zoo_reflex_rc_tempo_abs.py`): 이전에 skip → 이제 실제 pocket 진입/회수.
+- ✅ **Sanity test 10 maps × 모든 headers × 모든 k**: 0 위반 (cost == cells len, all grid-adjacent, 모든 tour는 attach에서 끝남).
+- 📊 **30-seed n=1 sweep (ABS vs baseline)**: 23 WIN / 3 TIE / 4 LOSS = **76.7% WR, mean +4.23**.
+  - WIN seeds: 1, 2, 4, 5, 6, 7, 12-15, 17-27, 29, 30 (23개)
+  - TIE: 3, 10, 11
+  - LOSS: 8 (-18), 9 (-25), 16 (-2), 28 (-20)
+- 🔬 **회귀 4 seeds 진단**: plan food < 28 (구조적 한계, 코드 버그 X)
+  - 8: cap1 plan 20 / cap2 18 — both < 28
+  - 9: cap1 plan **11** / cap2 22 — 매우 낮음
+  - 16: cap-in-pocket 구조 (pm34 known issue)
+  - 28: cap1 plan 22 / cap2 24 — both < 28
+  - 결론: 현재 ABS = **A 단독 모델**. Feasibility 20/30은 **A+B 협력** 가정. B=rc82 fallback이라 plan food<28 maps에서 cover 못함.
+- 📊 **Heatmap 분석 (`experiments/artifacts/rc_tempo/home_dist_summary.csv`)**:
+  - shallow (home_dist≤3) mean **0.9** per map (range 0-3)
+  - medium (4-7) mean 5.7
+  - deep (≥8) mean 23.4 (≈78%)
+  - 결론: "trip-2 shallow buffer" 전략 구조적 무효 (6/30 maps만 shallow≥2). 1-trip 28-food 가 유일한 합리적 win path.
+
+### pm35 → pm36 handoff
+
+→ **B coordination 시도 결과: NET-NEGATIVE**. Naive BFS-greedy "B during scared = nearest food" 구현 후 6-seed smoke: RANDOM5 +21 → -11 (-32 폭락), RANDOM1 +9 → +24 (+15 gain), 손실 seeds(8/9/16/28) 회복 거의 없음. 가설: rc82가 scared 중 자연스럽게 offensive role-switching 함 (`zoo_reflex_rc82.py:67-76`에서 `isPacman`/`scaredTimer` 검사). 내 naive greedy가 rc82의 heuristic-based offensive보다 약함. **결론: B는 rc82에 위임 유지.**
+→ **진짜 lever (LOSS seeds 회복용)**:
+  - Beam strengthening (BEAM=2000-5000) — pm34 분석에서 BEAM=5000이 seed 2 회복. 단점: per-map 13s (15s init 예산 압박).
+  - Pre-cap food collection (A가 cap1 가는 길에 food 1-3개) — SESSION_RESUME 명시.
+  - Smarter B coordination (beam-based plan for B instead of naive greedy).
+→ Saturating objective (`min(28, food) + ε*food`) 미구현. 우선순위 낮음.
+→ Blue 팀 mirror 미구현. Tournament fairness 위해 필요. 코드 1-2h.
+→ n=5 sweep 재가동 중 (~25min, clean code). 종료 후 확정 진단.
+
+### pm35 file changes (uncommitted, smoke-tested)
+
+- `minicontest/zoo_rctempo_gamma_graph.py` — _tree_knapsack returns (cost_list, cells_list); header에 cells_table 추가
+- `experiments/rc_tempo/abstract_graph.py` — 위와 byte-identical sync
+- `minicontest/zoo_reflex_rc_tempo_abs.py` — _plan_to_cells에 header 처리 wiring
+- `experiments/rc_tempo/home_dist_analysis.py` (new) — 30-map BFS home_dist 계산
+- `experiments/artifacts/rc_tempo/home_dist_*.{csv,png,md}` (new) — 분석 결과
+
+---
+
+**Earlier 2026-04-22 pm34 END** — **Abstract graph port + feasibility 20/30 WIN (식타 19 초과)**:
 - ✅ **Abstract graph 모듈화**: `experiments/rc_tempo/abstract_graph.py`. PIL 제거, 재사용 가능. `build_from_maze` 단일 API.
 - ✅ **Abstract beam search** (`experiments/rc_tempo/abstract_search.py`): bitmask vx/vh, multi-source start, multi-sink end, revisit-allowed, **Pareto dedup (food in key)**, **cost_table 기반 k-option 분기**.
 - ✅ **Tree knapsack DP for pockets** (`_tree_knapsack` + `build_pocket_headers_with_cost_table`): 각 pocket을 attach root로 재구성, post-order DP로 `cost_table[k]` 계산. Partial pocket visit 모델링. Y-merge overlap 자동 해소.
