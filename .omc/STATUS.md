@@ -1,19 +1,36 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-29 — **pm46 v2 (CAPX) Phase 1 + Phase 2 + Phase 2.5 PASS, Phase 0 + Phase 3 in flight (Mac CAPX 510 + sts ABS 510 동시).**
+**Last updated:** 2026-04-29 — **pm46 v2 (CAPX) COMPLETE — All 4 plan §3.3 acceptance bars PASS by wide margins. CAPX 68.4% vs ABS 4.5% eat_alive (15.2× improvement), 15/17 strict improvement.**
 
-## ⭐ pm46 v2 status
+## ⭐ pm46 v2 status — DONE
 
 | Phase | Status | Result |
 |---|---|---|
-| 1 (CAPX Agent + Wrapper) | ✅ | 665 lines greenfield, py_compile OK |
-| 1 timing AC | ✅ | p95=67.6ms (limit 150ms) |
+| 1 (CAPX Agent + Wrapper) | ✅ | 665 lines greenfield, p95=67.6ms (vs 150ms limit) |
 | Algorithmic patch | ✅ | `CAPX_GATE_HORIZON=8` (full-path gate over-restrictive) |
 | 2 smoke (3×3) | ✅ | 9/9 eat_alive |
 | 2.5 tier-screen (17×5) | ✅ | 64/85 eat_alive (75.3%) |
-| Phase 4 partial compare | ✅ | CAPX 75% vs ABS 10% (+65pp) |
-| 0 ABS baseline (sts 510) | ⏳ | ~225/510 (44%) |
-| 3 CAPX matrix (Mac 510) | ⏳ | ~40/510 (8%) |
+| 0 ABS baseline (sts 510) | ✅ | 23/510 eat_alive (4.5%) |
+| 3 CAPX matrix (Mac 510) | ✅ | **349/510 eat_alive (68.4%)** |
+| 4 final compare | ✅ | **15/17 strict improve, all 4 acceptance bars PASS** |
+| Phase 4 knob sweep launcher | ✅ | `pm46_v2_capx_knob_sweep.sh` (ready, not run) |
+| Code review (reviewer agent) | ✅ | 1 HIGH (mitigated), 4 MED, 4 LOW; tuning candidates docs |
+| pm47 plan draft | ✅ | `omc-pm47-capx-to-submission-integration-DRAFT.md` |
+
+**Plan §3.3 acceptance bars** (all PASS):
+- aggregate cap_eat_alive ≥ 50%: **68.4%** ✅
+- aggregate died_pre_eat ≤ 60%: **1.6%** ✅
+- per-defender died_pre_eat < 80%: max **6.7%** ✅
+- ≥12 of 17 strict improvement: **15/17** ✅
+
+**FINAL wiki**: `.omc/wiki/pm46-v2-FINAL-phase-3-4-acceptance-met.md`
+**FINAL CSVs**:
+- `experiments/results/pm46_v2/abs_baseline_corrected_clean.csv` (510)
+- `experiments/results/pm46_v2/capx_matrix_m0.csv` (510)
+- `experiments/results/pm46_v2/compare_phase4_FINAL.md`
+
+**Decision deferred to pm47**: CAPX → submission integration (Option A: drop-in
+cap-evaluator on `your_best.py`).
 
 Plan §3.3 acceptance bars status:
 - aggregate cap_eat_alive ≥ 50%: **75.3%** (tier-screen) ✅

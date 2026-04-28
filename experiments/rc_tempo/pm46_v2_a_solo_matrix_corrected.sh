@@ -101,8 +101,14 @@ for DEF in "${DEFENDERS[@]}"; do
 
     WALL=$(( $(date +%s) - T0 ))
 
-    # Parse cap-eat events.
-    EAT_LINES=$(grep -c '\[ABS_CAP_EATEN\]' "$LOG" 2>/dev/null || echo 0)
+    # Parse cap-eat events. Use ${VAR:-0} + digit-strip to handle grep-c
+    # multi-line "0\n0" (grep -c on no matches returns "0\n" + exit 1 -> ||
+    # echo 0 appends another "0\n" -> shell tests choke on multi-line).
+    EAT_LINES=$(grep -c '\[ABS_CAP_EATEN\]' "$LOG" 2>/dev/null)
+    EAT_LINES=${EAT_LINES:-0}
+    EAT_LINES=${EAT_LINES//[!0-9]/}
+    [ -z "$EAT_LINES" ] && EAT_LINES=0
+
     FIRST_EAT_LINE=$(grep '\[ABS_CAP_EATEN\]' "$LOG" 2>/dev/null | head -1 || true)
     if [ -n "$FIRST_EAT_LINE" ]; then
       FIRST_EAT_TICK=$(echo "$FIRST_EAT_LINE" | sed -n 's/.*tick=\([0-9]*\).*/\1/p')
@@ -112,7 +118,14 @@ for DEF in "${DEFENDERS[@]}"; do
 
     # Parse A respawn events.
     DIED_LINES=$(grep '\[ABS_A_DIED\]' "$LOG" 2>/dev/null || true)
-    A_TOTAL_DEATHS=$(echo "$DIED_LINES" | grep -c '\[ABS_A_DIED\]' || echo 0)
+    if [ -z "$DIED_LINES" ]; then
+      A_TOTAL_DEATHS=0
+    else
+      A_TOTAL_DEATHS=$(printf '%s\n' "$DIED_LINES" | grep -c '\[ABS_A_DIED\]')
+      A_TOTAL_DEATHS=${A_TOTAL_DEATHS:-0}
+      A_TOTAL_DEATHS=${A_TOTAL_DEATHS//[!0-9]/}
+      [ -z "$A_TOTAL_DEATHS" ] && A_TOTAL_DEATHS=0
+    fi
 
     # a_died_within_3: any death tick within 3 of first eat tick.
     A_DIED_WITHIN_3="false"
