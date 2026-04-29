@@ -23,7 +23,8 @@ from pathlib import Path
 
 TIER_A = {
     'baseline', 'monster_rule_expert', 'zoo_minimax_ab_d3_opp',
-    'zoo_reflex_defensive', 'zoo_reflex_A1', 'zoo_reflex_A1_D13', 'zoo_belief',
+    'zoo_reflex_defensive', 'zoo_reflex_A1', 'zoo_reflex_A1_D13',
+    'zoo_belief', 'zoo_reflex_A1_T5',  # A1_T5 = A1 + belief tracker (replaces broken zoo_belief)
 }
 TIER_B = {
     'zoo_hybrid_mcts_reflex', 'zoo_minimax_ab_d2', 'zoo_reflex_A1_D1',

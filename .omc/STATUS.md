@@ -1,6 +1,6 @@
 # STATUS — CS470 A3 Pacman Capture-the-Flag
 
-**Last updated:** 2026-04-29 — **pm46 v2 (CAPX) COMPLETE — All 4 plan §3.3 acceptance bars PASS by wide margins. CAPX 68.4% vs ABS 4.5% eat_alive (15.2× improvement), 15/17 strict improvement.**
+**Last updated:** 2026-04-29 — **pm46 v2 (CAPX) PERFECT — recovery sweep fixed 2 invalid measurements (zoo_belief→zoo_reflex_A1_T5, hybrid_mcts with budget=0.05). CAPX 79.0% vs ABS ~5% eat_alive, **17/17 strict improvement** (perfect), all 4 §3.3 bars PASS. Final commits: d9d48e8 + recovery commit.**
 
 ## ⭐ pm46 v2 status — DONE
 
