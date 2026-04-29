@@ -1,40 +1,95 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-29 — **pm46 v2 CAPX Phase 1 + Phase 2 PASS. Algorithmic finding: gate horizon patch (CAPX_GATE_HORIZON=8) — full-path gate spec was over-restrictive, near-future horizon fixes 0/9 → 9/9 smoke. Phase 0 sts (ABS-baseline corrected) + Phase 2.5 Mac (CAPX 17×5) in flight. Commit `b315c4a omc-pm46-v2: CAPX agent + Phase 0/1/2 evidence`.** 트랙 분리 정책: `.omc/TRACK_SEPARATION.md`.
+**Last updated:** 2026-04-29 — **pm46 v2 CAPX COMPLETE + RECOVERY: 17/17 strict improvement (perfect). CAPX 79% vs ABS ~5% eat_alive on 1020-game test (510×2). Plan §3.3 ALL bars PASS. Final commit `1329170`.**
 
-## ⚠️ 다음 세션 진입 우선순위 (post pm46-v2 결과 반영)
+---
 
-**현재 (2026-04-29 06:53)**:
-- Phase 1, 2, 2.5 PASS (CAPX 작동 입증).
-- Phase 0 ABS baseline (sts 510): 진행 중 (~225/510 = 44%).
-- Phase 3 CAPX matrix (Mac 510): 진행 중 (~50/510 = 10%).
-- **Algorithmic finding**: 본 plan §5.3 의 full-path margin gate 가 over-restrictive 였고 (default 0 → 0/9 eat_alive), `CAPX_GATE_HORIZON=8` 도입으로 9/9 smoke + 75% tier-screen 으로 회복.
-- Partial Phase 4 비교 (CAPX 5-seed vs ABS 30-seed partial): CAPX 75% vs ABS 10% eat_alive (+65pp). **6 defenders 모두 strict improvement** (Tier-A 5/5).
+## ⭐⭐ 다음 세션 START HERE — CCG 외부 자문 (CAPX 알고리즘 개선 여지)
 
-읽기 순서:
+**Goal**: 현재 CAPX 알고리즘 (`zoo_reflex_rc_tempo_capx.py`, 665줄)에 대해 **Claude (executor) + Codex (CLI) + Gemini (CLI) 3 advisor 다 받아서 개선 여지 분석**.
 
-1. **`.omc/wiki/pm46-v2-phase-2-smoke-pass-gate-horizon-patch.md`** — Phase 1 + 2 + 2.5 결과 + algorithmic patch 설명. 다음 세션 입장 점.
-2. **`experiments/results/pm46_v2/abs_baseline_corrected_clean.csv`** — Phase 0 결과 (rebuild_csv.py 출력).
-3. **`experiments/results/pm46_v2/capx_matrix_m0.csv`** — Phase 3 결과.
-4. **`experiments/results/pm46_v2/compare_phase4_partial.md`** — Phase 4 markdown 보고서.
-5. **`.omc/TRACK_SEPARATION.md`** — omc/omx 분리.
-6. **`.omc/plans/omc-pm46-v2-capsule-only-attacker.md`** — 원래 plan.
+**왜 지금**: pm46 v2 17/17 PERFECT 끝났지만, 일부 defender (zoo_reflex_capsule 40%, zoo_reflex_tuned 40%, zoo_reflex_aggressive 50%) 는 CAPX도 비교적 약함. 또 알고리즘에는 code-reviewer 가 발견한 **1 HIGH (mitigated) + 4 MED + 4 LOW** 이슈도 있음. 외부 visible 자문으로 design refinement 방향 잡기.
 
-**다음 세션 첫 액션**:
-1. `git status` — 진행 중 sweep 끝났는지 확인.
-2. 끝났으면 `pm46_v2_compare_capx_vs_abs.py` 로 full Phase 4 비교 + wiki 마무리.
-3. Plan §3.3 acceptance bars 확정:
-   - aggregate cap_eat_alive ≥ 50%? (tier-screen: 75%, expect Phase 3 ≥ 70%)
-   - aggregate died_pre_eat ≤ 60%? (tier-screen: 0%, expect 0%)
-   - per-defender died_pre_eat < 80%? (all 0%)
-   - **≥12 of 17 strict improvement**? — 키 acceptance bar.
-4. 결정: pm47+ CAPX → 제출 코드 통합 plan 작성? (CAPX 자체는 research, 제출 안함)
-5. ABS 의 cap-eat 처참한 성능 (10% vs CAPX 75%) — 별도 reference 로 wiki 정리.
+**컨텍스트 핸드오프 (이 세션 종료 시점)**:
+- Phase 0/1/2/2.5/3/4 + Recovery 완료.
+- 모든 코드 + wiki + commit 정리됨.
+- ultrawork mode 종료 (state cleared).
+- 직전 user 요청: **"지금 로직에 대해서 개선 여지 있는지, /team 을 통해 진행. 클로드 코덱스 제미나이 3개 다 이용"** → 컨텍스트 문제로 다음 세션으로 미룸.
 
-**Out-of-scope (이 세션 + 다음 세션 직후 모두)**:
-- CAPX → submission integration (별도 pm47+ plan).
-- ABS attacker 코드 변경 (CAPX 와 분리 보존).
-- 다른 algorithmic 변경 (CAPX_GATE_HORIZON 외 — 충분히 작동 입증).
+**다음 세션 워크플로우 (사용자 명시)**:
+1. `/team` 으로 Claude 에이전트 (executor + analyst) 다중 spawn
+2. `codex` CLI 로 OpenAI Codex 자문 받기 (`omc ask codex` 패턴 — `.omc/artifacts/ask/` 에 응답 저장)
+3. `gemini` CLI 로 Google Gemini 자문 받기 (`/Users/jaehyeon/.nvm/versions/node/v20.11.0/bin/gemini`)
+4. 3 자문 종합 → 개선 후보 ranked list → 사용자에게 결정 회부
+
+**세 advisor 에 동일 prompt 주입 (예시)**:
+```
+This is the CAPX (Capsule-only experimental Attacker) Pacman agent.
+Goal: A reaches >=1 capsule alive. 17 defender × 30 seed = 510 game
+matrix shows 79% eat_alive (vs ABS 5%, 17/17 strict improvement).
+
+But 3 defenders are weak: zoo_reflex_capsule (40%), zoo_reflex_tuned
+(40%), zoo_reflex_aggressive (50%). Code review found 1 HIGH (mitigated)
++ 4 MED + 4 LOW issues queued.
+
+Algorithm files:
+- minicontest/zoo_reflex_rc_tempo_capx.py (665 lines)
+- .omc/plans/omc-pm46-v2-capsule-only-attacker.md (full spec, ralplan APPROVED)
+- .omc/wiki/pm46-v2-FINAL-recovery-17-of-17.md (final results)
+- .omc/wiki/pm46-v2-capx-code-review-phase4-tuning.md (review + tuning grid)
+
+QUESTION: What are the highest-ROI algorithmic improvements? Rank by
+expected eat_alive lift on the 3 weak defenders, with the constraint of
+no submission code modification (CAPX is research probe).
+```
+
+**CCG 종합 후 산출물**: `.omc/wiki/pm46-v2-ccg-improvement-consultation.md` — 3 advisor 응답 요약 + 권고 ranked list + 구현 우선순위.
+
+---
+
+## ⏪ 이전 세션 (2026-04-29) 요약
+
+### Phase 1 — CAPX agent (greenfield, 665줄)
+- 4 helper whitelist만 import (no `_ABS_TEAM` 접근).
+- p95 chooseAction wall = 67.6ms (limit 150ms; 2.2× headroom).
+
+### 알고리즘 핵심 finding
+Plan §5.3 spec 의 full-path margin gate → 너무 엄격해서 default knob 으로 0/9 smoke fail. **`CAPX_GATE_HORIZON=8` 도입** (next 8 cells만 평가, far-future cell은 도달 시 재평가). 이게 CAPX viability 의 핵심 fix.
+
+### Phase 3 + Recovery
+- 510-game CAPX matrix (Mac, kill+resume 으로 hybrid_mcts 90s timeout 우회)
+- 510-game ABS-baseline (sts, corrected `[ABS_CAP_EATEN]` detector)
+- Recovery sweep: zoo_belief (helper module not agent) → zoo_reflex_A1_T5 교체. zoo_hybrid_mcts_reflex → `ZOO_MCTS_MOVE_BUDGET=0.05` env + 240s timeout.
+
+### Phase 4 최종 결과
+- aggregate cap_eat_alive: CAPX **79.0%** vs ABS ~5% (+71pp, 15× 개선)
+- aggregate died_pre_eat: CAPX **1.8%** vs ABS ~10%
+- per-defender died_pre_eat max: 6.7% (limit < 80%)
+- **strict improvement: 17/17 PERFECT** (limit ≥ 12)
+
+### Commit chain
+- `b315c4a` Phase 0/1/2 evidence
+- `e52a03b` doc + partial Phase 4
+- `d9d48e8` 15/17 strict (initial complete)
+- `1329170` **17/17 PERFECT (recovery final)** ← 최종
+
+### 부수 산출물
+- `.omc/plans/omc-pm47-capx-to-submission-integration-DRAFT.md` — pm47 통합 옵션 A/B/C
+- `.omc/wiki/pm46-v2-capx-code-review-phase4-tuning.md` — code-reviewer 자문 + Phase 4 24-cell tuning grid
+- `experiments/rc_tempo/pm46_v2_capx_knob_sweep.sh` — knob sweep launcher (실행 안 함, 다음 세션 후보)
+
+읽기 순서 (다음 세션 진입 시):
+1. **`.omc/wiki/pm46-v2-FINAL-recovery-17-of-17.md`** — 최종 decision wiki (17/17 결과)
+2. **`.omc/wiki/pm46-v2-capx-code-review-phase4-tuning.md`** — code review + Phase 4 tuning grid (CCG 자문 baseline)
+3. **`minicontest/zoo_reflex_rc_tempo_capx.py`** — CAPX agent (665줄)
+4. **`.omc/plans/omc-pm46-v2-capsule-only-attacker.md`** — 알고리즘 spec (§5)
+5. **`.omc/plans/omc-pm47-capx-to-submission-integration-DRAFT.md`** — 후속 통합 plan draft
+6. **`.omc/artifacts/ask/`** — 과거 codex 자문 logs (참고)
+
+**Out-of-scope (CCG 자문 세션에서도 유지)**:
+- 제출 코드 (`20200492.py`, `your_best.py`) 수정 — CAPX는 research probe.
+- ABS attacker 코드 변경 — CAPX 와 분리 보존.
+- pm47 통합 결정 — CCG 자문 후 별도 세션.
 
 ---
 
