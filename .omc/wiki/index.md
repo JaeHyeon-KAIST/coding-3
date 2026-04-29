@@ -15,6 +15,7 @@
 
 ## decision
 
+- [pm47 Phase 0.5 — Submission cap-eat-alive vs CAPX comparison](pm47-submission-cap-eat-comparison.md) — submission 42% vs CAPX 79% (-37pp aggregate, all 17 defenders). Path 2 narrow integration ROI 명확. A1 family 약점은 food competition (cap-eat 아님).
 - [pm46 v2 CCG tri-advisor consultation — CAPX improvements (S-tier 3 fixes ~6 LOC)](pm46-v2-ccg-improvement-consultation.md) — # pm46 v2 CAPX — CCG tri-advisor consultation (Claude + Codex + Gemini)
 - [pm45 final decision — retrograde feature retire (default OFF, dead-code marked)](2026-04-30-pm45-final-decision.md) — # pm45 final decision — retrograde feature retire
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
