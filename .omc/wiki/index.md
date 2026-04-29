@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 94 pages | Last updated: 2026-04-29T00:35:00.000Z
+> 95 pages | Last updated: 2026-04-29T11:30:00.000Z
 
 ## convention
 
@@ -8,6 +8,7 @@
 
 ## debugging
 
+- [pm46 v2 CAPX failure mode deep analysis (post Phase A)](pm46-v2-failure-mode-deep-analysis.md) — F2 oscillation + ranker degenerate (P_survive=0) — 3 advisor 모두 잘못된 fail mode 가정. algorithm ceiling +3pp 확인.
 - [Experiments infrastructure audit — pre-M4/M6](experiments-infrastructure-audit-pre-m4-m6.md) — # Experiments infrastructure audit — pre-M4/M6
 - [M3 smoke deadlock — 0-win pattern across all tuned agents](m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md) — # M3 smoke deadlock — 0-win pattern across all tuned agents
 - [pm46 Phase 0 — PRETRIGGER flag is dead-code (regression hypothesis cannot reproduce)](pm46-phase-0-pretrigger-flag-is-dead-code-regression-hypothesis-.md) — # pm46 Phase 0 — PRETRIGGER flag is dead-code (regression hypothesis cannot r...
