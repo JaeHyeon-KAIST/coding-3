@@ -1,10 +1,75 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-29 — **pm46 v2 CCG complete + S1+S3 implemented + Phase A ablation dispatched (3 weak def × 30 seeds × 4 variants on sts server). S2 broken (smoke 0/7 deaths regression), default OFF. Decision wiki: `pm46-v2-ccg-improvement-consultation.md` (§7.1 implementation post-mortem).**
+**Last updated:** 2026-04-29 — **pm47 측정 완료 + H3/H1 smoke negative. CAPX baseline 79% / submission 42% cap-eat-alive / submission 51.8% win-rate. Tier-1 (B distraction, defender history) 둘 다 fail. 다음 세션: Tier-2 H5/H6/H8 + H9 topology viz + Path 2 submission integration. 사용자 목표 80%+ eat_alive.**
 
 ---
 
-## ⭐⭐ 다음 세션 START HERE — CCG Phase A 결과 회수 + 분석 (2026-04-29 dispatch)
+## ⭐⭐⭐ 다음 세션 START HERE — pm47 여러 방향 sequential (2026-04-29)
+
+**사용자 명시 목표**: cap_eat_alive **80%+** (CAPX baseline 79% 초과). 여러
+방향 다 시도. 다음 세션에서 sequentially 진행.
+
+**진행 순서 (ROI 기준)**:
+
+### Phase 1 (Algorithm side — Tier-2 surgical, ~30분 each)
+
+1. **H5 — Oscillation detector + force commit** (~20 LOC)
+   - A position last 8 ticks 가 같은 2-3 cells cycle 검출 → force commit on
+     chosen target (gate 무시)
+   - Pattern A 78% 의 fail direct cure 가설
+   - env knob: `CAPX_OSC_DETECT=1` (default 0)
+   - file: `zoo_reflex_rc_tempo_capx.py` 의 `_choose_action_impl` 안에 추가
+   - smoke 5×5 → sts 17×10
+
+2. **H6 — Path-cell hysteresis** (~20 LOC)
+   - 이전 path first 5 cells 와 80% overlap 새 path → "same path" → gate
+     threshold -2 적용 (committed_target 아니어도)
+   - Pattern A 다른 mechanism cure
+   - env knob: `CAPX_PATH_HYSTERESIS=1` (default 0)
+   - H5 와 결합 가능
+
+3. **H8 — Time-budget forced commit** (~10 LOC)
+   - tick > 800 (game 끝 1/3) 인데 cap 못 먹음 → margin threshold -3 (suicide
+     risk 일부 허용)
+   - Late-game commit lift
+   - env knob: `CAPX_LATE_GAME_FORCE=1` (default 0)
+
+4. **결합 sts dispatch** (H5+H6+H8 모두 ON, 17×10, ~10분 sts)
+
+### Phase 2 (Decision tree)
+
+- **80% 달성**: Path 2 (submission integration) 로 ROI maximize
+- **80% 미달**: H7 (alternative survival) 또는 H2 (multi-step lookahead)
+- **모두 negative**: P2-narrow 또는 LaTeX report
+
+### Phase 3 (병행 분석)
+
+- **H9 — Topology-bound seeds visualization** (측정 only)
+  - 17 topology-bound seeds (3,4,5,6,11,13,14,15,22,24,25,26,27,28,29,30 등)
+    의 cap 위치 + spawn + walls visualize
+  - "정말 unsolvable" 가설 확정 또는 specific algorithm 발견 가능
+
+### Long-term (별도 plan)
+
+- **Path 2 (pm47 narrow integration)**: CAPX cap-eat algorithm 을
+  20200492.py 에 fold-in (mode-switch). submission 의 cap-eat 42% → 60-70%
+  가능 가설.
+- **Path 4 (pm48 CEM re-evolution)**: A1 family 이기는 weights CEM 진화.
+  큰 sts compute.
+
+---
+
+## 다음 세션 진입 시 읽기 순서
+
+1. **`.omc/wiki/pm47-h3-h1-attempts-results.md`** ← 가장 최신 (이번 세션 종합)
+2. **`.omc/wiki/pm47-capx-failure-conditions-algorithmic.md`** ← Tier 후보 + failure mode
+3. **`.omc/wiki/pm47-submission-cap-eat-comparison.md`** ← submission baseline (42% cap-eat-alive)
+4. **`.omc/wiki/pm47-submission-cap-eat-comparison.md`** + **`.omc/wiki/pm46-v2-failure-mode-deep-analysis.md`**
+5. `minicontest/zoo_reflex_rc_tempo_capx.py` ← 코드 (H1 env knob 이미 추가, ablation-friendly)
+
+---
+
+## (Historical) ⭐⭐ 이전 START HERE — CCG Phase A 결과 회수 + 분석 (2026-04-29)
 
 **Goal**: sts 서버에서 진행 중인 phase A ablation matrix (4 variants × 90 weak-defender games = 360 games, ~3h) 결과 회수 → 분석 → 다음 액션 (S2 scope-narrow 재시도? S1+S3 default → 17×30 full matrix? pm47 통합 시작?).
 

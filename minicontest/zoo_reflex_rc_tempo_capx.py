@@ -43,6 +43,9 @@ _CAPX_STATE: dict = {
     'a_died_emitted': set(),   # tick set where [CAPX_A_DIED] emitted
     'wall_times': [],          # recent chooseAction wall times (ms)
     'tick_counter': 0,
+    # H1: defender behavior model — per-defender deque of last K=20 visited cells
+    'def_recent_visits': {},   # {d_idx: deque[cell, ...]} — see chooseAction
+    'def_recent_window': 20,   # rolling window size
 }
 
 # ---------------------------------------------------------------------------
@@ -86,14 +89,18 @@ def _read_capx_env() -> dict:
         # (sync with gate_horizon by default — fixes A*↔gate inconsistency).
         # Set high (e.g. 999) to revert to old full-path-pessimistic A*.
         'astar_horizon':        _int('CAPX_ASTAR_HORIZON', _int('CAPX_GATE_HORIZON', 8)),
-        # CCG S2: skip threat penalty on attacker's own side (where A is ghost
-        # and cannot be killed by non-scared enemy ghost). 0 disables (full
-        # symmetric threat — old behavior).
-        # NOTE: smoke RANDOM1 vs zoo_reflex_capsule shows S2-on causes 0-cap
-        # 7-death regression (gate margin own-side=999 → trigger anywhere on
-        # home side → border-rush death). Default OFF until phase-A ablation
-        # confirms safe per-defender behavior.
-        'asymmetric_threat':    _int('CAPX_ASYMMETRIC_THREAT', 0),
+        # CCG S2 (scope-narrow v2 — post Phase A): own-side safe mask now
+        # applies ONLY to A* planning (edge_cost) and ranker (_p_survive),
+        # NOT to gate.margin_at or _safest_step_toward (those need actual
+        # adversary distance to avoid border-rush). Default ON after redesign.
+        'asymmetric_threat':    _int('CAPX_ASYMMETRIC_THREAT', 1),
+        # H1 (pm47): defender behavior model. When ON, A* edge_cost only
+        # applies threat to cells the defender has actually visited in the
+        # last K=20 ticks. Cells the defender never patrols → threat=0
+        # (defender unlikely to suddenly be there). Reads
+        # _CAPX_STATE['def_recent_visits'] populated each tick by chooseAction.
+        # Default OFF; algorithmic ablation per pm47 H1 hypothesis.
+        'use_def_history':      _int('CAPX_USE_DEF_HISTORY', 0),
         # CCG S3: _p_survive enumerates path[1:] (skip current cell where A is
         # already alive). 0 reverts to old enumerate(path) including i=0.
         'psurvive_skip_current': _int('CAPX_PSURVIVE_SKIP_CURRENT', 1),
@@ -177,6 +184,12 @@ def _astar_capx(
 
     # edge cost from cell A -> cell B at step index step_idx
     astar_horizon = knobs.get('astar_horizon', 8)
+    use_def_history = knobs.get('use_def_history', 0)
+    # H1: per-defender recently-visited cells (last K=20 ticks). Populated
+    # by chooseAction. When use_def_history=1, threat applies only if
+    # the candidate cell has been in some defender's recent patrol.
+    if use_def_history:
+        _def_recent = _CAPX_STATE.get('def_recent_visits', {})
     def edge_cost(cell_b, step_idx):
         # CCG S1: ignore threat for cells beyond near-future horizon. Aligns
         # with `_gate`, which already only inspects margins[1:gate_horizon+1].
@@ -187,6 +200,18 @@ def _astar_capx(
         # CCG S2: own-side cells are non-lethal (A is ghost). Skip threat.
         if _is_own_side(cell_b, knobs):
             return 1
+        # H1: defender behavior model. If no defender has recently visited
+        # this cell, treat as non-threat (defender unlikely to suddenly
+        # appear here). Bypasses Pattern A oscillation by smoothing
+        # tick-to-tick defender position changes into rolling history.
+        if use_def_history:
+            any_recent = False
+            for d_idx in defender_dist_map.keys():
+                if cell_b in _def_recent.get(d_idx, ()):
+                    any_recent = True
+                    break
+            if not any_recent:
+                return 1
         threat = 0
         for d_dist in defender_dist_map.values():
             margin = d_dist.get(cell_b, 999) - step_idx
@@ -361,11 +386,14 @@ def _gate(
         return 'REJECT'
 
     # compute margin at each path cell (index i = step from current)
+    # S2 scope-narrow (post-Phase-A): own-side mask was removed here. Reason:
+    # When all next-8 cells are own-side, gate trivially triggers regardless
+    # of the cells beyond horizon — A border-rushes into opp-side death.
+    # Margin must reflect ACTUAL adversary distance even on own side.
+    # S2 still applies in _astar_capx.edge_cost + _p_survive (planning/ranking
+    # use the physical-rule shortcut, gate/drift use raw threat).
     def margin_at(i, cell):
         if not defender_dist_map:
-            return 999
-        # CCG S2: own-side cells are non-lethal — infinite margin.
-        if _is_own_side(cell, knobs):
             return 999
         return min(
             (d_dist.get(cell, 999) - i for d_dist in defender_dist_map.values()),
@@ -438,10 +466,10 @@ def _safest_step_toward(
         dx, dy = Actions.directionToVector(action)
         return (int(a_pos[0] + dx), int(a_pos[1] + dy))
 
+    # S2 scope-narrow: drift fallback must see actual threat — own-side mask
+    # would let A drift into a border-rush; same broken pattern as gate.
     def margin_at_cell(cell):
         if not defender_dist_map:
-            return 999
-        if knobs is not None and _is_own_side(cell, knobs):
             return 999
         return min(
             (d_dist.get(cell, 999) - 1 for d_dist in defender_dist_map.values()),
@@ -655,6 +683,18 @@ class ReflexRCTempoCapxAgent(CaptureAgent):
         defender_dist_map: dict = {}
         for d_idx, d_pos in raw_defs:
             defender_dist_map[d_idx] = _bfs_dist_map(d_pos, walls)
+
+        # H1: roll defender visit history (for use_def_history-aware edge_cost)
+        if knobs.get('use_def_history', 0):
+            from collections import deque as _deque
+            recent = _CAPX_STATE.setdefault('def_recent_visits', {})
+            window = _CAPX_STATE.get('def_recent_window', 20)
+            for d_idx, d_pos in raw_defs:
+                dq = recent.get(d_idx)
+                if dq is None or not isinstance(dq, _deque):
+                    dq = _deque(maxlen=window)
+                    recent[d_idx] = dq
+                dq.append(d_pos)
 
         # Step 1: rank cap targets by survival probability
         targets = _rank_targets(a_pos, list(current_caps), walls, defender_dist_map, knobs)

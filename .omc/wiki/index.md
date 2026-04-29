@@ -8,6 +8,7 @@
 
 ## debugging
 
+- [pm47 — CAPX failure conditions + algorithmic improvement hypotheses (no fine-tuning)](pm47-capx-failure-conditions-algorithmic.md) — 510-game cluster analysis: topology-bound 9 / reflex-patrol 9 / minimax 1 seeds. Tier-1 hypotheses: B-as-distraction, defender behavior model, multi-step lookahead.
 - [pm46 v2 CAPX failure mode deep analysis (post Phase A)](pm46-v2-failure-mode-deep-analysis.md) — F2 oscillation + ranker degenerate (P_survive=0) — 3 advisor 모두 잘못된 fail mode 가정. algorithm ceiling +3pp 확인.
 - [Experiments infrastructure audit — pre-M4/M6](experiments-infrastructure-audit-pre-m4-m6.md) — # Experiments infrastructure audit — pre-M4/M6
 - [M3 smoke deadlock — 0-win pattern across all tuned agents](m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md) — # M3 smoke deadlock — 0-win pattern across all tuned agents
