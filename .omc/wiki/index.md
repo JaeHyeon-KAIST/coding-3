@@ -1,6 +1,6 @@
 # Wiki Index
 
-> 72 pages | Last updated: 2026-04-21T17:47:25.254Z
+> 94 pages | Last updated: 2026-04-29T00:35:00.000Z
 
 ## convention
 
@@ -10,9 +10,12 @@
 
 - [Experiments infrastructure audit — pre-M4/M6](experiments-infrastructure-audit-pre-m4-m6.md) — # Experiments infrastructure audit — pre-M4/M6
 - [M3 smoke deadlock — 0-win pattern across all tuned agents](m3-smoke-deadlock-0-win-pattern-across-all-tuned-agents.md) — # M3 smoke deadlock — 0-win pattern across all tuned agents
+- [pm46 Phase 0 — PRETRIGGER flag is dead-code (regression hypothesis cannot reproduce)](pm46-phase-0-pretrigger-flag-is-dead-code-regression-hypothesis-.md) — # pm46 Phase 0 — PRETRIGGER flag is dead-code (regression hypothesis cannot r...
 
 ## decision
 
+- [pm46 v2 CCG tri-advisor consultation — CAPX improvements (S-tier 3 fixes ~6 LOC)](pm46-v2-ccg-improvement-consultation.md) — # pm46 v2 CAPX — CCG tri-advisor consultation (Claude + Codex + Gemini)
+- [pm45 final decision — retrograde feature retire (default OFF, dead-code marked)](2026-04-30-pm45-final-decision.md) — # pm45 final decision — retrograde feature retire
 - [ADR — evolve.py parallelization (genome-level) + resume checkpoint](adr-evolve-py-parallelization-genome-level-resume-checkpoint.md) — # ADR — evolve.py parallelization (genome-level) + resume checkpoint
 - [ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus](adr-pm19-phase-2-scope-revision-based-on-a1-validation-ccg-conse.md) — # ADR pm19 — Phase 2 scope revision based on A1 validation + CCG consensus
 - [Next-session execution plan — performance-max 6-phase pipeline](next-session-execution-plan-performance-max-6-phase-pipeline.md) — # Next-session execution plan — performance-max 6-phase pipeline
@@ -32,6 +35,7 @@
 
 - [A1 champion weights HTH profile + strategy interpretation (pm19)](a1-champion-weights-hth-profile-strategy-interpretation-pm19.md) — # A1 champion weights HTH profile + strategy interpretation (pm19)
 - [Glossary — CS470 A3 project terms](glossary-cs470-a3-project-terms.md) — # Glossary — CS470 A3 project terms
+- [pm46 v2 Step 0 — defender zoo inventory](pm46-v2-step-0-defender-zoo-inventory.md) — # pm46 v2 Step 0 — defender zoo inventory
 
 ## session-log
 
@@ -63,7 +67,10 @@
 - [2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + Mac smoke](2026-04-21-pm32-3-iter-ralplan-mac-coding-step-a-c-2-16-layouts-.md) — # 2026-04-21 pm32 — 3-iter ralplan + Mac coding (Step A-C.2) + 16 layouts + M...
 - [2026-04-21 pm33 — 2-cap chain strategy + abstract graph design (pivot from freeze-checkpoint)](2026-04-21-pm33-2-cap-chain-strategy-abstract-graph-design-pivot.md) — # 2026-04-21 pm33 — 2-cap chain strategy + abstract graph design (pivot from ...
 - [2026-04-22 pm34 - abstract graph port + 20/30 WIN feasibility](2026-04-22-pm34-abstract-graph-port-20-30-win-feasibility.md) — # 2026-04-22 pm34 - abstract graph port + 20/30 WIN feasibility
+- [2026-04-27 pm41 — 1-defender retrograde tablebase implementation](2026-04-27-pm41-1-defender-retrograde-tablebase-implementation.md) — # 2026-04-27 pm41 — 1-defender retrograde tablebase implementation
+- [2026-04-28 pm44 — B-start mismatch handling](2026-04-28-pm44-b-start-mismatch-handling.md) — # 2026-04-28 pm44 — B-start mismatch handling
 - [pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff](pm21-autopilot-server-pipeline-order-2-hth-order-3-launch-pm22-h.md) — # pm21 — autopilot server pipeline + Order 2 HTH + Order 3 launch + pm22 handoff
+- [pm46 v2 — session 종결 + handoff (CAPX plan APPROVED, Phase 0/1 대기)](pm46-v2-session-handoff-capx-plan-approved-phase-0-1.md) — # pm46 v2 — session 종결 + handoff (CAPX plan APPROVED, Phase 0/1 대기)
 - [Session 2026-04-15 — M3 smoke completion + deadlock observation](session-2026-04-15-m3-smoke-completion-deadlock-observation.md) — # Session 2026-04-15 — M3 smoke completion + deadlock observation
 - [Session Log 2026-04-15](session-log-2026-04-15-11207029.md) — # Session Log 2026-04-15
 - [Session Log 2026-04-15](session-log-2026-04-15-2437996d.md) — # Session Log 2026-04-15
@@ -94,3 +101,18 @@
 - [Session Log 2026-04-21](session-log-2026-04-21-3b56dde7.md) — # Session Log 2026-04-21
 - [Session Log 2026-04-21](session-log-2026-04-21-86d8fbdd.md) — # Session Log 2026-04-21
 - [Session Log 2026-04-21](session-log-2026-04-21-9b68aff1.md) — # Session Log 2026-04-21
+- [Session Log 2026-04-23](session-log-2026-04-23-67b202e3.md) — # Session Log 2026-04-23
+- [Session Log 2026-04-23](session-log-2026-04-23-b36da093.md) — # Session Log 2026-04-23
+- [Session Log 2026-04-25](session-log-2026-04-25-63062272.md) — # Session Log 2026-04-25
+- [Session Log 2026-04-25](session-log-2026-04-25-6535472a.md) — # Session Log 2026-04-25
+- [Session Log 2026-04-26](session-log-2026-04-26-abe68bac.md) — # Session Log 2026-04-26
+- [Session Log 2026-04-26](session-log-2026-04-26-cb88a2b1.md) — # Session Log 2026-04-26
+- [Session Log 2026-04-26](session-log-2026-04-26-cbb77640.md) — # Session Log 2026-04-26
+- [Session Log 2026-04-28](session-log-2026-04-28-6f7a139c.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-7b901baf.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-7d376e8a.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-83ba7812.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-8c76e333.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-94260874.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-ae200f53.md) — # Session Log 2026-04-28
+- [Session Log 2026-04-28](session-log-2026-04-28-cd20c788.md) — # Session Log 2026-04-28

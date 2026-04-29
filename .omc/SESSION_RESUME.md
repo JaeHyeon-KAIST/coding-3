@@ -1,10 +1,58 @@
 # SESSION_RESUME — 5-minute onboarding for any new Claude or human session
 
-**Last updated:** 2026-04-29 — **pm46 v2 CAPX COMPLETE + RECOVERY: 17/17 strict improvement (perfect). CAPX 79% vs ABS ~5% eat_alive on 1020-game test (510×2). Plan §3.3 ALL bars PASS. Final commit `1329170`.**
+**Last updated:** 2026-04-29 — **pm46 v2 CCG complete + S1+S3 implemented + Phase A ablation dispatched (3 weak def × 30 seeds × 4 variants on sts server). S2 broken (smoke 0/7 deaths regression), default OFF. Decision wiki: `pm46-v2-ccg-improvement-consultation.md` (§7.1 implementation post-mortem).**
 
 ---
 
-## ⭐⭐ 다음 세션 START HERE — CCG 외부 자문 (CAPX 알고리즘 개선 여지)
+## ⭐⭐ 다음 세션 START HERE — CCG Phase A 결과 회수 + 분석 (2026-04-29 dispatch)
+
+**Goal**: sts 서버에서 진행 중인 phase A ablation matrix (4 variants × 90 weak-defender games = 360 games, ~3h) 결과 회수 → 분석 → 다음 액션 (S2 scope-narrow 재시도? S1+S3 default → 17×30 full matrix? pm47 통합 시작?).
+
+**상태 (이전 세션 종료 시점)**:
+- CCG 자문 완료: Codex + Gemini + Claude lead 종합. S-tier 3 fix 권고.
+- 코딩 완료: `minicontest/zoo_reflex_rc_tempo_capx.py` 에 S1/S2/S3 모두 env knob 으로 분리. 합 ~30 LOC.
+- **S2 broken** (`CAPX_ASYMMETRIC_THREAT=1` smoke RANDOM1 capsule 0 caps + 7 deaths). **Default OFF**. 원인: `_gate.margin_at` 에서 own-side cell margin=999 → gate 무조건 trigger → border-rush.
+- S1+S3 default ON. 4 spot-check 게임 결과: aggressive RANDOM20 suicide → eat_alive (cure ⭐), tuned RANDOM7 1death → 0deaths (개선), 나머지 2 baseline 동일.
+- Phase A wrapper: `experiments/rc_tempo/pm46_v2_ccg_phase_a_ablation.sh` (4 variants × 3 weak × 30 seeds = 360 games)
+- Server dispatch: ssh jdl_wsl + tmux work 안에서 launch.
+
+**다음 세션 첫 액션**:
+1. `ssh jdl_wsl` → `tmux capture-pane -t work -p | tail -50` 로 진척 확인.
+2. `ls -la <project>/experiments/results/pm46_v2/ccg_phaseA/*.csv` — 4 csv 모두 있는지.
+3. 결과 analysis: 각 variant 별 weak-defender × seed 결과 → eat_alive %, no_eat_died % 비교.
+4. **결정 트리**:
+   - **S1+S3 가 baseline 대비 명확한 lift** (예: +10pp 이상) → S1+S3 으로 17×30 full matrix 진행 (sts 서버, ~5h) → 17/17 maintain 확인 → pm47 통합 시작.
+   - **S1 만 lift, S3 neutral 또는 negative** → S1 default 만 keep, S3 deeper 분석.
+   - **둘 다 marginal** (±5pp) → S2 scope-narrow 재시도 (gate margin 빼고 edge_cost+_p_survive 만). 또는 A-tier (Codex Top 1: defender-weighted safest drift) 시도.
+   - **S2 별도**: scope-narrow patch 만들고 small smoke 부터 다시.
+
+**핵심 파일** (다음 세션 진입 시):
+1. `.omc/wiki/pm46-v2-ccg-improvement-consultation.md` — 권위 wiki. §7.1/§7.2 가 새 implementation 결과.
+2. `.omc/research/pm46-v2-ccg/{codex,gemini}-summary.md` — advisor 요약.
+3. `.omc/artifacts/ask/{codex,gemini}-capx-improvement-2026-04-29T*.md` — raw 응답.
+4. `experiments/rc_tempo/pm46_v2_ccg_phase_a_ablation.sh` — wrapper (sts 에서 돌고 있음).
+5. `minicontest/zoo_reflex_rc_tempo_capx.py` — 새 코드 (3 env knob 추가).
+6. `experiments/results/pm46_v2/ccg_phaseA/` — 결과 csv 들 (sts 에서 회수).
+
+**Out-of-scope (이전 세션 유지)**:
+- 제출 코드 (`20200492.py`, `your_best.py`) 수정 — pm47 별도 결정.
+- ABS attacker — 별도 트랙.
+- S2 의 wide-scope 적용 — broken 입증, 재시도 시 scope narrowing 필수.
+
+---
+
+## (Historical, 2026-04-29) CCG 자문 + S1+S3 implementation
+
+(위의 다음 세션 START HERE 가 가장 최신. 아래는 컨텍스트 보존.)
+
+CCG 워커 spawn 시도 (oh-my-claudecode:executor team 모드) → **워커 즉시 죽음** (tmux pane %47/%48/%49 사라짐, 원인 미상; 한국어 path 또는 sonnet routing 추정). Plan B 발동: lead 직접 진행:
+- omc ask codex / gemini 백그라운드 호출 → 결과 자동 .omc/artifacts/ask/ 저장
+- lead 가 직접 weak-defender CSV 분석 (capsule+tuned outcome identical 발견 = effective n=60)
+- 종합 wiki 작성
+
+---
+
+## ⭐⭐ (Historical) 이전 START HERE — CCG 외부 자문 (CAPX 알고리즘 개선 여지)
 
 **Goal**: 현재 CAPX 알고리즘 (`zoo_reflex_rc_tempo_capx.py`, 665줄)에 대해 **Claude (executor) + Codex (CLI) + Gemini (CLI) 3 advisor 다 받아서 개선 여지 분석**.
 

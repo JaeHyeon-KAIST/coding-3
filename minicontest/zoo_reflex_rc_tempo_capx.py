@@ -82,6 +82,21 @@ def _read_capx_env() -> dict:
         # agent gets closer (cache cleared per tick).
         'gate_horizon':         _int('CAPX_GATE_HORIZON', 8),
         'gate_use_full':        _int('CAPX_GATE_USE_FULL', 0),
+        # CCG S1: A* edge_cost ignores threat for cells beyond this step horizon
+        # (sync with gate_horizon by default — fixes A*↔gate inconsistency).
+        # Set high (e.g. 999) to revert to old full-path-pessimistic A*.
+        'astar_horizon':        _int('CAPX_ASTAR_HORIZON', _int('CAPX_GATE_HORIZON', 8)),
+        # CCG S2: skip threat penalty on attacker's own side (where A is ghost
+        # and cannot be killed by non-scared enemy ghost). 0 disables (full
+        # symmetric threat — old behavior).
+        # NOTE: smoke RANDOM1 vs zoo_reflex_capsule shows S2-on causes 0-cap
+        # 7-death regression (gate margin own-side=999 → trigger anywhere on
+        # home side → border-rush death). Default OFF until phase-A ablation
+        # confirms safe per-defender behavior.
+        'asymmetric_threat':    _int('CAPX_ASYMMETRIC_THREAT', 0),
+        # CCG S3: _p_survive enumerates path[1:] (skip current cell where A is
+        # already alive). 0 reverts to old enumerate(path) including i=0.
+        'psurvive_skip_current': _int('CAPX_PSURVIVE_SKIP_CURRENT', 1),
     }
 
 # ---------------------------------------------------------------------------
@@ -104,6 +119,22 @@ def _bfs_dist_map(src: tuple, walls) -> dict:
                     dist[n] = d + 1
                     q.append(n)
     return dist
+
+# ---------------------------------------------------------------------------
+# CCG S2: home-side mask helper. A is non-killable while a ghost on its own
+# side. `knobs` must carry 'is_red' (bool) and 'mid_x' (int = walls.width//2)
+# from registerInitialState. Returns True if `cell` is on attacker's home side.
+# ---------------------------------------------------------------------------
+
+def _is_own_side(cell: tuple, knobs: dict) -> bool:
+    if not knobs.get('asymmetric_threat', 1):
+        return False  # disabled — treat all cells as opp side (full threat)
+    mid = knobs.get('mid_x')
+    if mid is None:
+        return False
+    if knobs.get('is_red', True):
+        return cell[0] < mid
+    return cell[0] >= mid
 
 # ---------------------------------------------------------------------------
 # Defender-aware A* path planner (§5.2)
@@ -145,7 +176,17 @@ def _astar_capx(
         return d if d is not None else INF
 
     # edge cost from cell A -> cell B at step index step_idx
+    astar_horizon = knobs.get('astar_horizon', 8)
     def edge_cost(cell_b, step_idx):
+        # CCG S1: ignore threat for cells beyond near-future horizon. Aligns
+        # with `_gate`, which already only inspects margins[1:gate_horizon+1].
+        # Without this, A* assumes omniscient defenders perfectly intercept
+        # cells 20+ steps out — drives most paths to None → BFS fallback.
+        if step_idx > astar_horizon:
+            return 1
+        # CCG S2: own-side cells are non-lethal (A is ghost). Skip threat.
+        if _is_own_side(cell_b, knobs):
+            return 1
         threat = 0
         for d_dist in defender_dist_map.values():
             margin = d_dist.get(cell_b, 999) - step_idx
@@ -240,12 +281,21 @@ def _p_step_safe(margin: float, scale: float) -> float:
     """Sigmoid survival probability for a single step margin."""
     return 1.0 / (1.0 + math.exp(-(margin - 0) / scale))
 
-def _p_survive(path: list, defender_dist_map: dict, scale: float) -> float:
-    """Product of per-step survival probabilities along path."""
+def _p_survive(path: list, defender_dist_map: dict, scale: float, knobs: dict | None = None) -> float:
+    """Product of per-step survival probabilities along path.
+
+    CCG S2: own-side cells contribute P=1 (non-lethal).
+    CCG S3: when knobs['psurvive_skip_current']=1 (default), skip i=0 cell
+    where A is already alive (avoids ~0.5x bias collapsing ranker).
+    """
     if not defender_dist_map:
         return 1.0
     p = 1.0
-    for i, cell in enumerate(path):
+    skip_current = bool(knobs.get('psurvive_skip_current', 1)) if knobs else True
+    iterable = enumerate(path[1:], start=1) if skip_current else enumerate(path)
+    for i, cell in iterable:
+        if knobs is not None and _is_own_side(cell, knobs):
+            continue  # CCG S2: own-side = non-lethal
         m = min(
             (d_dist.get(cell, 999) - i for d_dist in defender_dist_map.values()),
             default=999,
@@ -278,7 +328,7 @@ def _rank_targets(
     for c in caps:
         path = _astar_cached(a_pos, c, walls, defender_dist_map, knobs)
         if path:
-            p_map[c] = _p_survive(path, defender_dist_map, scale)
+            p_map[c] = _p_survive(path, defender_dist_map, scale, knobs)
         else:
             p_map[c] = 0.0
 
@@ -313,6 +363,9 @@ def _gate(
     # compute margin at each path cell (index i = step from current)
     def margin_at(i, cell):
         if not defender_dist_map:
+            return 999
+        # CCG S2: own-side cells are non-lethal — infinite margin.
+        if _is_own_side(cell, knobs):
             return 999
         return min(
             (d_dist.get(cell, 999) - i for d_dist in defender_dist_map.values()),
@@ -372,10 +425,12 @@ def _safest_step_toward(
     defender_dist_map: dict,
     walls,
     legal: list,
+    knobs: dict | None = None,
 ) -> str:
     """
     For each legal next cell, pick action maximizing min-defender-margin,
     breaking ties by minimizing BFS distance to target.
+    CCG S2: own-side cells get max margin (non-lethal).
     """
     W, H = walls.width, walls.height
 
@@ -385,6 +440,8 @@ def _safest_step_toward(
 
     def margin_at_cell(cell):
         if not defender_dist_map:
+            return 999
+        if knobs is not None and _is_own_side(cell, knobs):
             return 999
         return min(
             (d_dist.get(cell, 999) - 1 for d_dist in defender_dist_map.values()),
@@ -517,6 +574,12 @@ class ReflexRCTempoCapxAgent(CaptureAgent):
 
         self._is_red = (self.index in gameState.getRedTeamIndices())
 
+        # CCG S2: bake side info into knobs so all helpers (edge_cost,
+        # _p_survive, _gate margin, _safest_step_toward) can compute
+        # _is_own_side(cell, knobs). Red home: x < mid_x. Blue home: x >= mid_x.
+        self._knobs['is_red'] = self._is_red
+        self._knobs['mid_x']  = self._W // 2
+
         # Init module-level state on first agent registration
         if _CAPX_STATE['prev_caps'] is None:
             _CAPX_STATE['prev_caps'] = set()
@@ -613,7 +676,7 @@ class ReflexRCTempoCapxAgent(CaptureAgent):
                 chosen_path = path
                 chosen_gate = 'TRIGGER'
                 if defender_dist_map:
-                    chosen_p = _p_survive(path, defender_dist_map, knobs['sigmoid_scale'])
+                    chosen_p = _p_survive(path, defender_dist_map, knobs['sigmoid_scale'], knobs)
                 else:
                     chosen_p = 1.0
                 _CAPX_STATE['committed_target'] = tgt
@@ -631,7 +694,7 @@ class ReflexRCTempoCapxAgent(CaptureAgent):
         # Step 3: hard abandon / drift toward safest reachable target
         _CAPX_STATE['committed_target'] = None
         fallback_tgt = targets[0] if targets else a_pos
-        action = _safest_step_toward(a_pos, fallback_tgt, defender_dist_map, walls, legal)
+        action = _safest_step_toward(a_pos, fallback_tgt, defender_dist_map, walls, legal, knobs)
 
         if knobs['trace']:
             self._emit_trace(
